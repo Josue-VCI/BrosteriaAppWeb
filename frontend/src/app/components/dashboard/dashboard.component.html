@@ -1,0 +1,98 @@
+<div class="dashboard-container">
+  <div class="header-section">
+    <h2>📈 Panel General - La Brostería CRM</h2>
+    <p>Control de operaciones, inventario y fidelización en tiempo real</p>
+  </div>
+
+  <!-- Fila de KPIs -->
+  <div class="kpis-grid">
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-info">
+        <span class="kpi-label">Ingresos Totales</span>
+        <h3 class="number-font text-success">S/. {{ resumen.ventasTotales | number:'1.2-2' }}</h3>
+      </div>
+    </div>
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-info">
+        <span class="kpi-label">Total Pedidos</span>
+        <h3 class="number-font">{{ resumen.totalPedidos }}</h3>
+      </div>
+    </div>
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-info">
+        <span class="kpi-label">Completados</span>
+        <h3 class="number-font text-success">{{ resumen.completados }}</h3>
+      </div>
+    </div>
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon">❌</div>
+      <div class="kpi-info">
+        <span class="kpi-label">Cancelados</span>
+        <h3 class="number-font text-error">{{ resumen.cancelados }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="details-grid">
+    <!-- Tabla de Pedidos Recientes -->
+    <div class="glass-card table-section">
+      <h3>🍳 Últimos Pedidos</h3>
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Total</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pedido of pedidosRecientes">
+            <td>#{{ pedido.id }}</td>
+            <td>{{ pedido.customerName }}</td>
+            <td>
+              <span class="type-badge" [class.delivery]="pedido.type === 'DELIVERY'">
+                {{ pedido.type }}
+              </span>
+            </td>
+            <td class="number-font">S/. {{ pedido.total | number:'1.2-2' }}</td>
+            <td>
+              <span class="status-badge" [class]="pedido.status.toLowerCase()">
+                {{ pedido.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="link-footer">
+        <a routerLink="/pedidos">Ver todos los pedidos ➔</a>
+      </div>
+    </div>
+
+    <!-- Alertas de Inventario -->
+    <div class="glass-card alerts-section">
+      <h3>⚠️ Alertas de Inventario Crítico</h3>
+      <div class="alerts-list" *ngIf="insumosCriticos.length > 0; else noAlerts">
+        <div class="alert-item" *ngFor="let insumo of insumosCriticos">
+          <div class="alert-indicator"></div>
+          <div class="alert-details">
+            <span class="alert-name">{{ insumo.name }}</span>
+            <span class="alert-qty">Stock actual: {{ insumo.quantity }} {{ insumo.unit }} (Mínimo: {{ insumo.minimumStock }})</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noAlerts>
+        <div class="no-alerts-card">
+          <span>✅ Todo el stock se encuentra en niveles óptimos.</span>
+        </div>
+      </ng-template>
+      <div class="link-footer">
+        <a routerLink="/inventario">Gestionar inventario ➔</a>
+      </div>
+    </div>
+  </div>
+</div>

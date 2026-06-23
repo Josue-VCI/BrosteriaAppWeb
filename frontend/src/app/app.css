@@ -1,0 +1,138 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  height: 94vh;
+  margin: 3vh 15px 3vh 20px;
+  padding: 25px 15px;
+  position: fixed;
+  left: 0;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  padding-left: 10px;
+}
+
+.brand-icon {
+  font-size: 24px;
+}
+
+.sidebar-brand h3 {
+  font-family: var(--font-brand);
+  margin: 0;
+  font-size: 20px;
+  background: linear-gradient(to right, #ffffff, var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--font-brand);
+  padding: 12px 15px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.menu-item:hover {
+  background: rgba(255, 107, 0, 0.08);
+  color: var(--text-light);
+  padding-left: 20px;
+}
+
+.menu-item.active {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 183, 3, 0.1));
+  color: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  font-weight: bold;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--glass-border);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 10px;
+}
+
+.user-avatar {
+  font-size: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  padding: 8px;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.user-status {
+  font-size: 11px;
+}
+
+.logout-btn {
+  width: 100%;
+  background: rgba(255, 23, 68, 0.15) !important;
+  color: var(--error) !important;
+  border: 1px solid rgba(255, 23, 68, 0.2) !important;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: var(--error) !important;
+  color: white !important;
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.4) !important;
+}
+
+.main-content {
+  flex-grow: 1;
+  margin-left: 310px;
+  padding: 30px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+.main-content.no-sidebar {
+  margin-left: 0;
+  padding: 0;
+}

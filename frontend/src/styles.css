@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Oswald:wght@200..700&family=Quicksand:wght@300..700&display=swap');
+
+:root {
+    --primary: #FF6B00;         /* Naranja Broster */
+    --primary-light: #FF8A33;   /* Naranja claro */
+    --primary-dark: #CC5500;    /* Naranja oscuro */
+    --secondary: #FFB703;       /* Amarillo Fuego */
+    --secondary-light: #FFCA3A; /* Amarillo claro */
+    --bg-dark: #121214;         /* Fondo oscuro principal */
+    --bg-card: rgba(30, 30, 35, 0.65); /* Fondo tarjetas Glassmorphic */
+    --bg-body: #0A0A0B;         /* Fondo detrás de tarjetas (near-black) */
+    --text-light: #FAFAFA;      /* Blanco principal */
+    --text-muted: #A0A0A8;      /* Gris para descripciones */
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-hover: rgba(255, 107, 0, 0.35);
+    --success: #00C853;         /* Verde exitoso / Yape */
+    --error: #FF1744;           /* Rojo error */
+    --font-brand: 'Fredoka', sans-serif;
+    --font-heading: 'Oswald', sans-serif;
+    --font-body: 'Quicksand', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-body);
+    color: var(--text-light);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    background-image: radial-gradient(var(--glass-border) 1px, transparent 0);
+    background-size: 24px 24px;
+}
+
+/* Tarjetas Estilo Glassmorphism Premium */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: 0 8px 32px 0 rgba(255, 107, 0, 0.15);
+    transform: translateY(-4px);
+}
+
+/* Títulos y Botones de la Marca */
+h1, h2, h3, h4 {
+    font-family: var(--font-brand);
+    color: var(--text-light);
+}
+
+.brand-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    font-family: var(--font-brand);
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.brand-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+}
+
+.number-font {
+    font-family: var(--font-heading);
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+.text-error {
+    color: var(--error) !important;
+}
+
+/* Scrollbar Customizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-body);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-dark);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

@@ -1,0 +1,16 @@
+package com.upc.brosteria.DTOs;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+public class LoginRequest {
+    @NotBlank(message = "El correo es requerido")
+    @Email(message = "Debe ser un correo válido")
+    private String email;
+
+    @NotBlank(message = "La contraseña es requerida")
+    private String password;
+}

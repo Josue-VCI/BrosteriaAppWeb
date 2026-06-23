@@ -1,0 +1,101 @@
+<div class="inventario-container">
+  <div class="header-section">
+    <h2>🍗 Control de Inventario e Insumos</h2>
+    <p>Visualiza niveles de ingredientes críticos y realiza operaciones CRUD</p>
+  </div>
+
+  <div class="actions-bar">
+    <button class="brand-btn" (click)="abrirNuevoInsumo()">➕ Agregar Nuevo Insumo</button>
+  </div>
+
+  <div class="glass-card table-wrapper">
+    <table class="inventario-table">
+      <thead>
+        <tr>
+          <th>Insumo</th>
+          <th>Cantidad Disponible</th>
+          <th>Unidad</th>
+          <th>Stock Mínimo</th>
+          <th>Estado</th>
+          <th>Última Actualización</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let insumo of insumos" [class.alert-row]="insumo.quantity <= insumo.minimumStock">
+          <td><strong>{{ insumo.name }}</strong></td>
+          <td class="number-font">{{ insumo.quantity | number:'1.1-2' }}</td>
+          <td>{{ insumo.unit }}</td>
+          <td class="number-font">{{ insumo.minimumStock | number:'1.1-2' }}</td>
+          <td>
+            <span class="badge" [class.badge-success]="insumo.quantity > insumo.minimumStock" [class.badge-danger]="insumo.quantity <= insumo.minimumStock">
+              {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico ⚠️' }}
+            </span>
+          </td>
+          <td>{{ insumo.updatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="brand-btn refill-btn" (click)="abrirIngreso(insumo)">⚡ Abastecer</button>
+              <button class="brand-btn edit-btn" (click)="abrirEditarInsumo(insumo)">✏️</button>
+              <button class="brand-btn delete-btn" (click)="eliminarInsumo(insumo.id)">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de Abastecimiento/Recarga -->
+  <div class="modal-backdrop" *ngIf="mostrarModalRefill">
+    <div class="modal-card glass-card">
+      <h3>Reforzar Stock: {{ insumoSeleccionadoNombre }}</h3>
+      
+      <div class="form-group">
+        <label for="cantidad">Cantidad a ingresar</label>
+        <input type="number" id="cantidad" [(ngModel)]="cantidadIngresar" min="0.1" step="0.1" class="modal-input">
+      </div>
+      
+      <div class="modal-actions">
+        <button class="brand-btn cancel-btn" (click)="cerrarModalRefill()">Cancelar</button>
+        <button class="brand-btn" (click)="guardarIngreso()">Confirmar Ingreso</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal CRUD (Crear/Editar) -->
+  <div class="modal-backdrop" *ngIf="mostrarModalCrud">
+    <div class="modal-card glass-card">
+      <h3>{{ esEdicion ? 'Editar Insumo' : 'Registrar Nuevo Insumo' }}</h3>
+      
+      <div class="form-group">
+        <label for="crudName">Nombre del Insumo</label>
+        <input type="text" id="crudName" [(ngModel)]="formInsumo.name" placeholder="Ej. Pollo trozado" class="modal-input">
+      </div>
+      
+      <div class="form-group">
+        <label for="crudQty">Cantidad Inicial</label>
+        <input type="number" id="crudQty" [(ngModel)]="formInsumo.quantity" min="0" step="0.1" class="modal-input" [disabled]="esEdicion">
+      </div>
+
+      <div class="form-group">
+        <label for="crudUnit">Unidad de Medida</label>
+        <select id="crudUnit" [(ngModel)]="formInsumo.unit" class="modal-input">
+          <option value="unidades">unidades</option>
+          <option value="kg">kg</option>
+          <option value="litros">litros</option>
+          <option value="galones">galones</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="crudMin">Stock de Alerta Mínimo</label>
+        <input type="number" id="crudMin" [(ngModel)]="formInsumo.minimumStock" min="0" step="0.1" class="modal-input">
+      </div>
+      
+      <div class="modal-actions">
+        <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()">Cancelar</button>
+        <button class="brand-btn" (click)="guardarInsumo()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+dist/
+frontend/dist/
+target/
+backend/target/
+
+# Angular cache
+.angular/
+frontend/.angular/
+
+# IDE files
+.idea/
+backend/.idea/
+frontend/.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db

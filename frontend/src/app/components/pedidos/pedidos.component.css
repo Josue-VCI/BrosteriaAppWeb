@@ -1,0 +1,163 @@
+.kanban-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  align-items: start;
+}
+
+.kanban-column {
+  min-height: 70vh;
+  padding: 15px !important;
+}
+
+.column-header {
+  border-bottom: 2px solid var(--glass-border);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.column-header h3 {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 18px;
+}
+
+.yellow-line {
+  border-bottom-color: var(--secondary);
+}
+
+.orange-line {
+  border-bottom-color: var(--primary);
+}
+
+.blue-line {
+  border-bottom-color: #00B0FF;
+}
+
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.pedido-card {
+  padding: 15px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-radius: 15px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pedido-card:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pedido-id {
+  font-weight: bold;
+  font-family: var(--font-brand);
+}
+
+.pedido-type {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pedido-type.delivery {
+  background: rgba(0, 176, 255, 0.15);
+  color: #00B0FF;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-body strong {
+  font-size: 15px;
+  color: var(--text-light);
+}
+
+.phone, .address {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.items-list {
+  margin-top: 10px;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.creams-subtext {
+  font-size: 11px;
+  color: var(--secondary-light);
+  margin-top: 2px;
+}
+
+.total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  border-top: 1px dashed var(--glass-border);
+  padding-top: 10px;
+}
+
+.total-bar span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.total-bar strong {
+  font-size: 16px;
+  color: var(--primary-light);
+}
+
+.card-actions {
+  margin-top: 5px;
+}
+
+.accept-btn {
+  width: 100%;
+  padding: 8px 15px !important;
+  font-size: 13px !important;
+}
+
+.deliver-btn {
+  width: 100%;
+  padding: 8px 15px !important;
+  font-size: 13px !important;
+  background: linear-gradient(135deg, var(--success), #00A343) !important;
+  box-shadow: 0 0 10px rgba(0, 200, 83, 0.2);
+}
+
+.deliver-btn:hover {
+  box-shadow: 0 0 15px rgba(0, 200, 83, 0.4);
+}

@@ -1,0 +1,115 @@
+<div class="clientes-container">
+  <div class="header-section">
+    <h2>👥 Control y Fidelización de Clientes (CRM)</h2>
+    <p>Historial de compras, puntos acumulados y CRUD completo de clientes</p>
+  </div>
+
+  <div class="actions-bar">
+    <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="🔍 Buscar por nombre, celular o email..." class="search-input">
+    <div class="right-actions">
+      <button class="brand-btn add-btn" (click)="abrirNuevoCliente()">➕ Nuevo Cliente</button>
+      <button class="brand-btn" (click)="abrirRedactarMasivo()">✉️ Enviar Promoción Masiva (Gmail)</button>
+    </div>
+  </div>
+
+  <div class="glass-card table-wrapper">
+    <table class="clientes-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Celular</th>
+          <th>Correo Electrónico</th>
+          <th>Dirección Principal</th>
+          <th>Pedidos Realizados</th>
+          <th>Total Consumido</th>
+          <th>Puntos Club</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cliente of clientesFiltrados">
+          <td><strong>{{ cliente.name }}</strong></td>
+          <td class="number-font">{{ cliente.phone }}</td>
+          <td>{{ cliente.email || 'No registrado' }}</td>
+          <td>{{ cliente.address || 'Al paso' }}</td>
+          <td class="number-font">{{ cliente.totalOrders }}</td>
+          <td class="number-font text-success">S/. {{ cliente.totalSpent | number:'1.2-2' }}</td>
+          <td>
+            <span class="points-badge number-font">⭐ {{ cliente.points }} pts</span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="brand-btn edit-btn" (click)="abrirEditarCliente(cliente)">✏️</button>
+              <button class="brand-btn delete-btn" (click)="eliminarCliente(cliente.id)">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de Redacción de Gmail Masivo -->
+  <div class="modal-backdrop" *ngIf="mostrarModalCorreo">
+    <div class="modal-card glass-card">
+      <h3>Redactar Campaña de Fidelización (Gmail)</h3>
+      <p class="destination-sub">Se enviará a todos los clientes registrados con correo electrónico.</p>
+      
+      <div class="form-group">
+        <label for="plantilla">Plantilla de Campaña</label>
+        <select id="plantilla" [(ngModel)]="plantillaSeleccionada" (change)="onTemplateChange()" class="modal-input">
+          <option value="libre">Texto Libre (Escribe tu propio mensaje)</option>
+          <option value="mundial">Campaña Mundialista 🍗⚽🏆 (Diseño Premium)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="asunto">Asunto del Correo</label>
+        <input type="text" id="asunto" [(ngModel)]="asuntoCampana" placeholder="Ej. ¡Jueves Brostero! 20% de descuento en Combos" class="modal-input">
+      </div>
+      
+      <div class="form-group">
+        <label for="cuerpo">Cuerpo del Mensaje</label>
+        <textarea id="cuerpo" [(ngModel)]="cuerpoCampana" [disabled]="plantillaSeleccionada === 'mundial'" placeholder="Hola, te escribimos de La Brostería..." rows="6" class="modal-textarea"></textarea>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="brand-btn cancel-btn" [disabled]="enviandoCorreo" (click)="cerrarModalCorreo()">Cancelar</button>
+        <button class="brand-btn" [disabled]="enviandoCorreo" (click)="enviarMasivo()">
+          {{ enviandoCorreo ? 'Enviando correos...' : 'Enviar Campaña ✉️' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal CRUD Cliente -->
+  <div class="modal-backdrop" *ngIf="mostrarModalCrud">
+    <div class="modal-card glass-card">
+      <h3>{{ esEdicion ? 'Editar Ficha de Cliente' : 'Registrar Nuevo Cliente' }}</h3>
+      
+      <div class="form-group">
+        <label for="crudName">Nombre Completo</label>
+        <input type="text" id="crudName" [(ngModel)]="formCliente.name" placeholder="Ej. Juan Pérez" class="modal-input">
+      </div>
+
+      <div class="form-group">
+        <label for="crudPhone">Teléfono / Celular</label>
+        <input type="text" id="crudPhone" [(ngModel)]="formCliente.phone" placeholder="Ej. 960373555" class="modal-input">
+      </div>
+      
+      <div class="form-group">
+        <label for="crudEmail">Correo Electrónico</label>
+        <input type="email" id="crudEmail" [(ngModel)]="formCliente.email" placeholder="Ej. juan.perez@gmail.com" class="modal-input">
+      </div>
+
+      <div class="form-group">
+        <label for="crudAddress">Dirección Principal</label>
+        <input type="text" id="crudAddress" [(ngModel)]="formCliente.address" placeholder="Ej. Av. Universitaria 120" class="modal-input">
+      </div>
+      
+      <div class="modal-actions">
+        <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()">Cancelar</button>
+        <button class="brand-btn" (click)="guardarCliente()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

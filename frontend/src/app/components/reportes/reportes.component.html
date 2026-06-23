@@ -1,0 +1,67 @@
+<div class="reportes-container">
+  <div class="header-section">
+    <div>
+      <h2>📊 Reportes y Analítica de Ventas</h2>
+      <p>Métricas consolidadas de ventas e ingresos en base a la cola de caja</p>
+    </div>
+    <button class="brand-btn pdf-btn" (click)="descargarReportePdf()">📥 Descargar Reporte PDF</button>
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div class="filters-bar glass-card">
+    <div class="filter-group">
+      <label for="filtroRango">Intervalo de Fecha</label>
+      <select id="filtroRango" [(ngModel)]="filtroRango" (change)="aplicarFiltros()" class="filter-select">
+        <option value="semana">Últimos 7 días (Semana)</option>
+        <option value="mes">Últimos 30 días (Mes)</option>
+        <option value="trimestre">Últimos 90 días (Trimestre)</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="tipoPedido">Canal de Pedido</label>
+      <select id="tipoPedido" [(ngModel)]="tipoPedido" (change)="aplicarFiltros()" class="filter-select">
+        <option value="">Todos los Canales</option>
+        <option value="DELIVERY">Solo Delivery</option>
+        <option value="PICKUP">Solo Retiro en Local</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Fila de KPIs -->
+  <div class="kpis-grid">
+    <div class="glass-card kpi-card">
+      <span class="kpi-label">Ingresos Totales Brutos</span>
+      <h3 class="number-font kpi-value text-success">S/. {{ resumen.ventasTotales | number:'1.2-2' }}</h3>
+    </div>
+    <div class="glass-card kpi-card">
+      <span class="kpi-label">Total Pedidos Procesados</span>
+      <h3 class="number-font kpi-value">{{ resumen.totalPedidos }}</h3>
+    </div>
+    <div class="glass-card kpi-card">
+      <span class="kpi-label">Pedidos Completados</span>
+      <h3 class="number-font kpi-value text-success">{{ resumen.completados }}</h3>
+    </div>
+    <div class="glass-card kpi-card">
+      <span class="kpi-label">Pedidos Cancelados</span>
+      <h3 class="number-font kpi-value text-error">{{ resumen.cancelados }}</h3>
+    </div>
+  </div>
+
+  <!-- Fila de Gráficas -->
+  <div class="charts-grid">
+    <div class="glass-card chart-wrapper">
+      <h4>Tendencia Histórica de Ventas</h4>
+      <div class="canvas-container">
+        <canvas id="ventasChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="glass-card chart-wrapper">
+      <h4>Distribución por Método de Pago</h4>
+      <div class="canvas-container compact">
+        <canvas id="pagosChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
