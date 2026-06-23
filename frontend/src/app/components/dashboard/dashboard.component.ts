@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { API_BASE_URL } from '../../config';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,14 +25,14 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarResumen() {
-    this.http.get('http://localhost:8081/api/v1/reportes/resumen').subscribe({
+    this.http.get(`${API_BASE_URL}/api/v1/reportes/resumen`).subscribe({
       next: (data) => this.resumen = data,
       error: (err) => console.error('Error al cargar KPIs del dashboard', err)
     });
   }
 
   cargarInventarioCritico() {
-    this.http.get<any[]>('http://localhost:8081/api/v1/insumos').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/insumos`).subscribe({
       next: (data) => {
         // Filtrar insumos críticos
         this.insumosCriticos = data.filter(i => i.quantity <= i.minimumStock);
@@ -41,7 +42,7 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarPedidosRecientes() {
-    this.http.get<any[]>('http://localhost:8081/api/v1/pedidos').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos`).subscribe({
       next: (data) => {
         // Mostrar los 5 más recientes
         this.pedidosRecientes = data

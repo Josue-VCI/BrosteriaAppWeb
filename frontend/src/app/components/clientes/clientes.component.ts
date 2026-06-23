@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WORLD_CUP_TEMPLATE } from './templates';
+import { API_BASE_URL } from '../../config';
 
 @Component({
   selector: 'app-clientes',
@@ -46,7 +47,7 @@ export class ClientesComponent implements OnInit {
     address: ''
   };
 
-  private apiBaseUrl = 'http://localhost:8081/api/v1/clientes';
+  private apiBaseUrl = `${API_BASE_URL}/api/v1/clientes`;
 
   constructor(private http: HttpClient) {}
 

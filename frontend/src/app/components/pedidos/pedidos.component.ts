@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { API_BASE_URL } from '../../config';
 
 @Component({
   selector: 'app-pedidos',
@@ -22,7 +23,7 @@ export class PedidosComponent implements OnInit {
   }
 
   cargarTodosLosPedidos() {
-    this.http.get<any[]>('http://localhost:8081/api/v1/pedidos').subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos`).subscribe({
       next: (data) => {
         this.pedidosPendientes = data.filter(p => p.status === 'PENDIENTE');
         this.pedidosPreparando = data.filter(p => p.status === 'PREPARANDO');
@@ -34,7 +35,7 @@ export class PedidosComponent implements OnInit {
   }
 
   actualizarEstado(pedidoId: number, nuevoEstado: string) {
-    this.http.put(`http://localhost:8081/api/v1/pedidos/${pedidoId}/estado?nuevoEstado=${nuevoEstado}`, {}).subscribe({
+    this.http.put(`${API_BASE_URL}/api/v1/pedidos/${pedidoId}/estado?nuevoEstado=${nuevoEstado}`, {}).subscribe({
       next: () => {
         this.cargarTodosLosPedidos();
       },

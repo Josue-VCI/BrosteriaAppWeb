@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { API_BASE_URL } from '../../config';
 
 @Component({
   selector: 'app-inventario',
@@ -32,7 +33,7 @@ export class InventarioComponent implements OnInit {
     minimumStock: 5.0
   };
 
-  private apiBaseUrl = 'http://localhost:8081/api/v1/insumos';
+  private apiBaseUrl = `${API_BASE_URL}/api/v1/insumos`;
 
   constructor(private http: HttpClient) {}
 

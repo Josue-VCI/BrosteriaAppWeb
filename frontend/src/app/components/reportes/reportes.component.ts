@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Chart, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { API_BASE_URL } from '../../config';
 
 Chart.register(...registerables);
 
@@ -21,7 +22,7 @@ export class ReportesComponent implements OnInit {
   private ventasChartRef: any = null;
   private pagosChartRef: any = null;
 
-  private apiBaseUrl = 'http://localhost:8081/api/v1/reportes';
+  private apiBaseUrl = `${API_BASE_URL}/api/v1/reportes`;
 
   constructor(private http: HttpClient) {}
 

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { API_BASE_URL } from '../../config';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +26,7 @@ export class LoginComponent {
     
     const payload = { email: this.email, password: this.password };
     
-    this.http.post<any>('http://localhost:8081/api/v1/auth/login', payload).subscribe({
+    this.http.post<any>(`${API_BASE_URL}/api/v1/auth/login`, payload).subscribe({
       next: (res) => {
         localStorage.setItem('brosteria_token', res.token);
         localStorage.setItem('brosteria_username', res.userName);
