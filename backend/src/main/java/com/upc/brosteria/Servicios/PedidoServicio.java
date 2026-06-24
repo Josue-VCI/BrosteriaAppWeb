@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,14 +45,25 @@ public class PedidoServicio {
     private ModelMapper modelMapper;
 
     public List<PedidoDTO> listarPorEstado(String status) {
-        return pedidoRepositorio.findByStatus(status).stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findByStatusWithCliente(status);
+        return mappedPedidos(pedidos);
     }
 
     public List<PedidoDTO> listarTodos() {
-        return pedidoRepositorio.findAll().stream()
-                .map(this::convertirADTO)
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
+        return mappedPedidos(pedidos);
+    }
+
+    private List<PedidoDTO> mappedPedidos(List<PedidoEntidad> pedidos) {
+        if (pedidos.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Long> pedidoIds = pedidos.stream().map(PedidoEntidad::getId).collect(Collectors.toList());
+        List<DetallePedidoEntidad> allDetalles = detallePedidoRepositorio.findByPedidoEntidadIdIn(pedidoIds);
+        Map<Long, List<DetallePedidoEntidad>> detallesByPedidoId = allDetalles.stream()
+                .collect(Collectors.groupingBy(d -> d.getPedidoEntidad().getId()));
+        return pedidos.stream()
+                .map(p -> convertirADTO(p, detallesByPedidoId.getOrDefault(p.getId(), new ArrayList<>())))
                 .collect(Collectors.toList());
     }
 
@@ -185,11 +197,15 @@ public class PedidoServicio {
     }
 
     private PedidoDTO convertirADTO(PedidoEntidad entity) {
+        List<DetallePedidoEntidad> detalles = detallePedidoRepositorio.findByPedidoEntidadId(entity.getId());
+        return convertirADTO(entity, detalles);
+    }
+
+    private PedidoDTO convertirADTO(PedidoEntidad entity, List<DetallePedidoEntidad> detalles) {
         PedidoDTO dto = modelMapper.map(entity, PedidoDTO.class);
         if (entity.getClienteEntidad() != null) {
             dto.setClienteId(entity.getClienteEntidad().getId());
         }
-        List<DetallePedidoEntidad> detalles = detallePedidoRepositorio.findByPedidoEntidadId(entity.getId());
         dto.setDetalles(detalles.stream().map(d -> {
             DetallePedidoDTO dDto = new DetallePedidoDTO();
             dDto.setId(d.getId());
