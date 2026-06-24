@@ -43,7 +43,13 @@ export class InventarioComponent implements OnInit {
 
   cargarInsumos() {
     this.http.get<any[]>(this.apiBaseUrl).subscribe({
-      next: (data) => this.insumos = data,
+      next: (data) => {
+        this.insumos = data.sort((a, b) => {
+          const aCritico = a.quantity <= a.minimumStock ? 1 : 0;
+          const bCritico = b.quantity <= b.minimumStock ? 1 : 0;
+          return bCritico - aCritico;
+        });
+      },
       error: (err) => console.error('Error al cargar insumos', err)
     });
   }

@@ -18,6 +18,7 @@ export class ReportesComponent implements OnInit {
   resumen: any = { ventasTotales: 0, totalPedidos: 0, completados: 0, cancelados: 0 };
   filtroRango = 'trimestre'; // semana, mes, trimestre
   tipoPedido = ''; // vacio, delivery, pickup
+  diaSemana = ''; // vacio, MONDAY, TUESDAY, etc.
 
   private ventasChartRef: any = null;
   private pagosChartRef: any = null;
@@ -55,7 +56,8 @@ export class ReportesComponent implements OnInit {
 
     let url = `${this.apiBaseUrl}/resumen?`;
     if (fechaInicio) url += `fechaInicio=${fechaInicio}&`;
-    if (this.tipoPedido) url += `tipoPedido=${this.tipoPedido}`;
+    if (this.tipoPedido) url += `tipoPedido=${this.tipoPedido}&`;
+    if (this.diaSemana) url += `diaSemana=${this.diaSemana}`;
 
     this.http.get(url).subscribe({
       next: (data) => this.resumen = data,
@@ -166,7 +168,8 @@ export class ReportesComponent implements OnInit {
     }
 
     let url = `${this.apiBaseUrl}/descargar-pdf?`;
-    if (fechaInicio) url += `fechaInicio=${fechaInicio}`;
+    if (fechaInicio) url += `fechaInicio=${fechaInicio}&`;
+    if (this.diaSemana) url += `diaSemana=${this.diaSemana}`;
 
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {

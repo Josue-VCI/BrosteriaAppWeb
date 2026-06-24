@@ -12,6 +12,7 @@ import { filter } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit {
   mostrarSidebar = false;
+  sidebarAbierto = false;
   usuarioNombre = 'Administrador (Demo)';
 
   constructor(private router: Router) {
@@ -22,6 +23,10 @@ export class AppComponent implements OnInit {
     }
   }
 
+  toggleSidebar() {
+    this.sidebarAbierto = !this.sidebarAbierto;
+  }
+
   ngOnInit() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -29,6 +34,7 @@ export class AppComponent implements OnInit {
       // Mostrar la barra de navegación lateral en todas las vistas excepto login
       this.mostrarSidebar = this.router.url !== '/login';
       this.usuarioNombre = localStorage.getItem('brosteria_username') || 'Josue Espinoza (Admin)';
+      this.sidebarAbierto = false;
     });
   }
 

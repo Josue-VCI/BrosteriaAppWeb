@@ -45,6 +45,11 @@
   font-size: 13px;
 }
 
+.filter-select option {
+  background-color: #121214;
+  color: #FAFAFA;
+}
+
 .filter-select:focus {
   outline: none;
   border-color: var(--primary);

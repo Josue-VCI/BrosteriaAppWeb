@@ -1,4 +1,9 @@
-<div class="app-layout">
+<div class="app-layout" [class.sidebar-active]="sidebarAbierto">
+  <!-- Botón hamburguesa para móvil -->
+  <button class="mobile-toggle" *ngIf="mostrarSidebar" (click)="toggleSidebar()">
+    ☰
+  </button>
+
   <!-- Sidebar de Navegación Lateral -->
   <aside class="sidebar glass-card" *ngIf="mostrarSidebar">
     <div class="sidebar-brand">

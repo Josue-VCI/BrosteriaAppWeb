@@ -26,6 +26,20 @@
         <option value="PICKUP">Solo Retiro en Local</option>
       </select>
     </div>
+
+    <div class="filter-group">
+      <label for="diaSemana">Día de la Semana</label>
+      <select id="diaSemana" [(ngModel)]="diaSemana" (change)="aplicarFiltros()" class="filter-select">
+        <option value="">Todos los Días</option>
+        <option value="MONDAY">Lunes</option>
+        <option value="TUESDAY">Martes</option>
+        <option value="WEDNESDAY">Miércoles</option>
+        <option value="THURSDAY">Jueves</option>
+        <option value="FRIDAY">Viernes</option>
+        <option value="SATURDAY">Sábado</option>
+        <option value="SUNDAY">Domingo</option>
+      </select>
+    </div>
   </div>
 
   <!-- Fila de KPIs -->
