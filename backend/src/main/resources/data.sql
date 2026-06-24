@@ -70,136 +70,158 @@ ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('insumos', 'id'), coalesce(max(id), 1)) FROM insumos;
 
--- 5. Bloque PL/pgSQL para Simulación Masiva (~50 MB de datos variados)
--- 5. Bloque PL/pgSQL para Simulación Masiva (~50 MB de datos variados)
-DO $$
-DECLARE
-    v_order_count INTEGER;
-BEGIN
-    SELECT COUNT(*) INTO v_order_count FROM pedidos;
-    IF v_order_count < 1000 THEN
-        -- Limpiar tablas para asegurar carga fresca
-        TRUNCATE TABLE detalle_pedidos CASCADE;
-        DELETE FROM pedidos;
-        DELETE FROM clientes;
-        
-        -- A. Generar 2000 Clientes con correos ficticios/inválidos en un solo INSERT masivo
-        INSERT INTO clientes (id, name, email, phone, address, total_orders, total_spent, points, created_at)
-        SELECT 
-          i,
-          CASE (i % 10)
-              WHEN 0 THEN 'Carlos'
-              WHEN 1 THEN 'María'
-              WHEN 2 THEN 'Juan'
-              WHEN 3 THEN 'Ana'
-              WHEN 4 THEN 'Luis'
-              WHEN 5 THEN 'Laura'
-              WHEN 6 THEN 'Diego'
-              WHEN 7 THEN 'Sofía'
-              WHEN 8 THEN 'José'
-              ELSE 'Carmen'
-          END || ' ' || CASE (i % 8)
-              WHEN 0 THEN 'Pérez'
-              WHEN 1 THEN 'Gómez'
-              WHEN 2 THEN 'Rodríguez'
-              WHEN 3 THEN 'Sánchez'
-              WHEN 4 THEN 'López'
-              WHEN 5 THEN 'Torres'
-              WHEN 6 THEN 'Díaz'
-              ELSE 'Vargas'
-          END || ' (' || i || ')',
-          'cliente' || i || '@brosteria-invalid.local',
-          '9' || CAST(10000000 + (i * 439) % 89999999 AS VARCHAR),
-          'Av. Principal Mz ' || CHR(65 + (i % 26)) || ' Lote ' || ((i % 15) + 1) || ', ' || 
-            CASE (i % 6)
-                WHEN 0 THEN 'Carabayllo'
-                WHEN 1 THEN 'Comas'
-                WHEN 2 THEN 'Los Olivos'
-                WHEN 3 THEN 'Puente Piedra'
-                WHEN 4 THEN 'Independencia'
-                ELSE 'San Martín de Porres'
-            END,
-          0,
-          0.0,
-          0,
-          NOW() - (i * INTERVAL '1 hour')
-        FROM generate_series(1, 2000) AS i;
-        
-        -- B. Generar 50000 Pedidos distribuidos en 90 días (calculando total directo vía JOIN para evitar slow UPDATE)
-        INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date, cliente_id)
-        SELECT 
-          s.id,
-          c.name,
-          c.phone,
-          CASE WHEN s.id % 4 = 3 THEN 'Retiro en local' ELSE c.address END,
-          CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END,
-          CASE WHEN s.id % 4 = 3 THEN 'PICKUP' ELSE 'DELIVERY' END,
-          CASE (s.id % 4) WHEN 0 THEN 'YAPE' WHEN 1 THEN 'PLIN' WHEN 2 THEN 'TARJETA' ELSE 'EFECTIVO' END,
-          -- Total = subtotal1 (qty * price1) + subtotal2 (price2 si id % 5 in (1,3)) + delivery_cost
-          ( ((s.id % 3) + 1) * p1.price ) + 
-          ( CASE WHEN s.id % 5 IN (1, 3) THEN p2.price ELSE 0.0 END ) + 
-          ( CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END ),
-          CASE (s.id % 15) WHEN 0 THEN 'CANCELADO' WHEN 1 THEN 'PREPARANDO' WHEN 2 THEN 'PENDIENTE' ELSE 'ENTREGADO' END,
-          (NOW() - (s.id * INTERVAL '2.5 minutes')) 
-            + CASE (s.id % 3)
-                WHEN 0 THEN INTERVAL '0 hours'
-                WHEN 1 THEN INTERVAL '4 hours'
-                ELSE INTERVAL '-2 hours'
-              END,
-          c.id
-        FROM generate_series(1, 50000) AS s(id)
-        JOIN clientes c ON c.id = ((s.id % 2000) + 1)
-        JOIN productos p1 ON p1.id = ((s.id % 27) + 1)
-        JOIN productos p2 ON p2.id = (((s.id + 11) % 27) + 1);
+-- 5. Simulación Masiva condicional (~50 MB de datos variados)
 
-        -- C. Generar DetallePedidos (1 a 2 items por pedido)
-        -- Detalle 1
-        INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
-        SELECT 
-          p.id,
-          p_cat.id,
-          ((p.id % 3) + 1), 
-          ((p.id % 3) + 1) * p_cat.price,
-          CASE 
-            WHEN p_cat.category = 'BEBIDAS' THEN NULL 
-            ELSE 'Mayonesa, Ají de la casa' 
-          END
-        FROM pedidos p
-        JOIN productos p_cat ON p_cat.id = ((p.id % 27) + 1);
+-- A. Eliminar datos antiguos condicionalmente si no se cumple el mínimo de pedidos (menos de 1000 pedidos)
+DELETE FROM detalle_pedidos WHERE (SELECT COUNT(*) FROM pedidos) < 1000;
+DELETE FROM pedidos WHERE (SELECT COUNT(*) FROM pedidos) < 1000;
+DELETE FROM clientes WHERE (SELECT COUNT(*) FROM pedidos) < 1000;
 
-        -- Detalle 2 (para el 40% de los pedidos)
-        INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
-        SELECT 
-          p.id,
-          p_cat.id,
-          1,
-          p_cat.price,
-          CASE 
-            WHEN p_cat.category = 'BEBIDAS' THEN NULL 
-            ELSE 'Ketchup' 
-          END
-        FROM pedidos p
-        JOIN productos p_cat ON p_cat.id = (((p.id + 11) % 27) + 1)
-        WHERE p.id % 5 IN (1, 3);
+-- B. Generar 2000 Clientes con correos ficticios/inválidos si no se ha inicializado la base de datos
+INSERT INTO clientes (id, name, email, phone, address, total_orders, total_spent, points, created_at)
+SELECT 
+  i,
+  CASE (i % 10)
+      WHEN 0 THEN 'Carlos'
+      WHEN 1 THEN 'María'
+      WHEN 2 THEN 'Juan'
+      WHEN 3 THEN 'Ana'
+      WHEN 4 THEN 'Luis'
+      WHEN 5 THEN 'Laura'
+      WHEN 6 THEN 'Diego'
+      WHEN 7 THEN 'Sofía'
+      WHEN 8 THEN 'José'
+      ELSE 'Carmen'
+  END || ' ' || CASE (i % 8)
+      WHEN 0 THEN 'Pérez'
+      WHEN 1 THEN 'Gómez'
+      WHEN 2 THEN 'Rodríguez'
+      WHEN 3 THEN 'Sánchez'
+      WHEN 4 THEN 'López'
+      WHEN 5 THEN 'Torres'
+      WHEN 6 THEN 'Díaz'
+      ELSE 'Vargas'
+  END || ' (' || i || ')',
+  'cliente' || i || '@brosteria-invalid.local',
+  '9' || CAST(10000000 + (i * 439) % 89999999 AS VARCHAR),
+  'Av. Principal Mz ' || CHR(65 + (i % 26)) || ' Lote ' || ((i % 15) + 1) || ', ' || 
+    CASE (i % 6)
+        WHEN 0 THEN 'Carabayllo'
+        WHEN 1 THEN 'Comas'
+        WHEN 2 THEN 'Los Olivos'
+        WHEN 3 THEN 'Puente Piedra'
+        WHEN 4 THEN 'Independencia'
+        ELSE 'San Martín de Porres'
+    END,
+  0,
+  0.0,
+  0,
+  NOW() - (i * INTERVAL '1 hour')
+FROM generate_series(1, 2000) AS i
+WHERE NOT EXISTS (SELECT 1 FROM clientes WHERE email LIKE '%@brosteria-invalid.local' LIMIT 1);
 
-        -- E. Actualizar estadísticas acumulativas de Clientes usando un solo UPDATE agrupado (muy rápido)
-        UPDATE clientes c
-        SET total_orders = sub.cnt,
-            total_spent = sub.spent,
-            points = CAST(sub.spent / 10 AS INTEGER)
-        FROM (
-            SELECT cliente_id, 
-                   COUNT(*) as cnt, 
-                   SUM(total) as spent
-            FROM pedidos 
-            WHERE status = 'ENTREGADO'
-            GROUP BY cliente_id
-        ) sub
-        WHERE c.id = sub.cliente_id;
-            
-        -- F. Ajustar secuencias de ID de PostgreSQL
-        PERFORM setval(pg_get_serial_sequence('clientes', 'id'), COALESCE(MAX(id), 1)) FROM clientes;
-        PERFORM setval(pg_get_serial_sequence('pedidos', 'id'), COALESCE(MAX(id), 1)) FROM pedidos;
-        PERFORM setval(pg_get_serial_sequence('detalle_pedidos', 'id'), COALESCE(MAX(id), 1)) FROM detalle_pedidos;
-    END IF;
-END $$;
+-- C. Generar 50000 Pedidos distribuidos en 90 días si no existen
+INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date, cliente_id)
+SELECT 
+  s.id,
+  c.name,
+  c.phone,
+  CASE WHEN s.id % 4 = 3 THEN 'Retiro en local' ELSE c.address END,
+  CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END,
+  CASE WHEN s.id % 4 = 3 THEN 'PICKUP' ELSE 'DELIVERY' END,
+  CASE (s.id % 4) WHEN 0 THEN 'YAPE' WHEN 1 THEN 'PLIN' WHEN 2 THEN 'TARJETA' ELSE 'EFECTIVO' END,
+  -- Total = subtotal1 (qty * price1) + subtotal2 (price2 si id % 5 in (1,3)) + delivery_cost
+  ( ((s.id % 3) + 1) * p1.price ) + 
+  ( CASE WHEN s.id % 5 IN (1, 3) THEN p2.price ELSE 0.0 END ) + 
+  ( CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END ),
+  CASE (s.id % 15) WHEN 0 THEN 'CANCELADO' WHEN 1 THEN 'PREPARANDO' WHEN 2 THEN 'PENDIENTE' ELSE 'ENTREGADO' END,
+  (NOW() - (s.id * INTERVAL '2.5 minutes')) 
+    + CASE (s.id % 3)
+        WHEN 0 THEN INTERVAL '0 hours'
+        WHEN 1 THEN INTERVAL '4 hours'
+        ELSE INTERVAL '-2 hours'
+      END,
+  c.id
+FROM generate_series(1, 50000) AS s(id)
+JOIN clientes c ON c.id = ((s.id % 2000) + 1)
+JOIN productos p1 ON p1.id = ((s.id % 27) + 1)
+JOIN productos p2 ON p2.id = (((s.id + 11) % 27) + 1)
+WHERE c.email LIKE '%@brosteria-invalid.local'
+  AND NOT EXISTS (
+    SELECT 1 
+    FROM pedidos p_exist 
+    JOIN clientes c_exist ON p_exist.cliente_id = c_exist.id 
+    WHERE c_exist.email LIKE '%@brosteria-invalid.local' 
+    LIMIT 1
+  );
+
+-- D. Generar DetallePedidos (Detalle 1: para todos los pedidos seeded)
+INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
+SELECT 
+  p.id,
+  p_cat.id,
+  ((p.id % 3) + 1), 
+  ((p.id % 3) + 1) * p_cat.price,
+  CASE 
+    WHEN p_cat.category = 'BEBIDAS' THEN NULL 
+    ELSE 'Mayonesa, Ají de la casa' 
+  END
+FROM pedidos p
+JOIN productos p_cat ON p_cat.id = ((p.id % 27) + 1)
+JOIN clientes c ON c.id = p.cliente_id
+WHERE c.email LIKE '%@brosteria-invalid.local'
+  AND NOT EXISTS (
+    SELECT 1 
+    FROM detalle_pedidos dp 
+    WHERE dp.pedido_id = p.id 
+      AND dp.producto_id = p_cat.id 
+    LIMIT 1
+  );
+
+-- E. Generar DetallePedidos (Detalle 2: para el 40% de los pedidos seeded)
+INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
+SELECT 
+  p.id,
+  p_cat.id,
+  1,
+  p_cat.price,
+  CASE 
+    WHEN p_cat.category = 'BEBIDAS' THEN NULL 
+    ELSE 'Ketchup' 
+  END
+FROM pedidos p
+JOIN productos p_cat ON p_cat.id = (((p.id + 11) % 27) + 1)
+JOIN clientes c ON c.id = p.cliente_id
+WHERE p.id % 5 IN (1, 3)
+  AND c.email LIKE '%@brosteria-invalid.local'
+  AND NOT EXISTS (
+    SELECT 1 
+    FROM detalle_pedidos dp 
+    WHERE dp.pedido_id = p.id 
+      AND dp.producto_id = p_cat.id 
+    LIMIT 1
+  );
+
+-- F. Actualizar estadísticas acumulativas de Clientes usando un solo UPDATE agrupado (muy rápido)
+UPDATE clientes c
+SET total_orders = sub.cnt,
+    total_spent = sub.spent,
+    points = CAST(sub.spent / 10 AS INTEGER)
+FROM (
+    SELECT p.cliente_id, 
+           COUNT(*) as cnt, 
+           SUM(p.total) as spent
+    FROM pedidos p
+    JOIN clientes cl ON cl.id = p.cliente_id
+    WHERE p.status = 'ENTREGADO'
+      AND cl.email LIKE '%@brosteria-invalid.local'
+    GROUP BY p.cliente_id
+) sub
+WHERE c.id = sub.cliente_id
+  AND c.email LIKE '%@brosteria-invalid.local'
+  AND c.total_orders = 0;
+      
+-- G. Ajustar secuencias de ID de PostgreSQL
+SELECT setval(pg_get_serial_sequence('clientes', 'id'), COALESCE(MAX(id), 1)) FROM clientes;
+SELECT setval(pg_get_serial_sequence('pedidos', 'id'), COALESCE(MAX(id), 1)) FROM pedidos;
+SELECT setval(pg_get_serial_sequence('detalle_pedidos', 'id'), COALESCE(MAX(id), 1)) FROM detalle_pedidos;
