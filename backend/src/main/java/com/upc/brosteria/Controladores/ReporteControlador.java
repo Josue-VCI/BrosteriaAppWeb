@@ -25,9 +25,10 @@ public class ReporteControlador {
     public ResponseEntity<Map<String, Object>> obtenerResumenVentas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
-            @RequestParam(required = false) String tipoPedido) {
+            @RequestParam(required = false) String tipoPedido,
+            @RequestParam(required = false) String diaSemana) {
         
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAll();
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
 
         // Aplicar filtros
         if (fechaInicio != null) {
@@ -43,6 +44,11 @@ public class ReporteControlador {
         if (tipoPedido != null && !tipoPedido.isEmpty()) {
             pedidos = pedidos.stream()
                     .filter(p -> p.getType().equalsIgnoreCase(tipoPedido))
+                    .collect(Collectors.toList());
+        }
+        if (diaSemana != null && !diaSemana.isEmpty()) {
+            pedidos = pedidos.stream()
+                    .filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana))
                     .collect(Collectors.toList());
         }
 
@@ -109,15 +115,19 @@ public class ReporteControlador {
     @GetMapping("/descargar-pdf")
     public ResponseEntity<byte[]> descargarReportePdf(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
+            @RequestParam(required = false) String diaSemana) {
         
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAll();
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
 
         if (fechaInicio != null) {
             pedidos = pedidos.stream().filter(p -> p.getOrderDate().isAfter(fechaInicio)).collect(Collectors.toList());
         }
         if (fechaFin != null) {
             pedidos = pedidos.stream().filter(p -> p.getOrderDate().isBefore(fechaFin)).collect(Collectors.toList());
+        }
+        if (diaSemana != null && !diaSemana.isEmpty()) {
+            pedidos = pedidos.stream().filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana)).collect(Collectors.toList());
         }
 
         Double totalVentas = pedidos.stream()
