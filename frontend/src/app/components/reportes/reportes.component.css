@@ -114,3 +114,60 @@
   display: flex;
   justify-content: center;
 }
+
+.ranking-wrapper {
+  padding: 25px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.ranking-wrapper h4 {
+  margin: 0;
+  font-size: 16px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 10px;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ranking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.ranking-item:hover {
+  background: rgba(255, 107, 0, 0.05);
+  border-color: rgba(255, 107, 0, 0.2);
+}
+
+.rank-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rank-number {
+  font-family: var(--font-brand);
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--primary);
+  width: 30px;
+}
+
+.product-name {
+  font-size: 14px;
+  color: var(--text-light);
+  font-weight: 500;
+}

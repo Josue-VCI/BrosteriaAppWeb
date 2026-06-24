@@ -22,6 +22,9 @@ export class ReportesComponent implements OnInit {
 
   private ventasChartRef: any = null;
   private pagosChartRef: any = null;
+  private horasChartRef: any = null;
+  private distritosChartRef: any = null;
+  topProductos: any[] = [];
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/reportes`;
 
@@ -66,10 +69,13 @@ export class ReportesComponent implements OnInit {
   }
 
   cargarDatosGrafico() {
-    this.http.get<any>(`${this.apiBaseUrl}/datos-grafico?filtroRango=${this.filtroRango}`).subscribe({
+    this.http.get<any>(`${this.apiBaseUrl}/datos-grafico?filtroRango=${this.filtroRango}&diaSemana=${this.diaSemana}`).subscribe({
       next: (data) => {
         this.renderizarGraficoVentas(data.fechas, data.montos);
         this.renderizarGraficoPagos(data.metodosPago);
+        this.renderizarGraficoHoras(data.pedidosPorHora || []);
+        this.renderizarGraficoDistritos(data.distritos || {});
+        this.topProductos = data.topProductos || [];
       },
       error: (err) => console.error('Error al cargar datos del gráfico', err)
     });
@@ -181,6 +187,80 @@ export class ReportesComponent implements OnInit {
         window.URL.revokeObjectURL(urlBlob);
       },
       error: (err) => console.error('Error al descargar el reporte PDF', err)
+    });
+  }
+
+  renderizarGraficoHoras(pedidosPorHora: number[]) {
+    if (this.horasChartRef) {
+      this.horasChartRef.destroy();
+    }
+    const labels = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+    this.horasChartRef = new Chart('horasChart', {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Pedidos por Hora',
+          data: pedidosPorHora,
+          backgroundColor: '#FFB703',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#A0A0A8', stepSize: 1 }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#A0A0A8', maxRotation: 45, minRotation: 45 }
+          }
+        }
+      }
+    });
+  }
+
+  renderizarGraficoDistritos(distritos: any) {
+    if (this.distritosChartRef) {
+      this.distritosChartRef.destroy();
+    }
+    const labels = Object.keys(distritos);
+    const data = Object.values(distritos);
+    this.distritosChartRef = new Chart('distritosChart', {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Pedidos',
+          data: data,
+          backgroundColor: '#00B0FF',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#A0A0A8', stepSize: 1 }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: '#A0A0A8' }
+          }
+        }
+      }
     });
   }
 }

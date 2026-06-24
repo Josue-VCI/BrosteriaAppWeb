@@ -78,4 +78,35 @@
       </div>
     </div>
   </div>
+
+  <!-- Segunda Fila de Gráficas (Predicciones) -->
+  <div class="charts-grid">
+    <div class="glass-card chart-wrapper">
+      <h4>Horarios de Mayor Demanda (Pedidos por Hora)</h4>
+      <div class="canvas-container">
+        <canvas id="horasChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="glass-card chart-wrapper">
+      <h4>Zonas / Distritos con Más Pedidos</h4>
+      <div class="canvas-container compact">
+        <canvas id="distritosChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila de Ranking de Productos Estrella -->
+  <div class="glass-card ranking-wrapper">
+    <h4>🍗 Top 5 Productos / Combos Estrella</h4>
+    <div class="ranking-list">
+      <div class="ranking-item" *ngFor="let prod of topProductos; let i = index">
+        <div class="rank-info">
+          <span class="rank-number">#{{ i + 1 }}</span>
+          <span class="product-name">{{ prod.nombre }}</span>
+        </div>
+        <span class="badge badge-success">{{ prod.cantidad }} unds. vendidos</span>
+      </div>
+    </div>
+  </div>
 </div>
