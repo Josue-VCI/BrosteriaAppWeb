@@ -1,6 +1,13 @@
 package com.upc.brosteria.Servicios;
 
-import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Element;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.*;
 import com.upc.brosteria.Entidades.PedidoEntidad;
 import com.upc.brosteria.Entidades.DetallePedidoEntidad;
@@ -10,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
