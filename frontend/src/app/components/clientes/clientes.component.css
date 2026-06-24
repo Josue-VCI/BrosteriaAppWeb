@@ -194,3 +194,98 @@
   background: rgba(255, 255, 255, 0.1) !important;
   box-shadow: none !important;
 }
+
+/* Filtros y Diseño Responsivo Clientes */
+.search-and-filters {
+  display: flex;
+  flex-grow: 1;
+  gap: 15px;
+  align-items: center;
+}
+
+.search-and-filters .search-input {
+  flex-grow: 2;
+}
+
+.search-and-filters .filter-select {
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 12px 20px;
+  color: var(--text-light);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+}
+
+.search-and-filters .filter-select:focus {
+  border-color: var(--primary);
+}
+
+.search-and-filters .filter-select option {
+  background-color: #121214;
+  color: #FAFAFA;
+}
+
+
+
+.desktop-only-crm {
+  display: block;
+}
+
+.mobile-only-crm {
+  display: none;
+}
+
+.crm-placeholder-card {
+  padding: 40px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.placeholder-icon {
+  font-size: 50px;
+}
+
+.crm-placeholder-card h3 {
+  margin: 0;
+  color: var(--primary);
+  font-family: var(--font-brand);
+}
+
+.crm-placeholder-card p {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0;
+}
+
+.placeholder-actions {
+  margin-top: 10px;
+}
+
+@media (max-width: 1024px) {
+  .search-and-filters {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .search-and-filters .filter-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-only-crm {
+    display: none !important;
+  }
+  .mobile-only-crm {
+    display: block !important;
+  }
+}
+

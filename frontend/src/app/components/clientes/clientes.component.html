@@ -1,28 +1,76 @@
 <div class="clientes-container">
   <div class="header-section">
     <h2>👥 Control y Fidelización de Clientes (CRM)</h2>
-    <p>Historial de compras, puntos acumulados y CRUD completo de clientes</p>
+    <p>Historial de compras, puntos acumulados y CRM de clientes</p>
   </div>
 
   <div class="actions-bar">
-    <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="🔍 Buscar por nombre, celular o email..." class="search-input">
+    <div class="search-and-filters">
+      <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="🔍 Buscar por nombre, celular o dirección..." class="search-input">
+      
+      <!-- Filtro de Distrito -->
+      <select [(ngModel)]="filtroDistrito" (change)="filtrarClientes()" class="filter-select">
+        <option value="">📍 Todos los Distritos</option>
+        <option value="Carabayllo">Carabayllo</option>
+        <option value="Comas">Comas</option>
+        <option value="Los Olivos">Los Olivos</option>
+        <option value="Puente Piedra">Puente Piedra</option>
+        <option value="Independencia">Independencia</option>
+        <option value="San Martín de Porres">San Martín de Porres</option>
+      </select>
+
+      <!-- Filtro de Consumo -->
+      <select [(ngModel)]="filtroConsumo" (change)="filtrarClientes()" class="filter-select">
+        <option value="">💰 Todos los Consumos</option>
+        <option value="alto">Alto Consumo (> S/.150)</option>
+        <option value="medio">Consumo Medio (S/.50 - S/.150)</option>
+        <option value="bajo">Bajo Consumo (< S/.50)</option>
+        <option value="ninguno">Sin Consumo (S/.0)</option>
+      </select>
+    </div>
+
     <div class="right-actions">
       <button class="brand-btn add-btn" (click)="abrirNuevoCliente()">➕ Nuevo Cliente</button>
-      <button class="brand-btn" (click)="abrirRedactarMasivo()">✉️ Enviar Promoción Masiva (Gmail)</button>
+      <button class="brand-btn" (click)="abrirRedactarMasivo()">✉️ Campaña Masiva</button>
     </div>
   </div>
 
-  <div class="glass-card table-wrapper">
+  <!-- Vista Desktop: Tabla completa ordenada -->
+  <div class="glass-card table-wrapper desktop-only-crm">
     <table class="clientes-table">
       <thead>
         <tr>
-          <th>Nombre</th>
-          <th>Celular</th>
-          <th>Correo Electrónico</th>
-          <th>Dirección Principal</th>
-          <th>Pedidos Realizados</th>
-          <th>Total Consumido</th>
-          <th>Puntos Club</th>
+          <th (click)="ordenarPor('name')" class="sortable-header">
+            Nombre 
+            <span class="sort-arrow" *ngIf="columnaOrden === 'name'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'name'">↕</span>
+          </th>
+          <th (click)="ordenarPor('phone')" class="sortable-header">
+            Celular
+            <span class="sort-arrow" *ngIf="columnaOrden === 'phone'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'phone'">↕</span>
+          </th>
+          <th (click)="ordenarPor('email')" class="sortable-header">
+            Correo
+            <span class="sort-arrow" *ngIf="columnaOrden === 'email'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'email'">↕</span>
+          </th>
+          <th>Dirección</th>
+          <th (click)="ordenarPor('totalOrders')" class="sortable-header">
+            Pedidos
+            <span class="sort-arrow" *ngIf="columnaOrden === 'totalOrders'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'totalOrders'">↕</span>
+          </th>
+          <th (click)="ordenarPor('totalSpent')" class="sortable-header">
+            Consumo
+            <span class="sort-arrow" *ngIf="columnaOrden === 'totalSpent'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'totalSpent'">↕</span>
+          </th>
+          <th (click)="ordenarPor('points')" class="sortable-header">
+            Puntos
+            <span class="sort-arrow" *ngIf="columnaOrden === 'points'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'points'">↕</span>
+          </th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -44,8 +92,23 @@
             </div>
           </td>
         </tr>
+        <tr *ngIf="clientesFiltrados.length === 0">
+          <td colspan="8" class="text-center">No se encontraron clientes con los filtros aplicados.</td>
+        </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Vista Móvil: Tarjeta Informativa (Oculta en Desktop) -->
+  <div class="glass-card mobile-only-crm">
+    <div class="crm-placeholder-card">
+      <div class="placeholder-icon">👥</div>
+      <h3>Base de Datos de Clientes (CRM)</h3>
+      <p>El listado completo de clientes y el historial de fidelización contiene información detallada optimizada para pantallas de escritorio (PC) u orientación horizontal.</p>
+      <div class="placeholder-actions">
+        <button class="brand-btn" (click)="abrirNuevoCliente()">➕ Registrar Cliente Nuevo</button>
+      </div>
+    </div>
   </div>
 
   <!-- Modal de Redacción de Gmail Masivo -->
@@ -59,17 +122,19 @@
         <select id="plantilla" [(ngModel)]="plantillaSeleccionada" (change)="onTemplateChange()" class="modal-input">
           <option value="libre">Texto Libre (Escribe tu propio mensaje)</option>
           <option value="mundial">Campaña Mundialista 🍗⚽🏆 (Diseño Premium)</option>
+          <option value="combo">Campaña Súper 2x1 🍟🍗🔥 (Salchipapas y Pollo)</option>
+          <option value="finsemana">Campaña Fin de Semana 🎉🍗😎 (Descuento Locura)</option>
         </select>
       </div>
 
       <div class="form-group">
         <label for="asunto">Asunto del Correo</label>
-        <input type="text" id="asunto" [(ngModel)]="asuntoCampana" placeholder="Ej. ¡Jueves Brostero! 20% de descuento en Combos" class="modal-input">
+        <input type="text" id="asunto" [(ngModel)]="asuntoCampana" placeholder="Ej. ¡Jueves Brostero! 20% de descuento" class="modal-input">
       </div>
       
       <div class="form-group">
         <label for="cuerpo">Cuerpo del Mensaje</label>
-        <textarea id="cuerpo" [(ngModel)]="cuerpoCampana" [disabled]="plantillaSeleccionada === 'mundial'" placeholder="Hola, te escribimos de La Brostería..." rows="6" class="modal-textarea"></textarea>
+        <textarea id="cuerpo" [(ngModel)]="cuerpoCampana" [disabled]="plantillaSeleccionada !== 'libre'" placeholder="Hola, te escribimos de La Brostería..." rows="6" class="modal-textarea"></textarea>
       </div>
       
       <div class="modal-actions">

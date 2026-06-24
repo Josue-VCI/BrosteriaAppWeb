@@ -16,6 +16,10 @@ export class DashboardComponent implements OnInit {
   insumosCriticos: any[] = [];
   pedidosRecientes: any[] = [];
 
+  // Ordenación
+  columnaOrden = '';
+  ordenAscendente = true;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
@@ -44,12 +48,47 @@ export class DashboardComponent implements OnInit {
   cargarPedidosRecientes() {
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos`).subscribe({
       next: (data) => {
-        // Mostrar los 5 más recientes
+        // Guardar la lista completa ordenada por fecha
         this.pedidosRecientes = data
           .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
           .slice(0, 5);
+
+        if (this.columnaOrden) {
+          this.ordenarPorColumnaActiva();
+        }
       },
       error: (err) => console.error('Error al cargar pedidos recientes', err)
+    });
+  }
+
+  ordenarPor(columna: string) {
+    if (this.columnaOrden === columna) {
+      this.ordenAscendente = !this.ordenAscendente;
+    } else {
+      this.columnaOrden = columna;
+      this.ordenAscendente = true;
+    }
+    this.ordenarPorColumnaActiva();
+  }
+
+  ordenarPorColumnaActiva() {
+    const col = this.columnaOrden;
+    this.pedidosRecientes.sort((a, b) => {
+      let valA = a[col];
+      let valB = b[col];
+
+      if (valA === undefined || valA === null) valA = '';
+      if (valB === undefined || valB === null) valB = '';
+
+      if (typeof valA === 'string') {
+        return this.ordenAscendente 
+          ? valA.localeCompare(valB) 
+          : valB.localeCompare(valA);
+      } else {
+        return this.ordenAscendente 
+          ? (valA - valB) 
+          : (valB - valA);
+      }
     });
   }
 }

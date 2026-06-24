@@ -8,14 +8,27 @@
     <button class="brand-btn" (click)="abrirNuevoInsumo()">➕ Agregar Nuevo Insumo</button>
   </div>
 
-  <div class="glass-card table-wrapper">
+  <!-- Vista Desktop: Tabla completa ordenada -->
+  <div class="glass-card table-wrapper desktop-only-inventory">
     <table class="inventario-table">
       <thead>
         <tr>
-          <th>Insumo</th>
-          <th>Cantidad Disponible</th>
+          <th (click)="ordenarPor('name')" class="sortable-header">
+            Insumo
+            <span class="sort-arrow" *ngIf="columnaOrden === 'name'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'name'">↕</span>
+          </th>
+          <th (click)="ordenarPor('quantity')" class="sortable-header">
+            Cantidad Disponible
+            <span class="sort-arrow" *ngIf="columnaOrden === 'quantity'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'quantity'">↕</span>
+          </th>
           <th>Unidad</th>
-          <th>Stock Mínimo</th>
+          <th (click)="ordenarPor('minimumStock')" class="sortable-header">
+            Stock Mínimo
+            <span class="sort-arrow" *ngIf="columnaOrden === 'minimumStock'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+            <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'minimumStock'">↕</span>
+          </th>
           <th>Estado</th>
           <th>Última Actualización</th>
           <th>Acciones</th>
@@ -43,6 +56,30 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Vista Móvil: Listado de Doble Fila por Insumo (Oculto en Desktop) -->
+  <div class="mobile-only-inventory mobile-insumos-list">
+    <div class="mobile-insumo-card glass-card" *ngFor="let insumo of insumos" [class.alert-card]="insumo.quantity <= insumo.minimumStock">
+      <!-- Fila 1: Nombre del insumo (izquierda) y badge de estado (derecha) -->
+      <div class="card-row row-top">
+        <span class="insumo-name"><strong>{{ insumo.name }}</strong></span>
+        <span class="badge" [class.badge-success]="insumo.quantity > insumo.minimumStock" [class.badge-danger]="insumo.quantity <= insumo.minimumStock">
+          {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico ⚠️' }}
+        </span>
+      </div>
+      <!-- Fila 2: Cantidad disponible (izquierda) y botones de acción rápidos (derecha) -->
+      <div class="card-row row-bottom">
+        <span class="insumo-qty number-font">
+          {{ insumo.quantity | number:'1.1-2' }} <small>{{ insumo.unit }}</small>
+        </span>
+        <div class="action-buttons">
+          <button class="brand-btn refill-btn-sm" (click)="abrirIngreso(insumo)">⚡ Abastecer</button>
+          <button class="brand-btn edit-btn-sm" (click)="abrirEditarInsumo(insumo)">✏️</button>
+          <button class="brand-btn delete-btn-sm" (click)="eliminarInsumo(insumo.id)">🗑️</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal de Abastecimiento/Recarga -->

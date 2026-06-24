@@ -14,6 +14,10 @@ import { API_BASE_URL } from '../../config';
 export class InventarioComponent implements OnInit {
   insumos: any[] = [];
   
+  // Ordenación
+  columnaOrden = '';
+  ordenAscendente = true;
+
   // Modales
   mostrarModalRefill = false;
   mostrarModalCrud = false;
@@ -44,13 +48,50 @@ export class InventarioComponent implements OnInit {
   cargarInsumos() {
     this.http.get<any[]>(this.apiBaseUrl).subscribe({
       next: (data) => {
-        this.insumos = data.sort((a, b) => {
-          const aCritico = a.quantity <= a.minimumStock ? 1 : 0;
-          const bCritico = b.quantity <= b.minimumStock ? 1 : 0;
-          return bCritico - aCritico;
-        });
+        this.insumos = data;
+        if (this.columnaOrden) {
+          this.ordenarPorColumnaActiva();
+        } else {
+          // Orden por defecto: Críticos primero
+          this.insumos.sort((a, b) => {
+            const aCritico = a.quantity <= a.minimumStock ? 1 : 0;
+            const bCritico = b.quantity <= b.minimumStock ? 1 : 0;
+            return bCritico - aCritico;
+          });
+        }
       },
       error: (err) => console.error('Error al cargar insumos', err)
+    });
+  }
+
+  ordenarPor(columna: string) {
+    if (this.columnaOrden === columna) {
+      this.ordenAscendente = !this.ordenAscendente;
+    } else {
+      this.columnaOrden = columna;
+      this.ordenAscendente = true;
+    }
+    this.ordenarPorColumnaActiva();
+  }
+
+  ordenarPorColumnaActiva() {
+    const col = this.columnaOrden;
+    this.insumos.sort((a, b) => {
+      let valA = a[col];
+      let valB = b[col];
+
+      if (valA === undefined || valA === null) valA = '';
+      if (valB === undefined || valB === null) valB = '';
+
+      if (typeof valA === 'string') {
+        return this.ordenAscendente 
+          ? valA.localeCompare(valB) 
+          : valB.localeCompare(valA);
+      } else {
+        return this.ordenAscendente 
+          ? (valA - valB) 
+          : (valB - valA);
+      }
     });
   }
 

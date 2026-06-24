@@ -19,6 +19,7 @@ export class ReportesComponent implements OnInit {
   filtroRango = 'trimestre'; // semana, mes, trimestre
   tipoPedido = ''; // vacio, delivery, pickup
   diaSemana = ''; // vacio, MONDAY, TUESDAY, etc.
+  formatoPdf = 'naranja'; // naranja, monocromo, compacto
 
   private ventasChartRef: any = null;
   private pagosChartRef: any = null;
@@ -175,7 +176,8 @@ export class ReportesComponent implements OnInit {
 
     let url = `${this.apiBaseUrl}/descargar-pdf?`;
     if (fechaInicio) url += `fechaInicio=${fechaInicio}&`;
-    if (this.diaSemana) url += `diaSemana=${this.diaSemana}`;
+    if (this.diaSemana) url += `diaSemana=${this.diaSemana}&`;
+    url += `formato=${this.formatoPdf}`;
 
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {

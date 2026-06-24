@@ -70,86 +70,129 @@ ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('insumos', 'id'), coalesce(max(id), 1)) FROM insumos;
 
--- 5. Insertar Clientes Frecuentes (Incluyendo correos de prueba reales para masivos)
-INSERT INTO clientes (id, name, email, phone, address, total_orders, total_spent, points, created_at) VALUES
-(1, 'Renzo Alva', 'renzoalva@mail.com', '960373441', 'Av. Universitaria 1420, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '80 days'),
-(2, 'Milagros Sánchez', 'milasanchez@mail.com', '987654321', 'Calle Los Jazmines 432, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '75 days'),
-(3, 'Juan Carlos D.', 'juancarlosd@look.com', '955432110', 'Jr. Junín 105, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '70 days'),
-(4, 'Sofia Cárdenas', 'sofia.cardenas@mail.com', '998877665', 'Av. Túpac Amaru 4500, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '60 days'),
-(5, 'Pedro López', 'pedrolopez@mail.com', '933221100', 'Asoc. Las Margaritas Mz D Lte 5, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '50 days'),
-(6, 'Elena Mendoza', 'elenamendoza@mail.com', '944887722', 'Jr. Arequipa 512, Comas', 0, 0.0, 0, NOW() - INTERVAL '40 days'),
-(7, 'Diego Torres', 'diegotorres@mail.com', '912345678', 'Av. San Felipe 890, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '35 days'),
-(8, 'Patricia Ruiz', 'patruiz@mail.com', '977654312', 'Calle Primavera 212, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '30 days'),
-(9, 'Gustavo Rojas', 'gustavorojas@mail.com', '988123456', 'Av. Lomas de Carabayllo 120, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '25 days'),
-(10, 'Lucia Fernandez', 'luciafernandez@mail.com', '955778899', 'Urb. Santa Isabel Calle 4, Carabayllo', 0, 0.0, 0, NOW() - INTERVAL '20 days'),
-(11, 'Josue Becerra (Pruebas)', 'josuebecerrav@gmail.com', '960373551', 'Carabayllo, Lima', 0, 0.0, 0, NOW() - INTERVAL '15 days'),
-(12, 'UPC Mail (Pruebas)', 'u20231f683@upc.edu.pe', '960373552', 'Santiago de Surco, Lima', 0, 0.0, 0, NOW() - INTERVAL '10 days')
-ON CONFLICT (id) DO NOTHING;
+-- 5. Bloque PL/pgSQL para Simulación Masiva (~50 MB de datos variados)
+DO $$
+DECLARE
+    v_order_count INTEGER;
+    i INTEGER;
+    v_cust_name VARCHAR;
+    v_cust_phone VARCHAR;
+    v_cust_address VARCHAR;
+    v_distrito VARCHAR;
+BEGIN
+    SELECT COUNT(*) INTO v_order_count FROM pedidos;
+    IF v_order_count < 1000 THEN
+        -- Limpiar tablas para asegurar carga fresca
+        TRUNCATE TABLE detalle_pedidos CASCADE;
+        DELETE FROM pedidos;
+        DELETE FROM clientes;
+        
+        -- A. Generar 2000 Clientes con correos ficticios/inválidos
+        FOR i IN 1..2000 LOOP
+            v_cust_name := CASE (i % 10)
+                WHEN 0 THEN 'Carlos'
+                WHEN 1 THEN 'María'
+                WHEN 2 THEN 'Juan'
+                WHEN 3 THEN 'Ana'
+                WHEN 4 THEN 'Luis'
+                WHEN 5 THEN 'Laura'
+                WHEN 6 THEN 'Diego'
+                WHEN 7 THEN 'Sofía'
+                WHEN 8 THEN 'José'
+                ELSE 'Carmen'
+            END || ' ' || CASE (i % 8)
+                WHEN 0 THEN 'Pérez'
+                WHEN 1 THEN 'Gómez'
+                WHEN 2 THEN 'Rodríguez'
+                WHEN 3 THEN 'Sánchez'
+                WHEN 4 THEN 'López'
+                WHEN 5 THEN 'Torres'
+                WHEN 6 THEN 'Díaz'
+                ELSE 'Vargas'
+            END || ' (' || i || ')';
+            
+            v_cust_phone := '9' || CAST(10000000 + (i * 439) % 89999999 AS VARCHAR);
+            
+            v_distrito := CASE (i % 6)
+                WHEN 0 THEN 'Carabayllo'
+                WHEN 1 THEN 'Comas'
+                WHEN 2 THEN 'Los Olivos'
+                WHEN 3 THEN 'Puente Piedra'
+                WHEN 4 THEN 'Independencia'
+                ELSE 'San Martín de Porres'
+            END;
+            v_cust_address := 'Av. Principal Mz ' || CHR(65 + (i % 26)) || ' Lote ' || ((i % 15) + 1) || ', ' || v_distrito;
+            
+            INSERT INTO clientes (id, name, email, phone, address, total_orders, total_spent, points, created_at)
+            VALUES (i, v_cust_name, 'cliente' || i || '@brosteria-invalid.local', v_cust_phone, v_cust_address, 0, 0.0, 0, NOW() - (i * INTERVAL '1 hour'));
+        END LOOP;
+        
+        -- B. Generar 50000 Pedidos distribuidos en los últimos 90 días
+        INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date, cliente_id)
+        SELECT 
+          s.id,
+          c.name,
+          c.phone,
+          CASE WHEN s.id % 4 = 3 THEN 'Retiro en local' ELSE c.address END,
+          CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END,
+          CASE WHEN s.id % 4 = 3 THEN 'PICKUP' ELSE 'DELIVERY' END,
+          CASE (s.id % 4) WHEN 0 THEN 'YAPE' WHEN 1 THEN 'PLIN' WHEN 2 THEN 'TARJETA' ELSE 'EFECTIVO' END,
+          0.0, -- Total a calcular posteriormente
+          CASE (s.id % 15) WHEN 0 THEN 'CANCELADO' WHEN 1 THEN 'PREPARANDO' WHEN 2 THEN 'PENDIENTE' ELSE 'ENTREGADO' END,
+          -- Fechas distribuidas, concentradas en horas de comida (12-15h) y cena (18-23h)
+          (NOW() - (s.id * INTERVAL '2.5 minutes')) 
+            + CASE (s.id % 3)
+                WHEN 0 THEN INTERVAL '0 hours'
+                WHEN 1 THEN INTERVAL '4 hours'
+                ELSE INTERVAL '-2 hours'
+              END,
+          c.id
+        FROM generate_series(1, 50000) AS s(id)
+        JOIN clientes c ON c.id = ((s.id % 2000) + 1);
 
-SELECT setval(pg_get_serial_sequence('clientes', 'id'), coalesce(max(id), 1)) FROM clientes;
+        -- C. Generar DetallePedidos (1 a 2 items por pedido)
+        -- Detalle 1 (Todos los pedidos tienen al menos 1 producto)
+        INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
+        SELECT 
+          p.id,
+          p_cat.id,
+          ((p.id % 3) + 1), -- Cantidad: 1, 2 o 3
+          ((p.id % 3) + 1) * p_cat.price,
+          CASE 
+            WHEN p_cat.category = 'BEBIDAS' THEN NULL 
+            ELSE 'Mayonesa, Ají de la casa' 
+          END
+        FROM pedidos p
+        JOIN productos p_cat ON p_cat.id = ((p.id % 27) + 1);
 
--- 6. Insertar 100 Pedidos Simulados con alias explícito para la columna de generate_series
-INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date)
-SELECT 
-  s.id,
-  CASE 
-    WHEN s.id % 12 = 0 THEN 'Renzo Alva'
-    WHEN s.id % 12 = 1 THEN 'Milagros Sánchez'
-    WHEN s.id % 12 = 2 THEN 'Juan Carlos D.'
-    WHEN s.id % 12 = 3 THEN 'Sofia Cárdenas'
-    WHEN s.id % 12 = 4 THEN 'Pedro López'
-    WHEN s.id % 12 = 5 THEN 'Elena Mendoza'
-    WHEN s.id % 12 = 6 THEN 'Diego Torres'
-    WHEN s.id % 12 = 7 THEN 'Patricia Ruiz'
-    WHEN s.id % 12 = 8 THEN 'Gustavo Rojas'
-    WHEN s.id % 12 = 9 THEN 'Lucia Fernandez'
-    WHEN s.id % 12 = 10 THEN 'Josue Becerra (Pruebas)'
-    ELSE 'UPC Mail (Pruebas)'
-  END,
-  '9' || CAST(10000000 + FLOOR(random() * 89999999) AS VARCHAR),
-  CASE WHEN s.id % 3 = 0 THEN 'Av. Universitaria 1420, Carabayllo' WHEN s.id % 3 = 1 THEN 'Calle Los Jazmines 432, Carabayllo' ELSE 'Retiro en local' END,
-  CASE WHEN s.id % 3 <> 2 THEN 5.00 ELSE 0.00 END,
-  CASE WHEN s.id % 3 <> 2 THEN 'DELIVERY' ELSE 'PICKUP' END,
-  CASE WHEN s.id % 3 = 0 THEN 'YAPE' WHEN s.id % 3 = 1 THEN 'PLIN' ELSE 'EFECTIVO' END,
-  0.0, -- Se actualizará luego
-  CASE WHEN s.id % 12 = 0 THEN 'CANCELADO' WHEN s.id % 12 = 1 THEN 'PREPARANDO' ELSE 'ENTREGADO' END,
-  NOW() - (s.id * INTERVAL '18 hours')
-FROM generate_series(1, 100) AS s(id)
-ON CONFLICT (id) DO NOTHING;
+        -- Detalle 2 (para el 40% de los pedidos)
+        INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
+        SELECT 
+          p.id,
+          p_cat.id,
+          1,
+          p_cat.price,
+          CASE 
+            WHEN p_cat.category = 'BEBIDAS' THEN NULL 
+            ELSE 'Ketchup' 
+          END
+        FROM pedidos p
+        JOIN productos p_cat ON p_cat.id = (((p.id + 11) % 27) + 1)
+        WHERE p.id % 5 IN (1, 3);
 
--- 7. Insertar Detalles de Pedido (Primer item)
-INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
-SELECT 
-  p.id,
-  ((p.id % 27) + 1)::BIGINT,
-  1,
-  (SELECT price FROM productos WHERE id = ((p.id % 27) + 1)::BIGINT),
-  'Mayonesa, Ají de la casa'
-FROM pedidos p
-ON CONFLICT DO NOTHING;
+        -- D. Actualizar Totales del Pedido sumando delivery + subtotal de detalles
+        UPDATE pedidos p
+        SET total = COALESCE((SELECT SUM(d.subtotal) FROM detalle_pedidos d WHERE d.pedido_id = p.id), 0) + p.delivery_cost;
 
--- Segundo item para pedidos impares
-INSERT INTO detalle_pedidos (pedido_id, producto_id, quantity, subtotal, creams)
-SELECT 
-  p.id,
-  (((p.id + 5) % 27) + 1)::BIGINT,
-  1,
-  (SELECT price FROM productos WHERE id = (((p.id + 5) % 27) + 1)::BIGINT),
-  'Ketchup'
-FROM pedidos p
-WHERE p.id % 2 = 1
-ON CONFLICT DO NOTHING;
-
--- 8. Actualizar Totales del Pedido sumando delivery + subtotal de detalles
-UPDATE pedidos p
-SET total = COALESCE((SELECT SUM(d.subtotal) FROM detalle_pedidos d WHERE d.pedido_id = p.id), 0) + p.delivery_cost;
-
--- 9. Actualizar estadísticas de Clientes
-UPDATE clientes c
-SET total_orders = COALESCE((SELECT COUNT(*) FROM pedidos p WHERE p.cliente_id = c.id AND p.status = 'ENTREGADO'), 0),
-    total_spent = COALESCE((SELECT SUM(p.total) FROM pedidos p WHERE p.cliente_id = c.id AND p.status = 'ENTREGADO'), 0.0),
-    points = COALESCE((SELECT CAST(SUM(p.total)/10 AS INTEGER) FROM pedidos p WHERE p.cliente_id = c.id AND p.status = 'ENTREGADO'), 0);
-
--- Ajustar secuencias de ID de pedidos en PostgreSQL
-SELECT setval(pg_get_serial_sequence('pedidos', 'id'), coalesce(max(id), 1)) FROM pedidos;
-SELECT setval(pg_get_serial_sequence('detalle_pedidos', 'id'), coalesce(max(id), 1)) FROM detalle_pedidos;
+        -- E. Actualizar estadísticas acumulativas de Clientes
+        UPDATE clientes c
+        SET total_orders = COALESCE((SELECT COUNT(*) FROM pedidos p WHERE p.cliente_id = c.id AND p.status = 'ENTREGADO'), 0),
+            total_spent = COALESCE((SELECT SUM(p.total) FROM pedidos p WHERE p.cliente_id = c.id AND p.status = 'ENTREGADO'), 0.0),
+            points = COALESCE((SELECT CAST(SUM(p.total)/10 AS INTEGER) FROM pedidos p WHERE p.cliente_id = c.id AND p.status = 'ENTREGADO'), 0);
+            
+        -- F. Ajustar secuencias de ID de PostgreSQL
+        PERFORM setval(pg_get_serial_sequence('clientes', 'id'), COALESCE(MAX(id), 1)) FROM clientes;
+        PERFORM setval(pg_get_serial_sequence('pedidos', 'id'), COALESCE(MAX(id), 1)) FROM pedidos;
+        PERFORM setval(pg_get_serial_sequence('detalle_pedidos', 'id'), COALESCE(MAX(id), 1)) FROM detalle_pedidos;
+    END IF;
+END $$;

@@ -180,10 +180,11 @@ public class ReporteControlador {
     public ResponseEntity<byte[]> descargarReportePdf(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
-            @RequestParam(required = false) String diaSemana) {
+            @RequestParam(required = false) String diaSemana,
+            @RequestParam(required = false, defaultValue = "naranja") String formato) {
         
         List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
-
+ 
         if (fechaInicio != null) {
             pedidos = pedidos.stream().filter(p -> p.getOrderDate().isAfter(fechaInicio)).collect(Collectors.toList());
         }
@@ -193,18 +194,18 @@ public class ReporteControlador {
         if (diaSemana != null && !diaSemana.isEmpty()) {
             pedidos = pedidos.stream().filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana)).collect(Collectors.toList());
         }
-
+ 
         Double totalVentas = pedidos.stream()
                 .filter(p -> p.getStatus().equals("ENTREGADO"))
                 .mapToDouble(PedidoEntidad::getTotal)
                 .sum();
-
-        byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(pedidos, totalVentas);
-
+ 
+        byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(pedidos, totalVentas, formato);
+ 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename("reporte_ventas_filtrado.pdf").build());
-
+ 
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 }

@@ -15,6 +15,7 @@ export class PedidosComponent implements OnInit {
   pedidosPreparando: any[] = [];
   pedidosEnviados: any[] = [];
   pedidosEntregados: any[] = [];
+  columnaActiva = 'PENDIENTE'; // Control para móviles: PENDIENTE, PREPARANDO, ENVIADO
 
   constructor(private http: HttpClient) {}
 

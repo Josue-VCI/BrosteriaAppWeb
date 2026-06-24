@@ -43,11 +43,31 @@
       <table class="dashboard-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Tipo</th>
-            <th>Total</th>
-            <th>Estado</th>
+            <th (click)="ordenarPor('id')" class="sortable-header">
+              ID
+              <span class="sort-arrow" *ngIf="columnaOrden === 'id'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'id'">↕</span>
+            </th>
+            <th (click)="ordenarPor('customerName')" class="sortable-header">
+              Cliente
+              <span class="sort-arrow" *ngIf="columnaOrden === 'customerName'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'customerName'">↕</span>
+            </th>
+            <th (click)="ordenarPor('type')" class="sortable-header">
+              Tipo
+              <span class="sort-arrow" *ngIf="columnaOrden === 'type'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'type'">↕</span>
+            </th>
+            <th (click)="ordenarPor('total')" class="sortable-header">
+              Total
+              <span class="sort-arrow" *ngIf="columnaOrden === 'total'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'total'">↕</span>
+            </th>
+            <th (click)="ordenarPor('status')" class="sortable-header">
+              Estado
+              <span class="sort-arrow" *ngIf="columnaOrden === 'status'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'status'">↕</span>
+            </th>
           </tr>
         </thead>
         <tbody>

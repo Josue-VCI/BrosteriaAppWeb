@@ -98,3 +98,26 @@ h1, h2, h3, h4 {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+
+/* Cabeceras de Tabla Ordenables */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.sortable-header:hover {
+  color: var(--primary) !important;
+}
+
+.sort-arrow {
+  color: var(--primary);
+  margin-left: 5px;
+  font-size: 11px;
+}
+
+.sort-arrow-placeholder {
+  color: rgba(255, 255, 255, 0.15);
+  margin-left: 5px;
+  font-size: 11px;
+}

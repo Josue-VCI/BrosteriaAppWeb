@@ -26,36 +26,50 @@ public class PdfServicio {
     @Autowired
     private DetallePedidoRepositorio detallePedidoRepositorio;
 
-    public byte[] generarReporteVentasPdf(List<PedidoEntidad> pedidos, Double totalVentas) {
-        Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+    public byte[] generarReporteVentasPdf(List<PedidoEntidad> pedidos, Double totalVentas, String formato) {
+        boolean isCompact = "compacto".equalsIgnoreCase(formato);
+        Document document = new Document(PageSize.A4, 
+                isCompact ? 20 : 36, 
+                isCompact ? 20 : 36, 
+                isCompact ? 20 : 36, 
+                isCompact ? 20 : 36);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // Colores corporativos
+            // Colores corporativos según formato
             java.awt.Color brandOrange = new java.awt.Color(255, 107, 0);
             java.awt.Color darkGray = new java.awt.Color(33, 33, 33);
             java.awt.Color lightGray = new java.awt.Color(245, 245, 245);
             java.awt.Color textDark = new java.awt.Color(50, 50, 50);
 
+            if ("monocromo".equalsIgnoreCase(formato)) {
+                brandOrange = new java.awt.Color(50, 50, 50);
+                darkGray = new java.awt.Color(90, 90, 90);
+                lightGray = new java.awt.Color(240, 240, 240);
+            } else if (isCompact) {
+                brandOrange = new java.awt.Color(220, 80, 0);
+                darkGray = new java.awt.Color(45, 45, 45);
+            }
+
             // Fuentes
-            Font fontHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Font.BOLD, brandOrange);
-            Font fontSubHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Font.BOLD, darkGray);
-            Font fontText = FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL, textDark);
-            Font fontBoldText = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, Font.BOLD, textDark);
-            Font fontTableHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, Font.BOLD, java.awt.Color.WHITE);
+            Font fontHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, isCompact ? 14 : 18, Font.BOLD, brandOrange);
+            Font fontSubHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, isCompact ? 10 : 12, Font.BOLD, darkGray);
+            Font fontText = FontFactory.getFont(FontFactory.HELVETICA, isCompact ? 8 : 9, Font.NORMAL, textDark);
+            Font fontBoldText = FontFactory.getFont(FontFactory.HELVETICA_BOLD, isCompact ? 8 : 9, Font.BOLD, textDark);
+            Font fontTableHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, isCompact ? 8 : 9, Font.BOLD, java.awt.Color.WHITE);
 
             // Título Principal
             Paragraph titulo = new Paragraph("LA BROSTERÍA - REPORTE DE VENTAS", fontHeader);
             titulo.setAlignment(Element.ALIGN_CENTER);
-            titulo.setSpacingAfter(5);
+            titulo.setSpacingAfter(isCompact ? 2 : 5);
             document.add(titulo);
 
-            Paragraph subtitulo = new Paragraph("Métricas de Control de Caja y Análisis Operativo", FontFactory.getFont(FontFactory.HELVETICA, 10, Font.ITALIC, darkGray));
+            Paragraph subtitulo = new Paragraph("Métricas de Control de Caja y Análisis Operativo", FontFactory.getFont(FontFactory.HELVETICA, isCompact ? 8 : 10, Font.ITALIC, darkGray));
             subtitulo.setAlignment(Element.ALIGN_CENTER);
-            subtitulo.setSpacingAfter(15);
+            subtitulo.setSpacingAfter(isCompact ? 8 : 15);
             document.add(subtitulo);
 
             // Calcular Métricas
@@ -67,7 +81,7 @@ public class PdfServicio {
             // Tabla 1: Resumen Ejecutivo (Tarjetas)
             PdfPTable tableKpi = new PdfPTable(4);
             tableKpi.setWidthPercentage(100);
-            tableKpi.setSpacingAfter(15);
+            tableKpi.setSpacingAfter(isCompact ? 8 : 15);
             tableKpi.setWidths(new float[]{1f, 1f, 1f, 1f});
 
             addKpiCell(tableKpi, "Ventas Totales", "S/. " + String.format("%.2f", totalVentas), brandOrange, fontBoldText);
@@ -102,7 +116,7 @@ public class PdfServicio {
             // Dos Columnas: Top Productos (Izquierda) y Métodos de Pago (Derecha)
             PdfPTable tableSections = new PdfPTable(2);
             tableSections.setWidthPercentage(100);
-            tableSections.setSpacingAfter(20);
+            tableSections.setSpacingAfter(isCompact ? 10 : 20);
             tableSections.setWidths(new float[]{1.1f, 0.9f});
 
             // Sección Izquierda: Top Productos
@@ -170,8 +184,9 @@ public class PdfServicio {
             document.add(tableSections);
 
             // Listado de Transacciones
-            Paragraph titleOrders = new Paragraph("HISTORIAL COMPLETO DE PEDIDOS FILTRADOS", fontSubHeader);
-            titleOrders.setSpacingAfter(10);
+            int limitOrders = isCompact ? 10 : 100;
+            Paragraph titleOrders = new Paragraph("HISTORIAL DE PEDIDOS RECIENTES (MOSTRANDO MÁX. " + limitOrders + ")", fontSubHeader);
+            titleOrders.setSpacingAfter(isCompact ? 5 : 10);
             document.add(titleOrders);
 
             PdfPTable tableOrders = new PdfPTable(6);
@@ -185,7 +200,9 @@ public class PdfServicio {
             addTableHeader(tableOrders, "Pago", brandOrange, fontTableHeader);
             addTableHeader(tableOrders, "Total", brandOrange, fontTableHeader);
 
+            int orderCount = 0;
             for (PedidoEntidad ped : pedidos) {
+                if (orderCount++ >= limitOrders) break;
                 tableOrders.addCell(createCell("#" + ped.getId(), fontText, Element.ALIGN_CENTER, null));
                 tableOrders.addCell(createCell(ped.getCustomerName(), fontText, Element.ALIGN_LEFT, null));
                 tableOrders.addCell(createCell(ped.getOrderDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), fontText, Element.ALIGN_CENTER, null));

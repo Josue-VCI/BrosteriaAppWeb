@@ -4,7 +4,16 @@
       <h2>📊 Reportes y Analítica de Ventas</h2>
       <p>Métricas consolidadas de ventas e ingresos en base a la cola de caja</p>
     </div>
-    <button class="brand-btn pdf-btn" (click)="descargarReportePdf()">📥 Descargar Reporte PDF</button>
+    
+    <!-- Selección del Formato del PDF y descarga -->
+    <div class="pdf-download-actions">
+      <select [(ngModel)]="formatoPdf" class="filter-select format-select">
+        <option value="naranja">Diseño Corporativo Naranja 🍊</option>
+        <option value="monocromo">Diseño Monocromo Clásico 📄</option>
+        <option value="compacto">Diseño Compacto Ejecutivo 📑</option>
+      </select>
+      <button class="brand-btn pdf-btn" (click)="descargarReportePdf()">📥 Descargar Reporte PDF</button>
+    </div>
   </div>
 
   <!-- Barra de Filtros -->
@@ -60,6 +69,12 @@
       <span class="kpi-label">Pedidos Cancelados</span>
       <h3 class="number-font kpi-value text-error">{{ resumen.cancelados }}</h3>
     </div>
+  </div>
+
+  <!-- Aviso Móvil de Rotación (Se muestra en móviles verticales mediante CSS) -->
+  <div class="glass-card mobile-rotate-notice">
+    <div class="rotate-icon">🔄</div>
+    <p>Gira tu pantalla en orientación horizontal (paisaje) para visualizar los gráficos interactivos de analítica y tendencias de demanda.</p>
   </div>
 
   <!-- Fila de Gráficas -->
