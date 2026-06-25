@@ -1,7 +1,12 @@
 <div class="kanban-container">
-  <div class="header-section">
-    <h2>🍳 Control de Pedidos y Cocina (Kanban)</h2>
-    <p>Actualiza y monitorea los pedidos en tiempo real</p>
+  <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <div>
+      <h2>🍳 Control de Pedidos y Cocina (Kanban)</h2>
+      <p>Actualiza y monitorea los pedidos en tiempo real</p>
+    </div>
+    <div>
+      <button class="brand-btn" (click)="abrirNuevoPedido()">➕ Registrar Pedido (WhatsApp)</button>
+    </div>
   </div>
 
   <!-- Selector de Pestañas en Móvil -->
@@ -117,6 +122,101 @@
           </div>
         </div>
         <div class="no-pedidos" *ngIf="pedidosEnviados.length === 0">Sin pedidos despachados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Registro de Pedido de WhatsApp (Parser) -->
+  <div class="modal-backdrop" *ngIf="mostrarModalNuevoPedido">
+    <div class="modal-card glass-card" style="max-width: 700px; width: 95%;">
+      <h3>Registrar Pedido desde WhatsApp 🍗💬</h3>
+      <p class="destination-sub">Pega el texto completo copiado del mensaje de WhatsApp del cliente para procesarlo automáticamente.</p>
+
+      <!-- Entrada de texto -->
+      <div class="form-group">
+        <label for="textoRaw">Mensaje de WhatsApp</label>
+        <textarea id="textoRaw" [(ngModel)]="textoWhatsApp" (input)="procesarTextoWhatsApp()" placeholder="Pegue aquí el texto completo..." rows="6" class="modal-textarea"></textarea>
+      </div>
+
+      <!-- Vista previa si hay datos procesados -->
+      <div class="parsed-preview" *ngIf="formPedido.customerName || formPedido.detalles.length > 0" style="margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 15px;">
+        <h4 class="preview-title" style="color: var(--secondary); margin-bottom: 12px; font-size: 15px;">🔍 DETALLES EXTRAÍDOS</h4>
+        
+        <div class="preview-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Cliente (Nombre) *</label>
+            <input type="text" [(ngModel)]="formPedido.customerName" class="modal-input" placeholder="Nombre extraído">
+          </div>
+          <div class="form-group">
+            <label>Teléfono Celular *</label>
+            <input type="text" [(ngModel)]="formPedido.customerPhone" class="modal-input" placeholder="Ej. 960373555">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Dirección de Entrega</label>
+          <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Dirección extraída" [disabled]="formPedido.type === 'PICKUP'">
+        </div>
+
+        <div class="preview-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+          <div class="form-group">
+            <label>Tipo de Entrega</label>
+            <select [(ngModel)]="formPedido.type" (change)="recalcularTotal()" class="modal-input">
+              <option value="DELIVERY">Delivery</option>
+              <option value="PICKUP">Retiro en local</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <select [(ngModel)]="formPedido.paymentMethod" class="modal-input">
+              <option value="YAPE">Yape</option>
+              <option value="PLIN">Plin</option>
+              <option value="TARJETA">Tarjeta de Crédito/Débito</option>
+              <option value="EFECTIVO">Efectivo</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabla de Productos Extraídos -->
+        <div class="parsed-items-table" style="margin-top: 15px; background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;">
+          <h5 style="margin: 0 0 10px 0; font-size: 13px; color: var(--text-light);">Productos Solicitados</h5>
+          
+          <div class="parsed-item-row" *ngFor="let det of formPedido.detalles" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--glass-border);">
+            <span class="number-font" style="font-weight: bold; color: var(--secondary);">{{ det.quantity }}x</span>
+            
+            <div style="flex-grow: 1;">
+              <span *ngIf="!det.noCoincide" style="font-size: 13px;">{{ det.productoName }}</span>
+              <div *ngIf="det.noCoincide" class="select-error-container">
+                <span class="error-text" style="font-size: 11px; margin-bottom: 4px;">⚠️ No se vinculó automático. Selecciona abajo:</span>
+                <select (change)="onProductoChange(det, $event)" class="modal-input" style="padding: 5px; font-size: 12px; border-color: var(--error);">
+                  <option value="">-- Selecciona el producto del catálogo --</option>
+                  <option *ngFor="let p of productosCatalogo" [value]="p.id">
+                    {{ p.name }} (S/. {{ p.price | number:'1.2-2' }})
+                  </option>
+                </select>
+              </div>
+              <p class="creams-subtext" *ngIf="det.creams && !det.noCoincide" style="margin: 2px 0 0 0; font-size: 11px; color: var(--text-muted);">Cremas: {{ det.creams }}</p>
+            </div>
+            
+            <span class="number-font" style="font-weight: bold; font-size: 13px;">S/. {{ det.subtotal | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="preview-totals" style="margin-top: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div class="total-row" style="font-size: 13px; color: var(--text-muted);">
+            <span>Envío: </span>
+            <span class="number-font" style="margin-left: 10px;">S/. {{ formPedido.deliveryCost | number:'1.2-2' }}</span>
+          </div>
+          <div class="total-row grand-total" style="font-size: 16px; font-weight: bold; border-top: 1px solid var(--glass-border); padding-top: 6px;">
+            <span>Total a Registrar: </span>
+            <span class="number-font text-success" style="margin-left: 10px;">S/. {{ formPedido.total | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="brand-btn cancel-btn" (click)="cerrarModalNuevoPedido()">Cancelar</button>
+        <button class="brand-btn" [disabled]="!formPedido.customerName || formPedido.detalles.length === 0" (click)="guardarNuevoPedido()">Registrar Pedido</button>
       </div>
     </div>
   </div>
