@@ -70,14 +70,14 @@ ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('insumos', 'id'), coalesce(max(id), 1)) FROM insumos;
 
--- 5. Simulación Masiva condicional (~50 MB de datos variados)
+-- 5. Simulación Masiva condicional (1,000 pedidos, ~700 KB de volumen de datos)
 
--- A. Eliminar datos antiguos condicionalmente si no se cumple el mínimo de pedidos (menos de 1000 pedidos)
-DELETE FROM detalle_pedidos WHERE (SELECT COUNT(*) FROM pedidos) < 1000;
-DELETE FROM pedidos WHERE (SELECT COUNT(*) FROM pedidos) < 1000;
-DELETE FROM clientes WHERE (SELECT COUNT(*) FROM pedidos) < 1000;
+-- A. Limpiar tablas si hay una sobrepoblación (más de 10,000 pedidos, remanente de la simulación de 50MB anterior)
+DELETE FROM detalle_pedidos WHERE (SELECT COUNT(*) FROM pedidos) > 10000;
+DELETE FROM pedidos WHERE (SELECT COUNT(*) FROM pedidos) > 10000;
+DELETE FROM clientes WHERE (SELECT COUNT(*) FROM clientes) > 1500;
 
--- B. Generar 2000 Clientes con correos ficticios/inválidos si no se ha inicializado la base de datos
+-- B. Generar 200 Clientes con correos ficticios/inválidos si no se ha inicializado la base de datos
 INSERT INTO clientes (id, name, email, phone, address, total_orders, total_spent, points, created_at)
 SELECT 
   i,
@@ -116,11 +116,11 @@ SELECT
   0,
   0.0,
   0,
-  NOW() - (i * INTERVAL '1 hour')
-FROM generate_series(1, 2000) AS i
+  NOW() - (i * INTERVAL '2 hours')
+FROM generate_series(1, 200) AS i
 WHERE NOT EXISTS (SELECT 1 FROM clientes WHERE email LIKE '%@brosteria-invalid.local' LIMIT 1);
 
--- C. Generar 50000 Pedidos distribuidos en 90 días si no existen
+-- C. Generar 1000 Pedidos distribuidos en 30 días si no existen
 INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date, cliente_id)
 SELECT 
   s.id,
@@ -135,15 +135,15 @@ SELECT
   ( CASE WHEN s.id % 5 IN (1, 3) THEN p2.price ELSE 0.0 END ) + 
   ( CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END ),
   CASE (s.id % 15) WHEN 0 THEN 'CANCELADO' WHEN 1 THEN 'PREPARANDO' WHEN 2 THEN 'PENDIENTE' ELSE 'ENTREGADO' END,
-  (NOW() - (s.id * INTERVAL '2.5 minutes')) 
+  (NOW() - (s.id * INTERVAL '40 minutes')) -- 1000 pedidos distribuidos en aprox 27 días (1000 * 40 min = 40000 min = 27.7 días)
     + CASE (s.id % 3)
         WHEN 0 THEN INTERVAL '0 hours'
         WHEN 1 THEN INTERVAL '4 hours'
         ELSE INTERVAL '-2 hours'
       END,
   c.id
-FROM generate_series(1, 50000) AS s(id)
-JOIN clientes c ON c.id = ((s.id % 2000) + 1)
+FROM generate_series(1, 1000) AS s(id)
+JOIN clientes c ON c.id = ((s.id % 200) + 1)
 JOIN productos p1 ON p1.id = ((s.id % 27) + 1)
 JOIN productos p2 ON p2.id = (((s.id + 11) % 27) + 1)
 WHERE c.email LIKE '%@brosteria-invalid.local'

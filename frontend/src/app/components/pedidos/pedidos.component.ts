@@ -24,7 +24,7 @@ export class PedidosComponent implements OnInit {
   }
 
   cargarTodosLosPedidos() {
-    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos`).subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/activos`).subscribe({
       next: (data) => {
         this.pedidosPendientes = data.filter(p => p.status === 'PENDIENTE');
         this.pedidosPreparando = data.filter(p => p.status === 'PREPARANDO');

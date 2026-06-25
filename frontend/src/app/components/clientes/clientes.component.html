@@ -99,23 +99,41 @@
     </table>
   </div>
 
-  <!-- Vista Móvil: Tarjeta Informativa (Oculta en Desktop) -->
-  <div class="glass-card mobile-only-crm">
-    <div class="crm-placeholder-card">
-      <div class="placeholder-icon">👥</div>
-      <h3>Base de Datos de Clientes (CRM)</h3>
-      <p>El listado completo de clientes y el historial de fidelización contiene información detallada optimizada para pantallas de escritorio (PC) u orientación horizontal.</p>
-      <div class="placeholder-actions">
-        <button class="brand-btn" (click)="abrirNuevoCliente()">➕ Registrar Cliente Nuevo</button>
+  <!-- Vista Móvil: Listado de Tarjetas por Cliente (Oculto en Desktop) -->
+  <div class="mobile-only-crm mobile-clientes-list">
+    <!-- Botón de acción rápida en móvil -->
+    <div class="mobile-action-card glass-card" style="margin-bottom: 15px; text-align: center; padding: 15px !important;">
+      <button class="brand-btn" (click)="abrirRedactarMasivo()" style="width: 100%;">
+        ✉️ Campaña Filtrada ({{ obtenerDestinatariosValidosCount() }} destinatarios)
+      </button>
+    </div>
+    
+    <div class="mobile-cliente-card glass-card" *ngFor="let cliente of clientesFiltrados">
+      <div class="card-row row-top">
+        <span class="cliente-name"><strong>{{ cliente.name }}</strong></span>
+        <span class="points-badge">⭐ {{ cliente.points || 0 }} pts</span>
+      </div>
+      <div class="card-details-row">
+        <p class="phone"><i class="fa-solid fa-phone"></i> {{ cliente.phone }}</p>
+        <p class="email" *ngIf="cliente.email"><i class="fa-solid fa-envelope"></i> {{ cliente.email }}</p>
+        <p class="address" *ngIf="cliente.address"><i class="fa-solid fa-location-dot"></i> {{ cliente.address }}</p>
+      </div>
+      <div class="card-spent-row">
+        <span>Gasto: <strong class="number-font text-success">S/. {{ (cliente.totalSpent || 0) | number:'1.2-2' }}</strong></span>
+        <div class="action-buttons">
+          <button class="brand-btn edit-btn-sm" (click)="abrirEditarCliente(cliente)">✏️</button>
+          <button class="brand-btn delete-btn-sm" (click)="eliminarCliente(cliente.id)">🗑️</button>
+        </div>
       </div>
     </div>
+    <div class="no-pedidos" *ngIf="clientesFiltrados.length === 0" style="text-align: center; padding: 20px;">Sin resultados</div>
   </div>
 
   <!-- Modal de Redacción de Gmail Masivo -->
   <div class="modal-backdrop" *ngIf="mostrarModalCorreo">
     <div class="modal-card glass-card">
       <h3>Redactar Campaña de Fidelización (Gmail)</h3>
-      <p class="destination-sub">Se enviará a todos los clientes registrados con correo electrónico.</p>
+      <p class="destination-sub">Se enviará a los clientes filtrados con correo registrado (Destinatarios: {{ obtenerDestinatariosValidosCount() }}).</p>
       
       <div class="form-group">
         <label for="plantilla">Plantilla de Campaña</label>

@@ -17,4 +17,16 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     List<PedidoEntidad> findByStatusWithCliente(@Param("status") String status);
 
     List<PedidoEntidad> findByStatus(String status);
+
+    @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad WHERE p.status IN ('PENDIENTE', 'PREPARANDO', 'ENVIADO') ORDER BY p.orderDate DESC")
+    List<PedidoEntidad> findActiveWithCliente();
+
+    @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad ORDER BY p.orderDate DESC")
+    List<PedidoEntidad> findRecentWithCliente(org.springframework.data.domain.Pageable pageable);
+
+    long countByOrderDateBefore(java.time.LocalDateTime date);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM PedidoEntidad p WHERE p.orderDate < :date")
+    void deleteByOrderDateBefore(@Param("date") java.time.LocalDateTime date);
 }

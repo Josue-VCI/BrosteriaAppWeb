@@ -20,6 +20,16 @@ public class PedidoControlador {
         return ResponseEntity.ok(pedidoServicio.listarTodos());
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<List<PedidoDTO>> listarActivos() {
+        return ResponseEntity.ok(pedidoServicio.listarActivos());
+    }
+
+    @GetMapping("/recientes")
+    public ResponseEntity<List<PedidoDTO>> listarRecientes(@RequestParam(defaultValue = "5") int limite) {
+        return ResponseEntity.ok(pedidoServicio.listarRecientes(limite));
+    }
+
     @GetMapping("/estado/{status}")
     public ResponseEntity<List<PedidoDTO>> listarPorEstado(@PathVariable String status) {
         return ResponseEntity.ok(pedidoServicio.listarPorEstado(status));

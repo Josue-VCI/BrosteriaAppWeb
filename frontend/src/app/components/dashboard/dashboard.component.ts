@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarPedidosRecientes() {
-    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos`).subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/recientes?limite=5`).subscribe({
       next: (data) => {
         // Guardar la lista completa ordenada por fecha
         this.pedidosRecientes = data

@@ -126,8 +126,10 @@
 }
 
 .modal-card {
-  width: 500px;
-  padding: 30px !important;
+  width: 90% !important;
+  max-width: 500px !important;
+  box-sizing: border-box;
+  padding: 20px !important;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -285,7 +287,85 @@
     display: none !important;
   }
   .mobile-only-crm {
-    display: block !important;
+    display: flex !important;
   }
+}
+
+/* Estilos de Tarjetas Móviles CRM */
+.mobile-clientes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.mobile-cliente-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px !important;
+}
+
+.cliente-name {
+  font-size: 16px;
+  color: var(--text-light);
+}
+
+.card-details-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 10px 0;
+}
+
+.card-details-row p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.card-details-row p i {
+  color: var(--primary);
+  width: 16px;
+  margin-right: 5px;
+}
+
+.card-spent-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-spent-row span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.edit-btn-sm {
+  background: rgba(255, 183, 3, 0.15) !important;
+  color: var(--secondary) !important;
+  border: 1px solid rgba(255, 183, 3, 0.2) !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+}
+
+.edit-btn-sm:hover {
+  background: var(--secondary) !important;
+  color: #000 !important;
+}
+
+.delete-btn-sm {
+  background: rgba(255, 23, 68, 0.15) !important;
+  color: var(--error) !important;
+  border: 1px solid rgba(255, 23, 68, 0.2) !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+}
+
+.delete-btn-sm:hover {
+  background: var(--error) !important;
+  color: #fff !important;
 }
 

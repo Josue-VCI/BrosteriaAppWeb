@@ -265,4 +265,41 @@ export class ReportesComponent implements OnInit {
       }
     });
   }
+
+  descargarReportePDF90Dias() {
+    let url = `${this.apiBaseUrl}/descargar-pdf?`;
+    const ahora = new Date();
+    const fecha = new Date();
+    fecha.setMonth(ahora.getMonth() - 3);
+    url += `fechaInicio=${fecha.toISOString()}&formato=${this.formatoPdf}`;
+    
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const urlBlob = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = urlBlob;
+        a.download = `Respaldo_Ventas_Trimestral_${new Date().toISOString().slice(0,10)}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(urlBlob);
+      },
+      error: (err) => console.error('Error al descargar el reporte PDF', err)
+    });
+  }
+
+  limpiarHistorico() {
+    if (!confirm('¿Está seguro de eliminar de forma permanente todos los pedidos de la base de datos que tengan más de 90 días? Se conservará el total acumulado de cada cliente.')) {
+      return;
+    }
+
+    this.http.post(`${this.apiBaseUrl}/limpiar-historico`, {}).subscribe({
+      next: (res: any) => {
+        alert(res.mensaje || 'Historial de base de datos purgado con éxito.');
+        this.aplicarFiltros();
+      },
+      error: (err) => {
+        console.error('Error al purgar base de datos', err);
+        alert('Ocurrió un error al ejecutar el mantenimiento.');
+      }
+    });
+  }
 }

@@ -121,3 +121,10 @@ h1, h2, h3, h4 {
   margin-left: 5px;
   font-size: 11px;
 }
+
+/* Correcciones Responsivas Globales y Prevención de Zoom en iOS Safari */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}

@@ -54,6 +54,16 @@ public class PedidoServicio {
         return mappedPedidos(pedidos);
     }
 
+    public List<PedidoDTO> listarActivos() {
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findActiveWithCliente();
+        return mappedPedidos(pedidos);
+    }
+
+    public List<PedidoDTO> listarRecientes(int limite) {
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findRecentWithCliente(org.springframework.data.domain.PageRequest.of(0, limite));
+        return mappedPedidos(pedidos);
+    }
+
     private List<PedidoDTO> mappedPedidos(List<PedidoEntidad> pedidos) {
         if (pedidos.isEmpty()) {
             return new ArrayList<>();

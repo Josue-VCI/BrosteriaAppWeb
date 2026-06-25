@@ -198,6 +198,12 @@ export class ClientesComponent implements OnInit {
     });
   }
 
+  obtenerDestinatariosValidosCount(): number {
+    return this.clientesFiltrados
+      .filter(c => c.email && c.email.trim() !== '')
+      .length;
+  }
+
   // Lógica Masivos
   abrirRedactarMasivo() {
     this.asuntoCampana = '';
@@ -213,7 +219,7 @@ export class ClientesComponent implements OnInit {
     if (!this.asuntoCampana || (!this.cuerpoCampana && this.plantillaSeleccionada === 'libre')) return;
 
     this.enviandoCorreo = true;
-    const destinatarios = this.clientes
+    const destinatarios = this.clientesFiltrados
       .map(c => c.email)
       .filter(email => email !== null && email.trim() !== '');
 

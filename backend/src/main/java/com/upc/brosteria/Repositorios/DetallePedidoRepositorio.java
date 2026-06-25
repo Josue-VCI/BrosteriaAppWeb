@@ -13,4 +13,8 @@ public interface DetallePedidoRepositorio extends JpaRepository<DetallePedidoEnt
 
     @Query("SELECT d FROM DetallePedidoEntidad d JOIN FETCH d.productoEntidad WHERE d.pedidoEntidad.id IN :pedidoIds")
     List<DetallePedidoEntidad> findByPedidoEntidadIdIn(@Param("pedidoIds") List<Long> pedidoIds);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM DetallePedidoEntidad d WHERE d.pedidoEntidad.id IN (SELECT p.id FROM PedidoEntidad p WHERE p.orderDate < :date)")
+    void deleteByPedidoOrderDateBefore(@Param("date") java.time.LocalDateTime date);
 }
