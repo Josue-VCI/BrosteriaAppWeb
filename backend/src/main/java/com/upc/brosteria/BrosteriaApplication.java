@@ -21,21 +21,15 @@ public class BrosteriaApplication {
     public CommandLineRunner initPasswords(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder) {
         return args -> {
             usuarioRepositorio.findByEmail("admin@brosteria.com").ifPresent(usuario -> {
-                String hash = usuario.getPasswordHash();
-                if (hash == null || !hash.startsWith("$2")) {
-                    System.out.println("Auto-reparando contraseña de admin@brosteria.com a BCrypt...");
-                    usuario.setPasswordHash(passwordEncoder.encode("admin123"));
-                    usuarioRepositorio.save(usuario);
-                }
+                System.out.println("Forzando actualización de contraseña de admin@brosteria.com a admin123...");
+                usuario.setPasswordHash(passwordEncoder.encode("admin123"));
+                usuarioRepositorio.save(usuario);
             });
 
             usuarioRepositorio.findByEmail("cajero@brosteria.com").ifPresent(usuario -> {
-                String hash = usuario.getPasswordHash();
-                if (hash == null || !hash.startsWith("$2")) {
-                    System.out.println("Auto-reparando contraseña de cajero@brosteria.com a BCrypt...");
-                    usuario.setPasswordHash(passwordEncoder.encode("cajero123"));
-                    usuarioRepositorio.save(usuario);
-                }
+                System.out.println("Forzando actualización de contraseña de cajero@brosteria.com a cajero123...");
+                usuario.setPasswordHash(passwordEncoder.encode("cajero123"));
+                usuarioRepositorio.save(usuario);
             });
         };
     }
