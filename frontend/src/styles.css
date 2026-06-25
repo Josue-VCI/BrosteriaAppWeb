@@ -156,3 +156,24 @@ select, option {
   background-color: #121214 !important;
   color: #FAFAFA !important;
 }
+
+/* Estilos para Tarjetas Móviles (CRM e Inventario) */
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.card-row.row-top {
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.card-row.row-bottom {
+  margin-top: 5px;
+}
+
