@@ -185,17 +185,8 @@ export class ReportesComponent implements OnInit {
     if (this.tipoPedido) url += `tipoPedido=${this.tipoPedido}&`;
     url += `formato=${this.formatoPdf}`;
 
-    this.http.get(url, { responseType: 'blob' }).subscribe({
-      next: (blob) => {
-        const urlBlob = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = urlBlob;
-        a.download = `Reporte_Ventas_Filtrado_${new Date().toISOString().slice(0,10)}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(urlBlob);
-      },
-      error: (err) => console.error('Error al descargar el reporte PDF', err)
-    });
+    const filename = `Reporte_Ventas_Filtrado_${new Date().toISOString().slice(0,10)}.pdf`;
+    this.descargarBlobComoArchivo(url, filename);
   }
 
   renderizarGraficoHoras(pedidosPorHora: number[]) {
@@ -278,17 +269,44 @@ export class ReportesComponent implements OnInit {
     const fecha = new Date();
     fecha.setMonth(ahora.getMonth() - 3);
     url += `fechaInicio=${fecha.toISOString()}&formato=${this.formatoPdf}`;
-    
+
+    const filename = `Respaldo_Ventas_Trimestral_${new Date().toISOString().slice(0,10)}.pdf`;
+    this.descargarBlobComoArchivo(url, filename);
+  }
+
+  /** Descarga un blob como archivo, compatible con iOS Safari, Chrome Android y Desktop */
+  private descargarBlobComoArchivo(url: string, filename: string) {
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
-        const urlBlob = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = urlBlob;
-        a.download = `Respaldo_Ventas_Trimestral_${new Date().toISOString().slice(0,10)}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(urlBlob);
+        const blobConTipo = new Blob([blob], { type: 'application/pdf' });
+        const urlBlob = window.URL.createObjectURL(blobConTipo);
+
+        // Detectar iOS Safari (no soporta <a download> creado dinámicamente)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        if (isIOS || isSafari) {
+          // En iOS/Safari: abrir el PDF en una nueva pestaña y dejar que el usuario lo guarde
+          window.open(urlBlob, '_blank');
+        } else {
+          // En Android/Chrome/Desktop: descargar directamente
+          const a = document.createElement('a');
+          a.href = urlBlob;
+          a.download = filename;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          // Pequeño delay antes de limpiar para dar tiempo a que el navegador inicie la descarga
+          setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(urlBlob);
+          }, 250);
+        }
       },
-      error: (err) => console.error('Error al descargar el reporte PDF', err)
+      error: (err) => {
+        console.error('Error al descargar el reporte PDF', err);
+        alert('No se pudo descargar el reporte. Verifica tu conexión al servidor.');
+      }
     });
   }
 
