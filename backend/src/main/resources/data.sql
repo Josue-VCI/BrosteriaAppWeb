@@ -105,13 +105,12 @@ SELECT
   'cliente' || i || '@brosteria-invalid.local',
   '9' || CAST(10000000 + (i * 439) % 89999999 AS VARCHAR),
   'Av. Principal Mz ' || CHR(65 + (i % 26)) || ' Lote ' || ((i % 15) + 1) || ', ' || 
-    CASE (i % 6)
-        WHEN 0 THEN 'Carabayllo'
-        WHEN 1 THEN 'Comas'
-        WHEN 2 THEN 'Los Olivos'
-        WHEN 3 THEN 'Puente Piedra'
-        WHEN 4 THEN 'Independencia'
-        ELSE 'San Martín de Porres'
+    CASE (i % 5)
+        WHEN 0 THEN 'Surquillo'
+        WHEN 1 THEN 'Miraflores'
+        WHEN 2 THEN 'San Borja'
+        WHEN 3 THEN 'San Isidro'
+        ELSE 'Santiago de Surco'
     END,
   0,
   0.0,

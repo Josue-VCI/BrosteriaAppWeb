@@ -11,12 +11,11 @@
       <!-- Filtro de Distrito -->
       <select [(ngModel)]="filtroDistrito" (change)="filtrarClientes()" class="filter-select">
         <option value="">📍 Todos los Distritos</option>
-        <option value="Carabayllo">Carabayllo</option>
-        <option value="Comas">Comas</option>
-        <option value="Los Olivos">Los Olivos</option>
-        <option value="Puente Piedra">Puente Piedra</option>
-        <option value="Independencia">Independencia</option>
-        <option value="San Martín de Porres">San Martín de Porres</option>
+        <option value="Surquillo">Surquillo</option>
+        <option value="Miraflores">Miraflores</option>
+        <option value="San Isidro">San Isidro</option>
+        <option value="San Borja">San Borja</option>
+        <option value="Santiago de Surco">Santiago de Surco</option>
       </select>
 
       <!-- Filtro de Consumo -->
@@ -170,28 +169,43 @@
       <h3>{{ esEdicion ? 'Editar Ficha de Cliente' : 'Registrar Nuevo Cliente' }}</h3>
       
       <div class="form-group">
-        <label for="crudName">Nombre Completo</label>
-        <input type="text" id="crudName" [(ngModel)]="formCliente.name" placeholder="Ej. Juan Pérez" class="modal-input">
+        <label for="crudName">Nombre Completo *</label>
+        <input type="text" id="crudName" [(ngModel)]="formCliente.name" placeholder="Ej. Juan Pérez" class="modal-input" [class.input-error]="formCliente.name && !esNombreValido()">
+        <span class="error-text" *ngIf="formCliente.name && !esNombreValido()">El nombre debe tener al menos 3 caracteres</span>
       </div>
 
       <div class="form-group">
-        <label for="crudPhone">Teléfono / Celular</label>
-        <input type="text" id="crudPhone" [(ngModel)]="formCliente.phone" placeholder="Ej. 960373555" class="modal-input">
+        <label for="crudPhone">Teléfono / Celular *</label>
+        <input type="text" id="crudPhone" [(ngModel)]="formCliente.phone" placeholder="Ej. 960373555" class="modal-input" [class.input-error]="formCliente.phone && !esCelularValido()">
+        <span class="error-text" *ngIf="formCliente.phone && !esCelularValido()">Debe ser un celular peruano válido (9 dígitos, inicia con 9)</span>
       </div>
       
       <div class="form-group">
         <label for="crudEmail">Correo Electrónico</label>
-        <input type="email" id="crudEmail" [(ngModel)]="formCliente.email" placeholder="Ej. juan.perez@gmail.com" class="modal-input">
+        <input type="email" id="crudEmail" [(ngModel)]="formCliente.email" placeholder="Ej. juan.perez@gmail.com" class="modal-input" [class.input-error]="formCliente.email && !esEmailValido()">
+        <span class="error-text" *ngIf="formCliente.email && !esEmailValido()">Ingrese un formato de correo válido</span>
       </div>
 
       <div class="form-group">
-        <label for="crudAddress">Dirección Principal</label>
-        <input type="text" id="crudAddress" [(ngModel)]="formCliente.address" placeholder="Ej. Av. Universitaria 120" class="modal-input">
+        <label for="crudCalle">Dirección (Calle, Av., Nro, Dpto) *</label>
+        <input type="text" id="crudCalle" [(ngModel)]="formCliente.calle" placeholder="Ej. Av. Angamos 123" class="modal-input" [class.input-error]="formCliente.calle && !esDireccionValido()">
+        <span class="error-text" *ngIf="formCliente.calle && !esDireccionValido()">La dirección debe tener al menos 5 caracteres</span>
+      </div>
+
+      <div class="form-group">
+        <label for="crudDistrito">Distrito *</label>
+        <select id="crudDistrito" [(ngModel)]="formCliente.distrito" class="modal-input">
+          <option value="Surquillo">Surquillo</option>
+          <option value="Miraflores">Miraflores</option>
+          <option value="San Isidro">San Isidro</option>
+          <option value="San Borja">San Borja</option>
+          <option value="Santiago de Surco">Santiago de Surco</option>
+        </select>
       </div>
       
       <div class="modal-actions">
         <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()">Cancelar</button>
-        <button class="brand-btn" (click)="guardarCliente()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
+        <button class="brand-btn" [disabled]="!esFormularioValido()" (click)="guardarCliente()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
       </div>
     </div>
   </div>

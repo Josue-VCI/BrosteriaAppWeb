@@ -152,6 +152,31 @@ export class ClientesComponent implements OnInit {
     });
   }
 
+  // Validaciones del Formulario de Clientes
+  esNombreValido(): boolean {
+    return !!this.formCliente.name && this.formCliente.name.trim().length >= 3;
+  }
+
+  esCelularValido(): boolean {
+    const phone = this.formCliente.phone ? this.formCliente.phone.trim() : '';
+    // Celulares de Perú: 9 dígitos iniciando con 9
+    return /^9\d{8}$/.test(phone);
+  }
+
+  esEmailValido(): boolean {
+    const email = this.formCliente.email ? this.formCliente.email.trim() : '';
+    if (!email) return true; // Opcional
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  esDireccionValido(): boolean {
+    return !!this.formCliente.calle && this.formCliente.calle.trim().length >= 5;
+  }
+
+  esFormularioValido(): boolean {
+    return this.esNombreValido() && this.esCelularValido() && this.esEmailValido() && this.esDireccionValido();
+  }
+
   // Lógica CRUD
   abrirNuevoCliente() {
     this.esEdicion = false;
@@ -160,6 +185,8 @@ export class ClientesComponent implements OnInit {
       name: '',
       email: '',
       phone: '',
+      calle: '',
+      distrito: 'Surquillo',
       address: ''
     };
     this.mostrarModalCrud = true;
@@ -168,6 +195,18 @@ export class ClientesComponent implements OnInit {
   abrirEditarCliente(cliente: any) {
     this.esEdicion = true;
     this.formCliente = { ...cliente };
+    
+    // Extraer calle y distrito de la dirección
+    const address = cliente.address || '';
+    const parts = address.split(', ');
+    if (parts.length > 1) {
+      this.formCliente.distrito = parts[parts.length - 1].trim();
+      this.formCliente.calle = parts.slice(0, parts.length - 1).join(', ').trim();
+    } else {
+      this.formCliente.distrito = 'Surquillo';
+      this.formCliente.calle = address;
+    }
+    
     this.mostrarModalCrud = true;
   }
 
@@ -176,7 +215,10 @@ export class ClientesComponent implements OnInit {
   }
 
   guardarCliente() {
-    if (!this.formCliente.name || !this.formCliente.phone) return;
+    // Concatenar calle y distrito antes de enviar
+    this.formCliente.address = `${this.formCliente.calle}, ${this.formCliente.distrito}`;
+    
+    if (!this.esFormularioValido()) return;
 
     this.http.post(this.apiBaseUrl, this.formCliente).subscribe({
       next: () => {

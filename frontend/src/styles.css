@@ -128,3 +128,31 @@ h1, h2, h3, h4 {
     font-size: 16px !important;
   }
 }
+
+/* Estilos de Validación de Formularios */
+.input-error {
+  border-color: var(--error) !important;
+  box-shadow: 0 0 5px rgba(255, 23, 68, 0.4) !important;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+  font-family: var(--font-body);
+}
+
+.brand-btn:disabled {
+  background: #333336 !important;
+  color: #77777a !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Forzar fondo oscuro y texto claro en listas desplegables y sus opciones */
+select, option {
+  background-color: #121214 !important;
+  color: #FAFAFA !important;
+}

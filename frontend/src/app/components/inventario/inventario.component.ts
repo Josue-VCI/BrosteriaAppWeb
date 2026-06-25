@@ -120,6 +120,23 @@ export class InventarioComponent implements OnInit {
     });
   }
 
+  // Validaciones del Formulario de Insumos
+  esNombreValido(): boolean {
+    return !!this.formInsumo.name && this.formInsumo.name.trim().length >= 3;
+  }
+
+  esCantidadValida(): boolean {
+    return this.formInsumo.quantity !== null && this.formInsumo.quantity !== undefined && this.formInsumo.quantity >= 0;
+  }
+
+  esStockMinimoValido(): boolean {
+    return this.formInsumo.minimumStock !== null && this.formInsumo.minimumStock !== undefined && this.formInsumo.minimumStock >= 0;
+  }
+
+  esFormularioValido(): boolean {
+    return this.esNombreValido() && this.esCantidadValida() && this.esStockMinimoValido();
+  }
+
   // CRUD Modal Lógica
   abrirNuevoInsumo() {
     this.esEdicion = false;
@@ -144,7 +161,7 @@ export class InventarioComponent implements OnInit {
   }
 
   guardarInsumo() {
-    if (!this.formInsumo.name || this.formInsumo.quantity < 0 || this.formInsumo.minimumStock < 0) return;
+    if (!this.esFormularioValido()) return;
 
     if (this.esEdicion && this.formInsumo.id) {
       // Modificar
