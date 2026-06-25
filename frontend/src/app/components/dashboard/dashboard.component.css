@@ -192,3 +192,16 @@
   margin-top: 20px;
 }
 
+/* Nueva clase responsiva para tablas */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 15px;
+}
+
+.table-responsive .dashboard-table {
+  margin-top: 0;
+  min-width: 500px; /* Evita que la tabla se colapse demasiado en pantallas pequeñas */
+}
+

@@ -2,6 +2,7 @@ package com.upc.brosteria.Servicios;
 
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +14,9 @@ public class EmailServicio {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
+    @Value("${spring.mail.username:josuebecerrav19@gmail.com}")
+    private String fromEmail;
+
     @Async
     public void enviarCorreoHTML(String destinatario, String asunto, String contenidoHtml) {
         if (mailSender == null) {
@@ -22,6 +26,7 @@ public class EmailServicio {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail, "La Brostería");
             helper.setTo(destinatario);
             helper.setSubject(asunto);
             helper.setText(contenidoHtml, true);

@@ -86,8 +86,8 @@ export class ClientesComponent implements OnInit {
     // 1. Filtrado por búsqueda de texto
     if (query) {
       temp = temp.filter(c => 
-        c.name.toLowerCase().includes(query) || 
-        c.phone.includes(query) || 
+        (c.name && c.name.toLowerCase().includes(query)) || 
+        (c.phone && c.phone.includes(query)) || 
         (c.email && c.email.toLowerCase().includes(query)) ||
         (c.address && c.address.toLowerCase().includes(query))
       );
@@ -242,7 +242,7 @@ export class ClientesComponent implements OnInit {
 
   obtenerDestinatariosValidosCount(): number {
     return this.clientesFiltrados
-      .filter(c => c.email && c.email.trim() !== '')
+      .filter(c => c.email && c.email !== null && c.email !== undefined && c.email.trim() !== '')
       .length;
   }
 
@@ -263,7 +263,7 @@ export class ClientesComponent implements OnInit {
     this.enviandoCorreo = true;
     const destinatarios = this.clientesFiltrados
       .map(c => c.email)
-      .filter(email => email !== null && email.trim() !== '');
+      .filter(email => email !== null && email !== undefined && email.trim() !== '');
 
     let htmlContent = '';
     if (this.plantillaSeleccionada === 'mundial') {

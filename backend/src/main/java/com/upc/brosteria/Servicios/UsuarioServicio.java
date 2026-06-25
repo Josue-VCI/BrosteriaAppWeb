@@ -4,7 +4,11 @@ import com.upc.brosteria.DTOs.LoginRequest;
 import com.upc.brosteria.DTOs.LoginResponse;
 import com.upc.brosteria.Entidades.UsuarioEntidad;
 import com.upc.brosteria.Repositorios.UsuarioRepositorio;
+import com.upc.brosteria.Seguridad.JwtUtil;
+import com.upc.brosteria.Seguridad.UsuarioDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,18 +17,30 @@ public class UsuarioServicio {
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UsuarioDetailsService usuarioDetailsService;
+
     public LoginResponse login(LoginRequest loginRequest) {
         // Encontrar el usuario en la BD
         UsuarioEntidad usuario = usuarioRepositorio.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el correo ingresado"));
 
-        // Comparación simple de contraseña en texto plano para desarrollo (seguridad desactivada)
-        if ("admin123".equals(loginRequest.getPassword()) || "cajero123".equals(loginRequest.getPassword())) {
-            // Devolver un token mock estático libre de fallos criptográficos
-            String tokenMock = "token_demo_brosteria_exitoso";
-            return new LoginResponse(tokenMock, usuario.getId(), usuario.getName());
+        // Comparación real con BCrypt
+        if (passwordEncoder.matches(loginRequest.getPassword(), usuario.getPasswordHash())) {
+            // Cargar UserDetails para generar token con el rol
+            UserDetails userDetails = usuarioDetailsService.loadUserByUsername(usuario.getEmail());
+            String roleName = usuario.getRolEntidad().getName();
+            String token = jwtUtil.generateToken(userDetails, roleName);
+            
+            return new LoginResponse(token, usuario.getId(), usuario.getName());
         } else {
-            throw new RuntimeException("Contraseña incorrecta para el usuario de demostración");
+            throw new RuntimeException("Contraseña incorrecta");
         }
     }
 }

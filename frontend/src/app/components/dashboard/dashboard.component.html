@@ -40,54 +40,56 @@
     <!-- Tabla de Pedidos Recientes -->
     <div class="glass-card table-section">
       <h3>🍳 Últimos Pedidos</h3>
-      <table class="dashboard-table">
-        <thead>
-          <tr>
-            <th (click)="ordenarPor('id')" class="sortable-header">
-              ID
-              <span class="sort-arrow" *ngIf="columnaOrden === 'id'">{{ ordenAscendente ? '▲' : '▼' }}</span>
-              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'id'">↕</span>
-            </th>
-            <th (click)="ordenarPor('customerName')" class="sortable-header">
-              Cliente
-              <span class="sort-arrow" *ngIf="columnaOrden === 'customerName'">{{ ordenAscendente ? '▲' : '▼' }}</span>
-              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'customerName'">↕</span>
-            </th>
-            <th (click)="ordenarPor('type')" class="sortable-header">
-              Tipo
-              <span class="sort-arrow" *ngIf="columnaOrden === 'type'">{{ ordenAscendente ? '▲' : '▼' }}</span>
-              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'type'">↕</span>
-            </th>
-            <th (click)="ordenarPor('total')" class="sortable-header">
-              Total
-              <span class="sort-arrow" *ngIf="columnaOrden === 'total'">{{ ordenAscendente ? '▲' : '▼' }}</span>
-              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'total'">↕</span>
-            </th>
-            <th (click)="ordenarPor('status')" class="sortable-header">
-              Estado
-              <span class="sort-arrow" *ngIf="columnaOrden === 'status'">{{ ordenAscendente ? '▲' : '▼' }}</span>
-              <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'status'">↕</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let pedido of pedidosRecientes">
-            <td>#{{ pedido.id }}</td>
-            <td>{{ pedido.customerName }}</td>
-            <td>
-              <span class="type-badge" [class.delivery]="pedido.type === 'DELIVERY'">
-                {{ pedido.type }}
-              </span>
-            </td>
-            <td class="number-font">S/. {{ pedido.total | number:'1.2-2' }}</td>
-            <td>
-              <span class="status-badge" [class]="pedido.status.toLowerCase()">
-                {{ pedido.status }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="dashboard-table">
+          <thead>
+            <tr>
+              <th (click)="ordenarPor('id')" class="sortable-header">
+                ID
+                <span class="sort-arrow" *ngIf="columnaOrden === 'id'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'id'">↕</span>
+              </th>
+              <th (click)="ordenarPor('customerName')" class="sortable-header">
+                Cliente
+                <span class="sort-arrow" *ngIf="columnaOrden === 'customerName'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'customerName'">↕</span>
+              </th>
+              <th (click)="ordenarPor('type')" class="sortable-header">
+                Tipo
+                <span class="sort-arrow" *ngIf="columnaOrden === 'type'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'type'">↕</span>
+              </th>
+              <th (click)="ordenarPor('total')" class="sortable-header">
+                Total
+                <span class="sort-arrow" *ngIf="columnaOrden === 'total'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'total'">↕</span>
+              </th>
+              <th (click)="ordenarPor('status')" class="sortable-header">
+                Estado
+                <span class="sort-arrow" *ngIf="columnaOrden === 'status'">{{ ordenAscendente ? '▲' : '▼' }}</span>
+                <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'status'">↕</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pedido of pedidosRecientes">
+              <td>#{{ pedido.id }}</td>
+              <td>{{ pedido.customerName }}</td>
+              <td>
+                <span class="type-badge" [class.delivery]="pedido.type === 'DELIVERY'">
+                  {{ pedido.type }}
+                </span>
+              </td>
+              <td class="number-font">S/. {{ pedido.total | number:'1.2-2' }}</td>
+              <td>
+                <span class="status-badge" [class]="pedido.status.toLowerCase()">
+                  {{ pedido.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="link-footer">
         <a routerLink="/pedidos">Ver todos los pedidos ➔</a>
       </div>

@@ -18,7 +18,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   // Polling y Alerta Sonora
   intervalId: any;
-  cantidadPendientesAnterior = 0;
+  cantidadPendientesAnterior = -1; // Sentinel -1 evita que suene en el primer load
+  audioCtx: AudioContext | null = null;
 
   // Catálogo y Modal de Parser
   productosCatalogo: any[] = [];
@@ -47,13 +48,36 @@ export class PedidosComponent implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => {
       this.cargarTodosLosPedidos();
     }, 10000);
+
+    // Escuchar cambios de visibilidad de pestaña para ahorrar llamadas e impedir acumulación de audio
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   ngOnDestroy() {
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+    if (this.audioCtx) {
+      this.audioCtx.close().catch(() => {});
+    }
   }
+
+  onVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      this.cargarTodosLosPedidos();
+      if (!this.intervalId) {
+        this.intervalId = setInterval(() => {
+          this.cargarTodosLosPedidos();
+        }, 10000);
+      }
+    } else {
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      }
+    }
+  };
 
   cargarProductos() {
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/productos`).subscribe({
@@ -68,7 +92,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
         const nuevosCocina = data.filter(p => p.status === 'PENDIENTE' || p.status === 'PREPARANDO');
 
         // Si hay nuevos pedidos en cocina comparado con el estado anterior, sonar timbre
-        if (this.cantidadPendientesAnterior > 0 && nuevosCocina.length > this.cantidadPendientesAnterior) {
+        if (this.cantidadPendientesAnterior !== -1 && nuevosCocina.length > this.cantidadPendientesAnterior) {
           this.reproducirSonidoAlerta();
         }
         
@@ -82,6 +106,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   actualizarEstado(pedidoId: number, nuevoEstado: string) {
+    if (nuevoEstado === 'ENTREGADO') {
+      const confirmar = confirm('¿Está seguro de marcar este pedido como Pagado y Entregado? Se archivará del tablero.');
+      if (!confirmar) return;
+    }
+
     this.http.put(`${API_BASE_URL}/api/v1/pedidos/${pedidoId}/estado?nuevoEstado=${nuevoEstado}`, {}).subscribe({
       next: () => {
         this.cargarTodosLosPedidos();
@@ -90,18 +119,23 @@ export class PedidosComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Alerta Sonora Sintetizada mediante Web Audio API (Ding-Dong)
+  // Alerta Sonora Sintetizada mediante Web Audio API (Ding-Dong) - Reutiliza AudioContext
   reproducirSonidoAlerta() {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
+      if (!this.audioCtx) {
+        const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioCtxClass) return;
+        this.audioCtx = new AudioCtxClass();
+      }
       
-      const ctx = new AudioCtx();
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
       
       // Nota 1: Ding (Do5)
-      this.emitirTono(ctx, 523.25, 0.15, 0);
+      this.emitirTono(this.audioCtx, 523.25, 0.15, 0);
       // Nota 2: Dong (Mi5)
-      this.emitirTono(ctx, 659.25, 0.35, 0.15);
+      this.emitirTono(this.audioCtx, 659.25, 0.35, 0.15);
     } catch (e) {
       console.warn('No se pudo inicializar o reproducir la alerta sonora de cocina:', e);
     }
@@ -246,11 +280,16 @@ export class PedidosComponent implements OnInit, OnDestroy {
     return name
       .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '')
       .replace(/[⚽🏆🥅⏱️🤤🍗🦴🍟🍔🌶️😎🎉]/g, '')
+      .replace(/[^\w\s\d().,áéíóúÁÉÍÓÚñÑ-]/g, '')
       .trim();
   }
 
   onProductoChange(detalle: any, event: any) {
-    const prodId = parseInt(event.target.value, 10);
+    const val = event.target.value;
+    if (!val) return;
+    const prodId = parseInt(val, 10);
+    if (isNaN(prodId)) return;
+
     const product = this.productosCatalogo.find(p => p.id === prodId);
     if (product) {
       detalle.productoId = product.id;
@@ -263,9 +302,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   recalcularTotal() {
+    this.formPedido.deliveryCost = this.formPedido.type === 'PICKUP' ? 0.00 : 5.00;
     const subtotal = this.formPedido.detalles.reduce((sum: number, d: any) => sum + d.subtotal, 0);
-    const delivery = this.formPedido.type === 'PICKUP' ? 0.00 : this.formPedido.deliveryCost;
-    this.formPedido.total = subtotal + delivery;
+    this.formPedido.total = subtotal + this.formPedido.deliveryCost;
   }
 
   guardarNuevoPedido() {
@@ -280,7 +319,24 @@ export class PedidosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.http.post(`${API_BASE_URL}/api/v1/pedidos`, this.formPedido).subscribe({
+    // Limpiar el payload enviando únicamente los campos esperados por el backend DTO
+    const cleanDetalles = this.formPedido.detalles.map((d: any) => ({
+      productoId: d.productoId,
+      quantity: d.quantity,
+      creams: d.creams
+    }));
+
+    const payload = {
+      customerName: this.formPedido.customerName,
+      customerPhone: this.formPedido.customerPhone,
+      customerAddress: this.formPedido.customerAddress,
+      deliveryCost: this.formPedido.deliveryCost,
+      type: this.formPedido.type,
+      paymentMethod: this.formPedido.paymentMethod,
+      detalles: cleanDetalles
+    };
+
+    this.http.post(`${API_BASE_URL}/api/v1/pedidos`, payload).subscribe({
       next: () => {
         this.cargarTodosLosPedidos();
         this.cerrarModalNuevoPedido();
@@ -291,5 +347,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
         alert('Ocurrió un error al registrar el pedido.');
       }
     });
+  }
+
+  trackByPedido(index: number, item: any): number {
+    return item.id;
   }
 }

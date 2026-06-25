@@ -15,13 +15,7 @@ export class AppComponent implements OnInit {
   sidebarAbierto = false;
   usuarioNombre = 'Administrador (Demo)';
 
-  constructor(private router: Router) {
-    // Inicializar sesión por defecto para evitar pantallas de login por la desactivación de seguridad
-    if (!localStorage.getItem('brosteria_token')) {
-      localStorage.setItem('brosteria_token', 'token_demo_seguridad_desactivada');
-      localStorage.setItem('brosteria_username', 'Josue Espinoza (Admin)');
-    }
-  }
+  constructor(private router: Router) {}
 
   toggleSidebar() {
     this.sidebarAbierto = !this.sidebarAbierto;

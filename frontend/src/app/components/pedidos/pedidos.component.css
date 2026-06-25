@@ -246,3 +246,48 @@
   padding: 6px !important;
 }
 
+/* Nuevos estilos agregados para badges y responsividad */
+.status-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-badge.pendiente {
+  background: rgba(255, 183, 3, 0.15);
+  color: var(--secondary);
+}
+
+.status-badge.preparando {
+  background: rgba(255, 107, 0, 0.15);
+  color: var(--primary-light);
+}
+
+.pedido-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-brand);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 500px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-card {
+    width: 95% !important;
+    padding: 15px !important;
+  }
+}
+
+.pedido-card:hover {
+  transform: none !important;
+}
+

@@ -38,12 +38,12 @@ public class ReporteControlador {
         // Aplicar filtros
         if (fechaInicio != null) {
             pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().isAfter(fechaInicio))
+                    .filter(p -> p.getOrderDate().isAfter(fechaInicio.minusNanos(1)))
                     .collect(Collectors.toList());
         }
         if (fechaFin != null) {
             pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().isBefore(fechaFin))
+                    .filter(p -> p.getOrderDate().isBefore(fechaFin.plusNanos(1)))
                     .collect(Collectors.toList());
         }
         if (tipoPedido != null && !tipoPedido.isEmpty()) {
@@ -78,7 +78,8 @@ public class ReporteControlador {
     @GetMapping("/datos-grafico")
     public ResponseEntity<Map<String, Object>> obtenerDatosGrafico(
             @RequestParam(required = false) String filtroRango,
-            @RequestParam(required = false) String diaSemana) {
+            @RequestParam(required = false) String diaSemana,
+            @RequestParam(required = false) String tipoPedido) {
         
         List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente().stream()
                 .filter(p -> p.getStatus().equals("ENTREGADO"))
@@ -96,8 +97,15 @@ public class ReporteControlador {
 
         final LocalDateTime finalLimite = limite;
         pedidos = pedidos.stream()
-                .filter(p -> p.getOrderDate().isAfter(finalLimite))
+                .filter(p -> p.getOrderDate().isAfter(finalLimite.minusNanos(1)))
                 .collect(Collectors.toList());
+
+        // Aplicar filtro por tipo de pedido
+        if (tipoPedido != null && !tipoPedido.isEmpty()) {
+            pedidos = pedidos.stream()
+                    .filter(p -> p.getType().equalsIgnoreCase(tipoPedido))
+                    .collect(Collectors.toList());
+        }
 
         // Aplicar filtro por día de la semana si existe
         if (diaSemana != null && !diaSemana.isEmpty()) {
@@ -181,15 +189,19 @@ public class ReporteControlador {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
             @RequestParam(required = false) String diaSemana,
+            @RequestParam(required = false) String tipoPedido,
             @RequestParam(required = false, defaultValue = "naranja") String formato) {
         
         List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
  
         if (fechaInicio != null) {
-            pedidos = pedidos.stream().filter(p -> p.getOrderDate().isAfter(fechaInicio)).collect(Collectors.toList());
+            pedidos = pedidos.stream().filter(p -> p.getOrderDate().isAfter(fechaInicio.minusNanos(1))).collect(Collectors.toList());
         }
         if (fechaFin != null) {
-            pedidos = pedidos.stream().filter(p -> p.getOrderDate().isBefore(fechaFin)).collect(Collectors.toList());
+            pedidos = pedidos.stream().filter(p -> p.getOrderDate().isBefore(fechaFin.plusNanos(1))).collect(Collectors.toList());
+        }
+        if (tipoPedido != null && !tipoPedido.isEmpty()) {
+            pedidos = pedidos.stream().filter(p -> p.getType().equalsIgnoreCase(tipoPedido)).collect(Collectors.toList());
         }
         if (diaSemana != null && !diaSemana.isEmpty()) {
             pedidos = pedidos.stream().filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana)).collect(Collectors.toList());

@@ -70,7 +70,7 @@ export class ReportesComponent implements OnInit {
   }
 
   cargarDatosGrafico() {
-    this.http.get<any>(`${this.apiBaseUrl}/datos-grafico?filtroRango=${this.filtroRango}&diaSemana=${this.diaSemana}`).subscribe({
+    this.http.get<any>(`${this.apiBaseUrl}/datos-grafico?filtroRango=${this.filtroRango}&diaSemana=${this.diaSemana}&tipoPedido=${this.tipoPedido}`).subscribe({
       next: (data) => {
         this.renderizarGraficoVentas(data.fechas, data.montos);
         this.renderizarGraficoPagos(data.metodosPago);
@@ -177,6 +177,7 @@ export class ReportesComponent implements OnInit {
     let url = `${this.apiBaseUrl}/descargar-pdf?`;
     if (fechaInicio) url += `fechaInicio=${fechaInicio}&`;
     if (this.diaSemana) url += `diaSemana=${this.diaSemana}&`;
+    if (this.tipoPedido) url += `tipoPedido=${this.tipoPedido}&`;
     url += `formato=${this.formatoPdf}`;
 
     this.http.get(url, { responseType: 'blob' }).subscribe({

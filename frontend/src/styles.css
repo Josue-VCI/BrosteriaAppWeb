@@ -45,8 +45,13 @@ body {
 
 .glass-card:hover {
     border-color: var(--glass-border-hover);
-    box-shadow: 0 8px 32px 0 rgba(255, 107, 0, 0.15);
-    transform: translateY(-4px);
+}
+
+@media (hover: hover) {
+    .glass-card:hover {
+        box-shadow: 0 8px 32px 0 rgba(255, 107, 0, 0.15);
+        transform: translateY(-4px);
+    }
 }
 
 /* Títulos y Botones de la Marca */
@@ -262,6 +267,40 @@ select, option {
 .cancel-btn:hover {
   background: rgba(255, 255, 255, 0.1) !important;
   box-shadow: none !important;
+}
+
+/* Estilos de Badges Globales */
+.badge {
+  font-family: var(--font-brand);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: rgba(0, 200, 83, 0.15);
+  color: var(--success);
+}
+
+.badge-danger {
+  background: rgba(255, 23, 68, 0.15);
+  color: var(--error);
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.2);
+}
+
+/* Estilo para botón destructivo/danger de marca */
+.logout-btn {
+  background: rgba(255, 23, 68, 0.15) !important;
+  color: var(--error) !important;
+  border: 1px solid rgba(255, 23, 68, 0.2) !important;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: var(--error) !important;
+  color: white !important;
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.4) !important;
 }
 
 
