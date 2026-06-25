@@ -1,6 +1,8 @@
 package com.upc.brosteria;
 
+import com.upc.brosteria.Entidades.RolEntidad;
 import com.upc.brosteria.Entidades.UsuarioEntidad;
+import com.upc.brosteria.Repositorios.RolRepositorio;
 import com.upc.brosteria.Repositorios.UsuarioRepositorio;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -18,19 +20,39 @@ public class BrosteriaApplication {
     }
 
     @Bean
-    public CommandLineRunner initPasswords(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner initPasswords(UsuarioRepositorio usuarioRepositorio, RolRepositorio rolRepositorio, PasswordEncoder passwordEncoder) {
         return args -> {
-            usuarioRepositorio.findByEmail("admin@brosteria.com").ifPresent(usuario -> {
-                System.out.println("Forzando actualización de contraseña de admin@brosteria.com a admin123...");
-                usuario.setPasswordHash(passwordEncoder.encode("admin123"));
-                usuarioRepositorio.save(usuario);
-            });
+            // Asegurar que los roles básicos existen
+            if (!rolRepositorio.existsById(1L)) {
+                rolRepositorio.save(new RolEntidad(1L, "ADMIN"));
+            }
+            if (!rolRepositorio.existsById(2L)) {
+                rolRepositorio.save(new RolEntidad(2L, "CAJERO"));
+            }
+            if (!rolRepositorio.existsById(3L)) {
+                rolRepositorio.save(new RolEntidad(3L, "COCINERO"));
+            }
 
-            usuarioRepositorio.findByEmail("cajero@brosteria.com").ifPresent(usuario -> {
-                System.out.println("Forzando actualización de contraseña de cajero@brosteria.com a cajero123...");
-                usuario.setPasswordHash(passwordEncoder.encode("cajero123"));
-                usuarioRepositorio.save(usuario);
-            });
+            RolEntidad adminRol = rolRepositorio.findById(1L).orElseThrow();
+            RolEntidad cajeroRol = rolRepositorio.findById(2L).orElseThrow();
+
+            // Asegurar/Actualizar los 5 usuarios requeridos (2 Admins y 3 Cajeros de Atención)
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", "admin123", adminRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", "admin123", adminRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", "cajero123", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atención 2", "cajero123", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atención 3", "cajero123", cajeroRol);
         };
+    }
+
+    private void crearOActualizarUsuario(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder,
+                                         String email, String name, String rawPassword, RolEntidad rol) {
+        UsuarioEntidad usuario = usuarioRepositorio.findByEmail(email).orElse(new UsuarioEntidad());
+        usuario.setEmail(email);
+        usuario.setName(name);
+        usuario.setPasswordHash(passwordEncoder.encode(rawPassword));
+        usuario.setRolEntidad(rol);
+        usuarioRepositorio.save(usuario);
+        System.out.println("Usuario de personal asegurado/actualizado: " + email);
     }
 }

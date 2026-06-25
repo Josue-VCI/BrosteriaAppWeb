@@ -9,10 +9,13 @@ INSERT INTO roles (id, name) VALUES
 (3, 'COCINERO')
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Insertar Usuarios del Personal (Claves hasheadas con BCrypt para 'admin123' y 'cajero123')
+-- 2. Insertar Usuarios del Personal (2 Administradores y 3 Cajeros de Atención con BCrypt)
 INSERT INTO users (id, name, email, password_hash, role_id, created_at) VALUES
-(1, 'Josue Espinoza (Admin)', 'admin@brosteria.com', '$2a$10$8.uXF3I.u4uS3mK666wOuep9qYyKqK4m/qB8uA1uS85rY22S6.w0G', 1, NOW()),
-(2, 'Carlos Cajero', 'cajero@brosteria.com', '$2a$10$8.uXF3I.u4uS3mK666wOuep9qYyKqK4m/qB8uA1uS85rY22S6.w0G', 2, NOW())
+(1, 'Josue Espinoza (Admin 1)', 'admin@brosteria.com', '$2a$10$mDZ0jfgebisarO9aLiK4Q.Xd8A7xVnRDCToqdZj/cpWqUkAUQjg4G', 1, NOW()),
+(2, 'Carlos Cajero (Cajero 1)', 'cajero@brosteria.com', '$2a$10$.feCm2bJRkdWwJNo74SSM.5NQHWA0mINlKzznSvgP27nfy0O0Cb1S', 2, NOW()),
+(3, 'Administrador 2', 'admin2@brosteria.com', '$2a$10$mDZ0jfgebisarO9aLiK4Q.Xd8A7xVnRDCToqdZj/cpWqUkAUQjg4G', 1, NOW()),
+(4, 'Atención 2', 'cajero2@brosteria.com', '$2a$10$.feCm2bJRkdWwJNo74SSM.5NQHWA0mINlKzznSvgP27nfy0O0Cb1S', 2, NOW()),
+(5, 'Atención 3', 'cajero3@brosteria.com', '$2a$10$.feCm2bJRkdWwJNo74SSM.5NQHWA0mINlKzznSvgP27nfy0O0Cb1S', 2, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Insertar Catálogo de Productos Reales de La Brostería
@@ -230,6 +233,7 @@ WHERE c.id = sub.cliente_id
   AND c.total_orders = 0;
       
 -- G. Ajustar secuencias de ID de PostgreSQL
+SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE(MAX(id), 1)) FROM users;
 SELECT setval(pg_get_serial_sequence('clientes', 'id'), COALESCE(MAX(id), 1)) FROM clientes;
 SELECT setval(pg_get_serial_sequence('pedidos', 'id'), COALESCE(MAX(id), 1)) FROM pedidos;
 SELECT setval(pg_get_serial_sequence('detalle_pedidos', 'id'), COALESCE(MAX(id), 1)) FROM detalle_pedidos;
