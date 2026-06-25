@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,9 +30,13 @@ export class ReportesComponent implements OnInit {
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/reportes`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
+    if (localStorage.getItem('brosteria_role') !== 'ADMIN') {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
     this.aplicarFiltros();
   }
 

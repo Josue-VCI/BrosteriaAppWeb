@@ -24,7 +24,7 @@
       <a routerLink="/clientes" routerLinkActive="active" class="menu-item">
         <span class="menu-icon">👥</span> Clientes
       </a>
-      <a routerLink="/reportes" routerLinkActive="active" class="menu-item">
+      <a *ngIf="esAdmin" routerLink="/reportes" routerLinkActive="active" class="menu-item">
         <span class="menu-icon">📊</span> Reportes Analíticos
       </a>
     </nav>

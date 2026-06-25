@@ -14,6 +14,7 @@ export class AppComponent implements OnInit {
   mostrarSidebar = false;
   sidebarAbierto = false;
   usuarioNombre = 'Administrador (Demo)';
+  esAdmin = false;
 
   constructor(private router: Router) {}
 
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit {
       // Mostrar la barra de navegación lateral en todas las vistas excepto login
       this.mostrarSidebar = this.router.url !== '/login';
       this.usuarioNombre = localStorage.getItem('brosteria_username') || 'Josue Espinoza (Admin)';
+      this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
       this.sidebarAbierto = false;
     });
   }
@@ -35,6 +37,7 @@ export class AppComponent implements OnInit {
   logout() {
     localStorage.removeItem('brosteria_token');
     localStorage.removeItem('brosteria_username');
+    localStorage.removeItem('brosteria_role');
     this.router.navigate(['/login']);
   }
 }

@@ -30,6 +30,7 @@ export class LoginComponent {
       next: (res) => {
         localStorage.setItem('brosteria_token', res.token);
         localStorage.setItem('brosteria_username', res.userName);
+        localStorage.setItem('brosteria_role', res.role || 'CAJERO');
         this.cargando = false;
         this.router.navigate(['/dashboard']);
       },

@@ -38,7 +38,7 @@ public class UsuarioServicio {
             String roleName = usuario.getRolEntidad().getName();
             String token = jwtUtil.generateToken(userDetails, roleName);
             
-            return new LoginResponse(token, usuario.getId(), usuario.getName());
+            return new LoginResponse(token, usuario.getId(), usuario.getName(), roleName);
         } else {
             throw new RuntimeException("Contraseña incorrecta");
         }
