@@ -70,11 +70,11 @@ ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('insumos', 'id'), coalesce(max(id), 1)) FROM insumos;
 
--- 5. Simulación Masiva condicional (1,000 pedidos, ~700 KB de volumen de datos)
+-- 5. Simulación Masiva condicional (3,600 pedidos, ~2.5 MB de volumen de datos, 40 pedidos/día)
 
--- A. Limpiar tablas si hay una sobrepoblación (más de 10,000 pedidos, remanente de la simulación de 50MB anterior)
-DELETE FROM detalle_pedidos WHERE (SELECT COUNT(*) FROM pedidos) > 10000;
-DELETE FROM pedidos WHERE (SELECT COUNT(*) FROM pedidos) > 10000;
+-- A. Limpiar tablas si el total de pedidos no coincide con la meta de 3,600 para asegurar re-inicialización
+DELETE FROM detalle_pedidos WHERE (SELECT COUNT(*) FROM pedidos) <> 3600;
+DELETE FROM pedidos WHERE (SELECT COUNT(*) FROM pedidos) <> 3600;
 DELETE FROM clientes WHERE (SELECT COUNT(*) FROM clientes) > 1500;
 
 -- B. Generar 200 Clientes con correos ficticios/inválidos si no se ha inicializado la base de datos
@@ -120,7 +120,7 @@ SELECT
 FROM generate_series(1, 200) AS i
 WHERE NOT EXISTS (SELECT 1 FROM clientes WHERE email LIKE '%@brosteria-invalid.local' LIMIT 1);
 
--- C. Generar 1000 Pedidos distribuidos en 30 días si no existen
+-- C. Generar 3600 Pedidos distribuidos en 90 días si no existen
 INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date, cliente_id)
 SELECT 
   s.id,
@@ -134,15 +134,24 @@ SELECT
   ( ((s.id % 3) + 1) * p1.price ) + 
   ( CASE WHEN s.id % 5 IN (1, 3) THEN p2.price ELSE 0.0 END ) + 
   ( CASE WHEN s.id % 4 = 3 THEN 0.00 ELSE 5.00 END ),
-  CASE (s.id % 15) WHEN 0 THEN 'CANCELADO' WHEN 1 THEN 'PREPARANDO' WHEN 2 THEN 'PENDIENTE' ELSE 'ENTREGADO' END,
-  (NOW() - (s.id * INTERVAL '40 minutes')) -- 1000 pedidos distribuidos en aprox 27 días (1000 * 40 min = 40000 min = 27.7 días)
+  CASE 
+    WHEN s.id <= 50 THEN
+      CASE (s.id % 10)
+        WHEN 0 THEN 'PENDIENTE'
+        WHEN 1 THEN 'PREPARANDO'
+        ELSE 'ENVIADO'
+      END
+    ELSE
+      CASE WHEN (s.id % 20) = 0 THEN 'CANCELADO' ELSE 'ENTREGADO' END
+  END,
+  (NOW() - (s.id * INTERVAL '36 minutes')) -- 3600 pedidos distribuidos en 90 días (3600 * 36 min = 129600 min = 90 días)
     + CASE (s.id % 3)
         WHEN 0 THEN INTERVAL '0 hours'
         WHEN 1 THEN INTERVAL '4 hours'
         ELSE INTERVAL '-2 hours'
       END,
   c.id
-FROM generate_series(1, 1000) AS s(id)
+FROM generate_series(1, 3600) AS s(id)
 JOIN clientes c ON c.id = ((s.id % 200) + 1)
 JOIN productos p1 ON p1.id = ((s.id % 27) + 1)
 JOIN productos p2 ON p2.id = (((s.id + 11) % 27) + 1)
