@@ -37,11 +37,11 @@ public class BrosteriaApplication {
             RolEntidad cajeroRol = rolRepositorio.findById(2L).orElseThrow();
 
             // Asegurar/Actualizar los 5 usuarios requeridos (2 Admins y 3 Cajeros de Atención)
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", "admin123", adminRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", "admin123", adminRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", "cajero123", cajeroRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atención 2", "cajero123", cajeroRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atención 3", "cajero123", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", "admin_broster1", adminRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", "admin_broster2", adminRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", "caja_broster1", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atención 2", "caja_broster2", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atención 3", "caja_broster3", cajeroRol);
         };
     }
 

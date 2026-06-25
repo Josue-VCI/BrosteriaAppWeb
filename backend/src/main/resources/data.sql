@@ -11,11 +11,11 @@ ON CONFLICT (id) DO NOTHING;
 
 -- 2. Insertar Usuarios del Personal (2 Administradores y 3 Cajeros de Atención con BCrypt)
 INSERT INTO users (id, name, email, password_hash, role_id, created_at) VALUES
-(1, 'Josue Espinoza (Admin 1)', 'admin@brosteria.com', '$2a$10$mDZ0jfgebisarO9aLiK4Q.Xd8A7xVnRDCToqdZj/cpWqUkAUQjg4G', 1, NOW()),
-(2, 'Carlos Cajero (Cajero 1)', 'cajero@brosteria.com', '$2a$10$.feCm2bJRkdWwJNo74SSM.5NQHWA0mINlKzznSvgP27nfy0O0Cb1S', 2, NOW()),
-(3, 'Administrador 2', 'admin2@brosteria.com', '$2a$10$mDZ0jfgebisarO9aLiK4Q.Xd8A7xVnRDCToqdZj/cpWqUkAUQjg4G', 1, NOW()),
-(4, 'Atención 2', 'cajero2@brosteria.com', '$2a$10$.feCm2bJRkdWwJNo74SSM.5NQHWA0mINlKzznSvgP27nfy0O0Cb1S', 2, NOW()),
-(5, 'Atención 3', 'cajero3@brosteria.com', '$2a$10$.feCm2bJRkdWwJNo74SSM.5NQHWA0mINlKzznSvgP27nfy0O0Cb1S', 2, NOW())
+(1, 'Josue Espinoza (Admin 1)', 'admin@brosteria.com', '$2a$10$h9XoD8G34VqmQfkYwMBPy.l2rK/XeGfu./uEDPUjlBpwJ2Zwr.ET.', 1, NOW()),
+(2, 'Carlos Cajero (Cajero 1)', 'cajero@brosteria.com', '$2a$10$yYtR4Y7IGtThzZWscWf0T.TASnWVLtb3EzTZ//1xfg8SLcns832n.', 2, NOW()),
+(3, 'Administrador 2', 'admin2@brosteria.com', '$2a$10$9F49nqvBe8t9iNC3xqRqW.pfTldvsljd90GBJuin/6bF0e/veuJDW', 1, NOW()),
+(4, 'Atención 2', 'cajero2@brosteria.com', '$2a$10$rQInnKsrHRIldi1LeMZcE.shKxteS8oLcNClDyHhBaHone9s.txym', 2, NOW()),
+(5, 'Atención 3', 'cajero3@brosteria.com', '$2a$10$K879BTLFnflTta3bahV7YuAlOGiIRwKvSofchUhRrv6DcVsEnRl.W', 2, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Insertar Catálogo de Productos Reales de La Brostería
