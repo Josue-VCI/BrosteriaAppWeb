@@ -111,11 +111,44 @@ export class PedidosComponent implements OnInit, OnDestroy {
       if (!confirmar) return;
     }
 
+    // Copias del estado actual para rollback en caso de error
+    const copiaCocina = [...this.pedidosCocina];
+    const copiaDespacho = [...this.pedidosDespacho];
+    const copiaCantidadPendientes = this.cantidadPendientesAnterior;
+
+    // Actualización optimista de UI
+    if (nuevoEstado === 'PREPARANDO') {
+      // El pedido se queda en Cocina pero cambia su estado a PREPARANDO
+      this.pedidosCocina = this.pedidosCocina.map(p => 
+        p.id === pedidoId ? { ...p, status: 'PREPARANDO' } : p
+      );
+    } else if (nuevoEstado === 'ENVIADO') {
+      // Se mueve de Cocina a Despacho
+      const pedido = this.pedidosCocina.find(p => p.id === pedidoId);
+      if (pedido) {
+        this.pedidosCocina = this.pedidosCocina.filter(p => p.id !== pedidoId);
+        this.cantidadPendientesAnterior = this.pedidosCocina.length;
+        const pedidoActualizado = { ...pedido, status: 'ENVIADO' };
+        this.pedidosDespacho = [...this.pedidosDespacho, pedidoActualizado];
+      }
+    } else if (nuevoEstado === 'ENTREGADO') {
+      // Se elimina de Despacho
+      this.pedidosDespacho = this.pedidosDespacho.filter(p => p.id !== pedidoId);
+    }
+
     this.http.put(`${API_BASE_URL}/api/v1/pedidos/${pedidoId}/estado?nuevoEstado=${nuevoEstado}`, {}).subscribe({
       next: () => {
+        // Cargar en segundo plano para verificar consistencia
         this.cargarTodosLosPedidos();
       },
-      error: (err) => console.error('Error al actualizar estado del pedido', err)
+      error: (err) => {
+        console.error('Error al actualizar estado del pedido', err);
+        alert('No se pudo actualizar el estado del pedido en el servidor. Revirtiendo cambios...');
+        // Revertir UI al estado anterior
+        this.pedidosCocina = copiaCocina;
+        this.pedidosDespacho = copiaDespacho;
+        this.cantidadPendientesAnterior = copiaCantidadPendientes;
+      }
     });
   }
 

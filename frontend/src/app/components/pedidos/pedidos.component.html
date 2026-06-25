@@ -1,11 +1,11 @@
 <div class="kanban-container">
   <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div>
-      <h2>🍳 Control de Pedidos y Cocina (Kanban)</h2>
+      <h2>Control de Pedidos y Cocina (Kanban)</h2>
       <p>Actualiza y monitorea los pedidos en tiempo real</p>
     </div>
     <div>
-      <button class="brand-btn" (click)="abrirNuevoPedido()">➕ Registrar Pedido (WhatsApp)</button>
+      <button class="brand-btn" (click)="abrirNuevoPedido()">Registrar Pedido (WhatsApp)</button>
     </div>
   </div>
 
@@ -58,8 +58,8 @@
           </div>
           <div class="card-actions">
             <!-- Si está PENDIENTE, permitir pasar a PREPARANDO (Cocina), si está en PREPARANDO, pasar a ENVIADO (Despachado) -->
-            <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')">Empezar a Cocinar ➔</button>
-            <button *ngIf="pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')">Listo para Despachar ➔</button>
+            <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')">Empezar a Cocinar</button>
+            <button *ngIf="pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')">Listo para Despachar</button>
           </div>
         </div>
         <div class="no-pedidos" *ngIf="pedidosCocina.length === 0">Sin pedidos en cocina</div>
@@ -98,7 +98,7 @@
             </div>
           </div>
           <div class="card-actions">
-            <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')">Pagado ✓</button>
+            <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')">Pagado</button>
           </div>
         </div>
         <div class="no-pedidos" *ngIf="pedidosDespacho.length === 0">Sin pedidos para despachar</div>
@@ -109,7 +109,7 @@
   <!-- Modal de Registro de Pedido de WhatsApp (Parser) -->
   <div class="modal-backdrop" *ngIf="mostrarModalNuevoPedido">
     <div class="modal-card glass-card" style="max-height: 90vh; overflow-y: auto;">
-      <h3>Registrar Pedido desde WhatsApp 🍗💬</h3>
+      <h3>Registrar Pedido desde WhatsApp</h3>
       <p class="destination-sub">Pega el texto completo copiado del mensaje de WhatsApp del cliente para procesarlo automáticamente.</p>
 
       <!-- Entrada de texto -->
@@ -120,7 +120,7 @@
 
       <!-- Vista previa si hay datos procesados -->
       <div class="parsed-preview" *ngIf="formPedido.customerName || formPedido.detalles.length > 0" style="margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 15px;">
-        <h4 class="preview-title" style="color: var(--secondary); margin-bottom: 12px; font-size: 15px;">🔍 DETALLES EXTRAÍDOS</h4>
+        <h4 class="preview-title" style="color: var(--secondary); margin-bottom: 12px; font-size: 15px;">DETALLES EXTRAÍDOS</h4>
         
         <div class="preview-grid">
           <div class="form-group">
@@ -167,7 +167,7 @@
             <div style="flex-grow: 1;">
               <span *ngIf="!det.noCoincide" style="font-size: 13px;">{{ det.productoName }}</span>
               <div *ngIf="det.noCoincide" class="select-error-container">
-                <span class="error-text" style="font-size: 11px; margin-bottom: 4px;">⚠️ No se vinculó automático. Original: <strong>"{{ det.productoName }}"</strong></span>
+                <span class="error-text" style="font-size: 11px; margin-bottom: 4px;">No se vinculó automático. Original: <strong>"{{ det.productoName }}"</strong></span>
                 <select (change)="onProductoChange(det, $event)" class="modal-input" style="padding: 5px; font-size: 12px; border-color: var(--error);">
                   <option value="">-- Selecciona el producto del catálogo --</option>
                   <option *ngFor="let p of productosCatalogo" [value]="p.id">

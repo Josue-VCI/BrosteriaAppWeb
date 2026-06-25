@@ -95,6 +95,23 @@ public class PedidoServicio {
             ClienteEntidad cliente = clienteRepositorio.findById(pedidoDTO.getClienteId())
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
             pedido.setClienteEntidad(cliente);
+        } else if (pedidoDTO.getCustomerPhone() != null && !pedidoDTO.getCustomerPhone().trim().isEmpty()) {
+            String phone = pedidoDTO.getCustomerPhone().trim();
+            java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findByPhone(phone);
+            if (optCliente.isPresent()) {
+                pedido.setClienteEntidad(optCliente.get());
+            } else {
+                ClienteEntidad nuevoCliente = new ClienteEntidad();
+                nuevoCliente.setName(pedidoDTO.getCustomerName());
+                nuevoCliente.setPhone(phone);
+                nuevoCliente.setAddress(pedidoDTO.getCustomerAddress());
+                nuevoCliente.setEmail(null);
+                nuevoCliente.setTotalOrders(0);
+                nuevoCliente.setTotalSpent(0.0);
+                nuevoCliente.setPoints(0);
+                nuevoCliente = clienteRepositorio.save(nuevoCliente);
+                pedido.setClienteEntidad(nuevoCliente);
+            }
         }
 
         double subtotal = 0.0;
@@ -125,13 +142,9 @@ public class PedidoServicio {
             detallePedidoRepositorio.save(det);
         }
 
-        // Si el cliente está registrado, sumar estadísticas
+        // Recalcular estadísticas del cliente si está registrado
         if (pedido.getClienteEntidad() != null) {
-            ClienteEntidad cliente = pedido.getClienteEntidad();
-            cliente.setTotalOrders(cliente.getTotalOrders() + 1);
-            cliente.setTotalSpent(cliente.getTotalSpent() + pedido.getTotal());
-            cliente.setPoints(cliente.getPoints() + (int) (pedido.getTotal() / 10)); // 1 punto por cada S/.10
-            clienteRepositorio.save(cliente);
+            recalcularYGuardarStatsCliente(pedido.getClienteEntidad());
         }
 
         return convertirADTO(guardado);
@@ -148,6 +161,11 @@ public class PedidoServicio {
         // Si se entrega y el cliente tiene correo, enviar comprobante
         if ("ENTREGADO".equals(nuevoEstado) && pedido.getClienteEntidad() != null && pedido.getClienteEntidad().getEmail() != null) {
             enviarComprobantePorCorreo(pedido);
+        }
+
+        // Recalcular estadísticas del cliente
+        if (pedido.getClienteEntidad() != null) {
+            recalcularYGuardarStatsCliente(pedido.getClienteEntidad());
         }
 
         return convertirADTO(pedido);
@@ -230,5 +248,22 @@ public class PedidoServicio {
             return dDto;
         }).collect(Collectors.toList()));
         return dto;
+    }
+
+    private void recalcularYGuardarStatsCliente(ClienteEntidad cliente) {
+        if (cliente == null || cliente.getPhone() == null) return;
+        List<PedidoEntidad> orders = pedidoRepositorio.findByCustomerPhone(cliente.getPhone().trim());
+        int totalOrders = 0;
+        double totalSpent = 0.0;
+        for (PedidoEntidad order : orders) {
+            if ("ENTREGADO".equalsIgnoreCase(order.getStatus())) {
+                totalOrders++;
+                totalSpent += order.getTotal();
+            }
+        }
+        cliente.setTotalOrders(totalOrders);
+        cliente.setTotalSpent(totalSpent);
+        cliente.setPoints((int) (totalSpent / 10));
+        clienteRepositorio.save(cliente);
     }
 }

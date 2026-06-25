@@ -1,16 +1,16 @@
 <div class="clientes-container">
   <div class="header-section">
-    <h2>👥 Control y Fidelización de Clientes (CRM)</h2>
+    <h2>Control y Fidelización de Clientes (CRM)</h2>
     <p>Historial de compras, puntos acumulados y CRM de clientes</p>
   </div>
 
   <div class="actions-bar">
     <div class="search-and-filters">
-      <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="🔍 Buscar por nombre, celular o dirección..." class="search-input">
+      <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="Buscar por nombre, celular o dirección..." class="search-input">
       
       <!-- Filtro de Distrito -->
       <select [(ngModel)]="filtroDistrito" (change)="filtrarClientes()" class="filter-select">
-        <option value="">📍 Todos los Distritos</option>
+        <option value="">Todos los Distritos</option>
         <option value="Surquillo">Surquillo</option>
         <option value="Miraflores">Miraflores</option>
         <option value="San Isidro">San Isidro</option>
@@ -20,7 +20,7 @@
 
       <!-- Filtro de Consumo -->
       <select [(ngModel)]="filtroConsumo" (change)="filtrarClientes()" class="filter-select">
-        <option value="">💰 Todos los Consumos</option>
+        <option value="">Todos los Consumos</option>
         <option value="alto">Alto Consumo (> S/.150)</option>
         <option value="medio">Consumo Medio (S/.50 - S/.150)</option>
         <option value="bajo">Bajo Consumo (< S/.50)</option>
@@ -29,8 +29,8 @@
     </div>
 
     <div class="right-actions">
-      <button class="brand-btn add-btn" (click)="abrirNuevoCliente()">➕ Nuevo Cliente</button>
-      <button class="brand-btn" (click)="abrirRedactarMasivo()">✉️ Campaña Masiva</button>
+      <button class="brand-btn add-btn" (click)="abrirNuevoCliente()">Nuevo Cliente</button>
+      <button class="brand-btn" (click)="abrirRedactarMasivo()">Campaña Masiva</button>
     </div>
   </div>
 
@@ -82,12 +82,12 @@
           <td class="number-font">{{ cliente.totalOrders }}</td>
           <td class="number-font text-success">S/. {{ cliente.totalSpent | number:'1.2-2' }}</td>
           <td>
-            <span class="points-badge number-font">⭐ {{ cliente.points }} pts</span>
+            <span class="points-badge number-font"><i class="fa-solid fa-star"></i> {{ cliente.points }} pts</span>
           </td>
           <td>
             <div class="action-buttons">
-              <button class="brand-btn edit-btn" (click)="abrirEditarCliente(cliente)">✏️</button>
-              <button class="brand-btn delete-btn" (click)="eliminarCliente(cliente.id)">🗑️</button>
+              <button class="brand-btn edit-btn" (click)="abrirEditarCliente(cliente)"><i class="fa-solid fa-pen"></i></button>
+              <button class="brand-btn delete-btn" (click)="eliminarCliente(cliente.id)"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -103,14 +103,14 @@
     <!-- Botón de acción rápida en móvil -->
     <div class="mobile-action-card glass-card" style="margin-bottom: 15px; text-align: center; padding: 15px !important;">
       <button class="brand-btn" (click)="abrirRedactarMasivo()" style="width: 100%;">
-        ✉️ Campaña Filtrada ({{ obtenerDestinatariosValidosCount() }} destinatarios)
+        Campaña Filtrada ({{ obtenerDestinatariosValidosCount() }} destinatarios)
       </button>
     </div>
     
     <div class="mobile-cliente-card glass-card" *ngFor="let cliente of clientesFiltrados">
       <div class="card-row row-top">
         <span class="cliente-name"><strong>{{ cliente.name }}</strong></span>
-        <span class="points-badge">⭐ {{ cliente.points || 0 }} pts</span>
+        <span class="points-badge"><i class="fa-solid fa-star"></i> {{ cliente.points || 0 }} pts</span>
       </div>
       <div class="card-details-row">
         <p class="phone"><i class="fa-solid fa-phone"></i> {{ cliente.phone }}</p>
@@ -120,8 +120,8 @@
       <div class="card-spent-row">
         <span>Gasto: <strong class="number-font text-success">S/. {{ (cliente.totalSpent || 0) | number:'1.2-2' }}</strong></span>
         <div class="action-buttons">
-          <button class="brand-btn edit-btn-sm" (click)="abrirEditarCliente(cliente)">✏️</button>
-          <button class="brand-btn delete-btn-sm" (click)="eliminarCliente(cliente.id)">🗑️</button>
+          <button class="brand-btn edit-btn-sm" (click)="abrirEditarCliente(cliente)"><i class="fa-solid fa-pen"></i></button>
+          <button class="brand-btn delete-btn-sm" (click)="eliminarCliente(cliente.id)"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
     </div>
@@ -138,9 +138,9 @@
         <label for="plantilla">Plantilla de Campaña</label>
         <select id="plantilla" [(ngModel)]="plantillaSeleccionada" (change)="onTemplateChange()" class="modal-input">
           <option value="libre">Texto Libre (Escribe tu propio mensaje)</option>
-          <option value="mundial">Campaña Mundialista 🍗⚽🏆 (Diseño Premium)</option>
-          <option value="combo">Campaña Súper 2x1 🍟🍗🔥 (Salchipapas y Pollo)</option>
-          <option value="finsemana">Campaña Fin de Semana 🎉🍗😎 (Descuento Locura)</option>
+          <option value="mundial">Campaña Mundialista (Diseño Premium)</option>
+          <option value="combo">Campaña Súper 2x1 (Salchipapas y Pollo)</option>
+          <option value="finsemana">Campaña Fin de Semana (Descuento Locura)</option>
         </select>
       </div>
 
@@ -157,7 +157,7 @@
       <div class="modal-actions">
         <button class="brand-btn cancel-btn" [disabled]="enviandoCorreo" (click)="cerrarModalCorreo()">Cancelar</button>
         <button class="brand-btn" [disabled]="enviandoCorreo" (click)="enviarMasivo()">
-          {{ enviandoCorreo ? 'Enviando correos...' : 'Enviar Campaña ✉️' }}
+          {{ enviandoCorreo ? 'Enviando correos...' : 'Enviar Campaña' }}
         </button>
       </div>
     </div>

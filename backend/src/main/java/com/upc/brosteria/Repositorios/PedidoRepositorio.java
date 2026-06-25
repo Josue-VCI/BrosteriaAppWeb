@@ -13,6 +13,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad")
     List<PedidoEntidad> findAllWithCliente();
 
+    List<PedidoEntidad> findByCustomerPhone(String customerPhone);
+
     @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad WHERE p.status = :status")
     List<PedidoEntidad> findByStatusWithCliente(@Param("status") String status);
 

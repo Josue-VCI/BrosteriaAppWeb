@@ -23,15 +23,20 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.actualizarSidebarYRol();
+
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      // Mostrar la barra de navegación lateral en todas las vistas excepto login
-      this.mostrarSidebar = this.router.url !== '/login';
-      this.usuarioNombre = localStorage.getItem('brosteria_username') || 'Josue Espinoza (Admin)';
-      this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
+      this.actualizarSidebarYRol();
       this.sidebarAbierto = false;
     });
+  }
+
+  private actualizarSidebarYRol() {
+    this.mostrarSidebar = this.router.url !== '/login';
+    this.usuarioNombre = localStorage.getItem('brosteria_username') || 'Josue Espinoza (Admin)';
+    this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
   }
 
   logout() {

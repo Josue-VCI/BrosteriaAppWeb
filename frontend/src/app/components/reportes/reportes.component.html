@@ -1,18 +1,18 @@
 <div class="reportes-container">
   <div class="header-section">
     <div>
-      <h2>📊 Reportes y Analítica de Ventas</h2>
+      <h2>Reportes y Analítica de Ventas</h2>
       <p>Métricas consolidadas de ventas e ingresos en base a la cola de caja</p>
     </div>
     
     <!-- Selección del Formato del PDF y descarga -->
     <div class="pdf-download-actions">
       <select [(ngModel)]="formatoPdf" class="filter-select format-select">
-        <option value="naranja">Diseño Corporativo Naranja 🍊</option>
-        <option value="monocromo">Diseño Monocromo Clásico 📄</option>
-        <option value="compacto">Diseño Compacto Ejecutivo 📑</option>
+        <option value="naranja">Diseño Corporativo Naranja</option>
+        <option value="monocromo">Diseño Monocromo Clásico</option>
+        <option value="compacto">Diseño Compacto Ejecutivo</option>
       </select>
-      <button class="brand-btn pdf-btn" (click)="descargarReportePdf()">📥 Descargar Reporte PDF</button>
+      <button class="brand-btn pdf-btn" (click)="descargarReportePdf()">Descargar Reporte PDF</button>
     </div>
   </div>
 
@@ -73,7 +73,7 @@
 
   <!-- Aviso Móvil de Rotación (Se muestra en móviles verticales mediante CSS) -->
   <div class="glass-card mobile-rotate-notice">
-    <div class="rotate-icon">🔄</div>
+    <div class="rotate-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
     <p>Gira tu pantalla en orientación horizontal (paisaje) para visualizar los gráficos interactivos de analítica y tendencias de demanda.</p>
   </div>
 
@@ -113,7 +113,7 @@
 
   <!-- Fila de Ranking de Productos Estrella -->
   <div class="glass-card ranking-wrapper">
-    <h4>🍗 Top 5 Productos / Combos Estrella</h4>
+    <h4>Top 5 Productos / Combos Estrella</h4>
     <div class="ranking-list">
       <div class="ranking-item" *ngFor="let prod of topProductos; let i = index">
         <div class="rank-info">
@@ -127,16 +127,16 @@
 
   <!-- Fila de Mantenimiento de Base de Datos -->
   <div class="glass-card maintenance-wrapper" style="margin-top: 25px;">
-    <h4>⚙️ Mantenimiento de Base de Datos</h4>
+    <h4>Mantenimiento de Base de Datos</h4>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">
       Mantén el sistema fluido y rápido. Se recomienda realizar una purga manual cada 3 meses para conservar únicamente los pedidos de los últimos 90 días.
     </p>
     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
       <button class="brand-btn" (click)="descargarReportePDF90Dias()" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-light)) !important; color: #000 !important;">
-        📥 Descargar Respaldo Trimestral
+        Descargar Respaldo Trimestral
       </button>
       <button class="brand-btn logout-btn" (click)="limpiarHistorico()" style="padding: 10px 24px !important;">
-        🗑️ Purgar Pedidos antiguos (> 90 días)
+        Purgar Pedidos antiguos (> 90 días)
       </button>
     </div>
   </div>

@@ -1,11 +1,11 @@
 <div class="inventario-container">
   <div class="header-section">
-    <h2>🍗 Control de Inventario e Insumos</h2>
+    <h2>Control de Inventario e Insumos</h2>
     <p>Visualiza niveles de ingredientes críticos y realiza operaciones CRUD</p>
   </div>
 
   <div class="actions-bar">
-    <button class="brand-btn" (click)="abrirNuevoInsumo()">➕ Agregar Nuevo Insumo</button>
+    <button class="brand-btn" (click)="abrirNuevoInsumo()">Agregar Nuevo Insumo</button>
   </div>
 
   <!-- Vista Desktop: Tabla completa ordenada -->
@@ -42,15 +42,15 @@
           <td class="number-font">{{ insumo.minimumStock | number:'1.1-2' }}</td>
           <td>
             <span class="badge" [class.badge-success]="insumo.quantity > insumo.minimumStock" [class.badge-danger]="insumo.quantity <= insumo.minimumStock">
-              {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico ⚠️' }}
+              {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico' }}
             </span>
           </td>
           <td>{{ insumo.updatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td>
             <div class="action-buttons">
-              <button class="brand-btn refill-btn" (click)="abrirIngreso(insumo)">⚡ Abastecer</button>
-              <button class="brand-btn edit-btn" (click)="abrirEditarInsumo(insumo)">✏️</button>
-              <button class="brand-btn delete-btn" (click)="eliminarInsumo(insumo.id)">🗑️</button>
+              <button class="brand-btn refill-btn" (click)="abrirIngreso(insumo)">Abastecer</button>
+              <button class="brand-btn edit-btn" (click)="abrirEditarInsumo(insumo)"><i class="fa-solid fa-pen"></i></button>
+              <button class="brand-btn delete-btn" (click)="eliminarInsumo(insumo.id)"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -65,7 +65,7 @@
       <div class="card-row row-top">
         <span class="insumo-name"><strong>{{ insumo.name }}</strong></span>
         <span class="badge" [class.badge-success]="insumo.quantity > insumo.minimumStock" [class.badge-danger]="insumo.quantity <= insumo.minimumStock">
-          {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico ⚠️' }}
+          {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico' }}
         </span>
       </div>
       <!-- Fila 2: Cantidad disponible (izquierda) y botones de acción rápidos (derecha) -->
@@ -74,9 +74,9 @@
           {{ insumo.quantity | number:'1.1-2' }} <small>{{ insumo.unit }}</small>
         </span>
         <div class="action-buttons">
-          <button class="brand-btn refill-btn-sm" (click)="abrirIngreso(insumo)">⚡ Abastecer</button>
-          <button class="brand-btn edit-btn-sm" (click)="abrirEditarInsumo(insumo)">✏️</button>
-          <button class="brand-btn delete-btn-sm" (click)="eliminarInsumo(insumo.id)">🗑️</button>
+          <button class="brand-btn refill-btn-sm" (click)="abrirIngreso(insumo)">Abastecer</button>
+          <button class="brand-btn edit-btn-sm" (click)="abrirEditarInsumo(insumo)"><i class="fa-solid fa-pen"></i></button>
+          <button class="brand-btn delete-btn-sm" (click)="eliminarInsumo(insumo.id)"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
     </div>

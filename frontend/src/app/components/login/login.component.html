@@ -1,7 +1,7 @@
 <div class="login-wrapper">
   <div class="login-card glass-card">
     <div class="login-header">
-      <div class="logo-circle">🍗</div>
+      <div class="logo-circle"><i class="fa-solid fa-drumstick-bite"></i></div>
       <h2>La Brostería</h2>
       <p>Panel de Gestión de Ventas y CRM</p>
     </div>
@@ -18,11 +18,11 @@
       </div>
 
       <div class="error-banner" *ngIf="errorMsg">
-        ⚠️ {{ errorMsg }}
+        <i class="fa-solid fa-triangle-exclamation"></i> {{ errorMsg }}
       </div>
 
       <button type="submit" class="brand-btn submit-btn" [disabled]="cargando">
-        {{ cargando ? 'Ingresando...' : 'Iniciar Sesión 🔒' }}
+        {{ cargando ? 'Ingresando...' : 'Iniciar Sesión' }}
       </button>
     </form>
     

@@ -21,29 +21,29 @@ ON CONFLICT (id) DO NOTHING;
 -- 3. Insertar Catálogo de Productos Reales de La Brostería
 INSERT INTO productos (id, name, description, price, category, image_url, active) VALUES
 -- Combos Mundialistas
-(1, 'Combo El Hincha ⚽', '1 Pieza de pollo broster + Papas fritas + Chicha helada o gaseosa personal', 15.00, 'COMBOS', 'images/combo_pecho.png', true),
-(2, 'Combo La Jugada Familiar 🏆', '3 Piezas de pollo broster + 2 Salchipapas personales + Gaseosa de 1.5 Litros', 45.00, 'COMBOS', 'images/combo_familiar.png', true),
-(3, 'Combo Gol de Media Cancha 🥅', '2 Piezas de pollo broster + Papas fritas + 1 gaseosa personal', 25.00, 'COMBOS', 'images/combo_pecho.png', true),
-(4, 'Combo Tiempo Extra ⏱️', '4 Piezas de pollo broster + Papas familiares + Ensalada + Gaseosa 1.5L', 55.00, 'COMBOS', 'images/combo_familiar.png', true),
+(1, 'Combo El Hincha', '1 Pieza de pollo broster + Papas fritas + Chicha helada o gaseosa personal', 15.00, 'COMBOS', 'images/combo_pecho.png', true),
+(2, 'Combo La Jugada Familiar', '3 Piezas de pollo broster + 2 Salchipapas personales + Gaseosa de 1.5 Litros', 45.00, 'COMBOS', 'images/combo_familiar.png', true),
+(3, 'Combo Gol de Media Cancha', '2 Piezas de pollo broster + Papas fritas + 1 gaseosa personal', 25.00, 'COMBOS', 'images/combo_pecho.png', true),
+(4, 'Combo Tiempo Extra', '4 Piezas de pollo broster + Papas familiares + Ensalada + Gaseosa 1.5L', 55.00, 'COMBOS', 'images/combo_familiar.png', true),
 -- Clásicos de Siempre
-(5, 'Combo Pecho Crujiente 🤤', '1 Pecho broster crocante + Porción generosa de papas fritas', 13.00, 'CLASICOS', 'images/combo_pecho.png', true),
-(6, 'Combo Pierna Jugosa 🍗', '1 Pierna broster jugosa + Porción de papas fritas', 11.00, 'CLASICOS', 'images/combo_pierna.png', true),
-(7, 'Combo Ala Dorada 🦴', '1 Ala broster crocante + Porción de papas fritas', 9.00, 'CLASICOS', 'images/combo_pierna.png', true),
+(5, 'Combo Pecho Crujiente', '1 Pecho broster crocante + Porción generosa de papas fritas', 13.00, 'CLASICOS', 'images/combo_pecho.png', true),
+(6, 'Combo Pierna Jugosa', '1 Pierna broster jugosa + Porción de papas fritas', 11.00, 'CLASICOS', 'images/combo_pierna.png', true),
+(7, 'Combo Ala Dorada', '1 Ala broster crocante + Porción de papas fritas', 9.00, 'CLASICOS', 'images/combo_pierna.png', true),
 (8, '1/4 de Pollo Broster', 'Cuarto de pollo broster (pecho o pierna) + Papas + Ensalada', 18.00, 'CLASICOS', 'images/combo_pecho.png', true),
 (9, '1/2 Pollo Broster', 'Medio pollo broster (2 piezas) + Papas + Ensalada + Cremas', 32.00, 'CLASICOS', 'images/combo_familiar.png', true),
 (10, 'Pollo Entero Broster', 'Pollo entero broster (4 piezas) + Papas familiares + Ensalada', 55.00, 'CLASICOS', 'images/combo_familiar.png', true),
 -- Salchipapas
-(11, 'Salchipapa Personal 🍟', 'Papas fritas crocantes + Hot dog en rodajas + Cremas', 8.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
-(12, 'Salchipapa Familiar Especial 🍟', 'Doble porción de papas + Hot dog abundante + Cremas', 15.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+(11, 'Salchipapa Personal', 'Papas fritas crocantes + Hot dog en rodajas + Cremas', 8.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+(12, 'Salchipapa Familiar Especial', 'Doble porción de papas + Hot dog abundante + Cremas', 15.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
 (13, 'Papas Fritas Solas', 'Porción clásica de papas fritas crujientes', 5.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
-(14, 'Brosteipapa Extrema 🔥', 'Papas fritas + Tiras de pollo broster crujiente encima + Cremas', 12.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+(14, 'Brosteipapa Extrema', 'Papas fritas + Tiras de pollo broster crujiente encima + Cremas', 12.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
 -- Hamburguesas
 (15, 'Hamburguesa Clásica', 'Carne smash simple + Lechuga + Tomate + Cremas', 10.00, 'BURGERS', 'images/hamburguesa.png', true),
-(16, 'Hamburguesa Broster 🍔', 'Filete de pollo broster + Lechuga + Tomate + Cremas de la casa', 12.00, 'BURGERS', 'images/hamburguesa.png', true),
+(16, 'Hamburguesa Broster', 'Filete de pollo broster + Lechuga + Tomate + Cremas de la casa', 12.00, 'BURGERS', 'images/hamburguesa.png', true),
 (17, 'Hamburguesa Doble Smash', 'Doble carne smash + Doble queso cheddar + Tocino', 15.00, 'BURGERS', 'images/hamburguesa.png', true),
 -- Alitas
 (18, 'Alitas BBQ (6 unidades)', '6 Alitas bañadas en salsa BBQ premium + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
-(19, 'Alitas Picantes (6 unidades) 🌶️', '6 Alitas en salsa búfalo picante + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
+(19, 'Alitas Picantes (6 unidades)', '6 Alitas en salsa búfalo picante + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
 (20, 'Alitas Broster (6 unidades)', '6 Alitas fritas al estilo broster crujiente + Papas', 14.00, 'ALITAS', 'images/alitas.png', true),
 -- Bebidas
 (21, 'Chicha Morada Helada', 'Chicha morada natural hecha en casa de 500ml', 3.00, 'BEBIDAS', 'images/bebidas.png', true),
@@ -61,14 +61,14 @@ SELECT setval(pg_get_serial_sequence('productos', 'id'), coalesce(max(id), 1)) F
 
 -- 4. Insertar Insumos de Inventario Base
 INSERT INTO insumos (id, name, quantity, unit, minimum_stock, updated_at) VALUES
-(1, 'Pollo trozado fresco', 180.0, 'unidades', 50.0, NOW()),
-(2, 'Papas amarillas cortadas', 145.0, 'kg', 35.0, NOW()),
-(3, 'Aceite vegetal de cocina', 75.0, 'litros', 20.0, NOW()),
-(4, 'Crema Mayonesa (Galón)', 6.0, 'galones', 2.0, NOW()),
-(5, 'Ketchup clásico (Galón)', 4.0, 'galones', 1.5, NOW()),
-(6, 'Ají de la casa especial', 8.0, 'litros', 3.0, NOW()),
-(7, 'Cajas de cartón combo', 350.0, 'unidades', 100.0, NOW()),
-(8, 'Envases de gaseosa descartable', 120.0, 'unidades', 40.0, NOW())
+(1, 'Pollo trozado fresco', 0.0, 'unidades', 50.0, NOW()),
+(2, 'Papas amarillas cortadas', 0.0, 'kg', 35.0, NOW()),
+(3, 'Aceite vegetal de cocina', 0.0, 'litros', 20.0, NOW()),
+(4, 'Crema Mayonesa (Galón)', 0.0, 'galones', 2.0, NOW()),
+(5, 'Ketchup clásico (Galón)', 0.0, 'galones', 1.5, NOW()),
+(6, 'Ají de la casa especial', 0.0, 'litros', 3.0, NOW()),
+(7, 'Cajas de cartón combo', 0.0, 'unidades', 100.0, NOW()),
+(8, 'Envases de gaseosa descartable', 0.0, 'unidades', 40.0, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('insumos', 'id'), coalesce(max(id), 1)) FROM insumos;

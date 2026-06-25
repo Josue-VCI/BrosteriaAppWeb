@@ -38,13 +38,13 @@ export class ClientesComponent implements OnInit {
 
   onTemplateChange() {
     if (this.plantillaSeleccionada === 'mundial') {
-      this.asuntoCampana = '¡GOL DE SABOR MUNDIALISTA! Alienta a la Selección con La Brostería 🍗⚽';
+      this.asuntoCampana = '¡GOL DE SABOR MUNDIALISTA! Alienta a la Selección con La Brostería';
       this.cuerpoCampana = '[Cargada plantilla de correo de promoción mundialista]';
     } else if (this.plantillaSeleccionada === 'combo') {
-      this.asuntoCampana = '¡SUPER PROMO 2X1! Duplica el sabor de tus Salchipapas y Pollo 🍟🍗';
+      this.asuntoCampana = '¡SUPER PROMO 2X1! Duplica el sabor de tus Salchipapas y Pollo';
       this.cuerpoCampana = '[Cargada plantilla de correo de promoción 2x1]';
     } else if (this.plantillaSeleccionada === 'finsemana') {
-      this.asuntoCampana = '🔥 FIN DE SEMANA DE LOCURA: ¡Pollo Broster y Gaseosa Gratis! 🍗🎉';
+      this.asuntoCampana = 'FIN DE SEMANA DE LOCURA: ¡Pollo Broster y Gaseosa Gratis!';
       this.cuerpoCampana = '[Cargada plantilla de correo de fin de semana]';
     } else {
       this.asuntoCampana = '';
