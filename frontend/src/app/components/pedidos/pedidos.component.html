@@ -11,25 +11,22 @@
 
   <!-- Selector de Pestañas en Móvil -->
   <div class="mobile-tabs">
-    <button [class.active]="columnaActiva === 'PENDIENTE'" (click)="columnaActiva = 'PENDIENTE'">
-      Pendientes ({{ pedidosPendientes.length }})
+    <button [class.active]="columnaActiva === 'COCINA'" (click)="columnaActiva = 'COCINA'">
+      Cocina ({{ pedidosCocina.length }})
     </button>
-    <button [class.active]="columnaActiva === 'PREPARANDO'" (click)="columnaActiva = 'PREPARANDO'">
-      Cocina ({{ pedidosPreparando.length }})
-    </button>
-    <button [class.active]="columnaActiva === 'ENVIADO'" (click)="columnaActiva = 'ENVIADO'">
-      Despacho ({{ pedidosEnviados.length }})
+    <button [class.active]="columnaActiva === 'DESPACHO'" (click)="columnaActiva = 'DESPACHO'">
+      Despacho ({{ pedidosDespacho.length }})
     </button>
   </div>
 
   <div class="kanban-board">
-    <!-- Columna: Pendientes -->
-    <div class="kanban-column glass-card" [class.mobile-hidden]="columnaActiva !== 'PENDIENTE'">
+    <!-- Columna: Cocina -->
+    <div class="kanban-column glass-card" [class.mobile-hidden]="columnaActiva !== 'COCINA'">
       <div class="column-header yellow-line">
-        <h3>Pendientes ({{ pedidosPendientes.length }})</h3>
+        <h3>Cocina ({{ pedidosCocina.length }})</h3>
       </div>
       <div class="cards-list">
-        <div class="pedido-card glass-card" *ngFor="let pedido of pedidosPendientes">
+        <div class="pedido-card glass-card" *ngFor="let pedido of pedidosCocina">
           <div class="card-top">
             <span class="pedido-id">#{{ pedido.id }}</span>
             <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
@@ -52,20 +49,20 @@
             </div>
           </div>
           <div class="card-actions">
-            <button class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'PREPARANDO')">Aceptar Cocina ➔</button>
+            <button class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')">Listo para Despachar ➔</button>
           </div>
         </div>
-        <div class="no-pedidos" *ngIf="pedidosPendientes.length === 0">Sin pedidos pendientes</div>
+        <div class="no-pedidos" *ngIf="pedidosCocina.length === 0">Sin pedidos en cocina</div>
       </div>
     </div>
 
-    <!-- Columna: Preparando -->
-    <div class="kanban-column glass-card" [class.mobile-hidden]="columnaActiva !== 'PREPARANDO'">
+    <!-- Columna: Despacho -->
+    <div class="kanban-column glass-card" [class.mobile-hidden]="columnaActiva !== 'DESPACHO'">
       <div class="column-header orange-line">
-        <h3>En Preparación ({{ pedidosPreparando.length }})</h3>
+        <h3>Despacho ({{ pedidosDespacho.length }})</h3>
       </div>
       <div class="cards-list">
-        <div class="pedido-card glass-card" *ngFor="let pedido of pedidosPreparando">
+        <div class="pedido-card glass-card" *ngFor="let pedido of pedidosDespacho">
           <div class="card-top">
             <span class="pedido-id">#{{ pedido.id }}</span>
             <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
@@ -81,47 +78,17 @@
                 <span class="creams-subtext" *ngIf="det.creams">Cremas: {{ det.creams }}</span>
               </div>
             </div>
-            
+
             <div class="total-bar">
               <span>Total:</span>
               <strong class="number-font">S/. {{ pedido.total | number:'1.2-2' }}</strong>
             </div>
           </div>
           <div class="card-actions">
-            <button class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')">Despachar ➔</button>
+            <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')">Cobrar y Entregar ✓</button>
           </div>
         </div>
-        <div class="no-pedidos" *ngIf="pedidosPreparando.length === 0">Sin pedidos en preparación</div>
-      </div>
-    </div>
-
-    <!-- Columna: Despachados/Enviados -->
-    <div class="kanban-column glass-card" [class.mobile-hidden]="columnaActiva !== 'ENVIADO'">
-      <div class="column-header blue-line">
-        <h3>Despachados / Enviados ({{ pedidosEnviados.length }})</h3>
-      </div>
-      <div class="cards-list">
-        <div class="pedido-card glass-card" *ngFor="let pedido of pedidosEnviados">
-          <div class="card-top">
-            <span class="pedido-id">#{{ pedido.id }}</span>
-            <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
-          </div>
-          <div class="card-body">
-            <strong>{{ pedido.customerName }}</strong>
-            <p class="phone">{{ pedido.customerPhone }}</p>
-            <p class="address" *ngIf="pedido.type === 'DELIVERY'">{{ pedido.customerAddress }}</p>
-            
-            <div class="items-list">
-              <div class="item" *ngFor="let det of pedido.detalles">
-                <span class="item-name">{{ det.quantity }}x {{ det.productoName }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="card-actions">
-            <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')">Entregado ✓</button>
-          </div>
-        </div>
-        <div class="no-pedidos" *ngIf="pedidosEnviados.length === 0">Sin pedidos despachados</div>
+        <div class="no-pedidos" *ngIf="pedidosDespacho.length === 0">Sin pedidos para despachar</div>
       </div>
     </div>
   </div>

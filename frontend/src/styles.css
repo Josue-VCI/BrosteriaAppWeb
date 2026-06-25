@@ -177,3 +177,91 @@ select, option {
   margin-top: 5px;
 }
 
+/* Modales Compartidos (Clientes, Inventario y Parser de WhatsApp) */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  width: 90% !important;
+  max-width: 500px !important;
+  box-sizing: border-box;
+  padding: 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+.modal-card h3 {
+  margin: 0;
+}
+
+.destination-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: -10px 0 0 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.modal-input, .modal-textarea {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 15px;
+  color: var(--text-light);
+  font-family: var(--font-body);
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-input:focus, .modal-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.modal-textarea {
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-light) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+}
+
+

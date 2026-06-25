@@ -12,11 +12,9 @@ import { API_BASE_URL } from '../../config';
   styleUrls: ['./pedidos.component.css']
 })
 export class PedidosComponent implements OnInit, OnDestroy {
-  pedidosPendientes: any[] = [];
-  pedidosPreparando: any[] = [];
-  pedidosEnviados: any[] = [];
-  pedidosEntregados: any[] = [];
-  columnaActiva = 'PENDIENTE'; // Control para móviles: PENDIENTE, PREPARANDO, ENVIADO
+  pedidosCocina: any[] = [];
+  pedidosDespacho: any[] = [];
+  columnaActiva = 'COCINA'; // Control para móviles: COCINA, DESPACHO
 
   // Polling y Alerta Sonora
   intervalId: any;
@@ -34,7 +32,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     deliveryCost: 5.0,
     type: 'DELIVERY',
     paymentMethod: 'YAPE',
-    status: 'PENDIENTE',
+    status: 'PREPARANDO',
     detalles: [] as any[],
     total: 5.0
   };
@@ -67,19 +65,17 @@ export class PedidosComponent implements OnInit, OnDestroy {
   cargarTodosLosPedidos() {
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/activos`).subscribe({
       next: (data) => {
-        const nuevosPendientes = data.filter(p => p.status === 'PENDIENTE');
+        const nuevosCocina = data.filter(p => p.status === 'PENDIENTE' || p.status === 'PREPARANDO');
 
-        // Si hay nuevos pedidos pendientes comparado con el estado anterior, sonar timbre
-        if (this.cantidadPendientesAnterior > 0 && nuevosPendientes.length > this.cantidadPendientesAnterior) {
+        // Si hay nuevos pedidos en cocina comparado con el estado anterior, sonar timbre
+        if (this.cantidadPendientesAnterior > 0 && nuevosCocina.length > this.cantidadPendientesAnterior) {
           this.reproducirSonidoAlerta();
         }
         
-        this.cantidadPendientesAnterior = nuevosPendientes.length;
+        this.cantidadPendientesAnterior = nuevosCocina.length;
 
-        this.pedidosPendientes = nuevosPendientes;
-        this.pedidosPreparando = data.filter(p => p.status === 'PREPARANDO');
-        this.pedidosEnviados = data.filter(p => p.status === 'ENVIADO');
-        this.pedidosEntregados = data.filter(p => p.status === 'ENTREGADO');
+        this.pedidosCocina = nuevosCocina;
+        this.pedidosDespacho = data.filter(p => p.status === 'ENVIADO');
       },
       error: (err) => console.error('Error al cargar pedidos del kanban', err)
     });
@@ -138,7 +134,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       deliveryCost: 5.0,
       type: 'DELIVERY',
       paymentMethod: 'YAPE',
-      status: 'PENDIENTE',
+      status: 'PREPARANDO',
       detalles: [] as any[],
       total: 5.0
     };
@@ -238,7 +234,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       deliveryCost: deliveryCost,
       type: type,
       paymentMethod: paymentMethod,
-      status: 'PENDIENTE',
+      status: 'PREPARANDO',
       detalles: detalles,
       total: 0.0
     };

@@ -232,6 +232,39 @@
   }
 }
 
+@media (max-width: 768px) {
+  .pdf-download-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+  .pdf-download-actions select, .pdf-btn {
+    width: 100%;
+  }
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    padding: 15px !important;
+  }
+  .filter-group {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .filter-group select {
+    flex-grow: 1;
+    max-width: 60%;
+  }
+  .maintenance-wrapper div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .maintenance-wrapper button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) and (orientation: portrait) {
   .charts-grid {
     display: none !important;

@@ -55,7 +55,9 @@ public class PedidoServicio {
     }
 
     public List<PedidoDTO> listarActivos() {
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findActiveWithCliente();
+        java.time.LocalDateTime todayStart = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Lima"))
+                .toLocalDate().atStartOfDay();
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findActiveWithCliente(todayStart);
         return mappedPedidos(pedidos);
     }
 
