@@ -224,9 +224,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
     const typeMatch = text.match(/- Tipo de entrega.*:\s*(.*)/i);
     const districtMatch = text.match(/- Distrito:\s*(.*)/i);
     const addressMatch = text.match(/- Direccion de entrega.*:\s*(.*)/i);
-    const creamsMatch = text.match(/- Cremas.*:\s*(.*)/i) || text.match(/\*Cremas:\*\s*(.*)/i);
+    const creamsMatch = text.match(/Cremas:\s*(.*)/i) || text.match(/- Cremas.*:\s*(.*)/i) || text.match(/\*Cremas:\*\s*(.*)/i);
     const paymentMatch = text.match(/- Metodo de pago.*:\s*(.*)/i);
-    const emailMatch = text.match(/- Correo:\s*(.*)/i) || text.match(/- Email:\s*(.*)/i);
+    const emailMatch = text.match(/- Correo:\s*(.*)/i) || text.match(/- Email:\s*(.*)/i) || text.match(/Correo:\s*(.*)/i);
 
     const parsedName = nameMatch ? nameMatch[1].trim() : '';
     const parsedPhone = phoneMatch ? phoneMatch[1].trim() : '';
