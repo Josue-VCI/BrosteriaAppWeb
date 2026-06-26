@@ -30,9 +30,14 @@ export class LoginComponent {
       next: (res) => {
         localStorage.setItem('brosteria_token', res.token);
         localStorage.setItem('brosteria_username', res.userName);
-        localStorage.setItem('brosteria_role', res.role || 'CAJERO');
+        const role = res.role || 'CAJERO';
+        localStorage.setItem('brosteria_role', role);
         this.cargando = false;
-        this.router.navigate(['/dashboard']);
+        if (role === 'ADMIN') {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/pedidos']);
+        }
       },
       error: (err) => {
         this.cargando = false;

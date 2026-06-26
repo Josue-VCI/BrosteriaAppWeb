@@ -82,12 +82,22 @@ public class PedidoServicio {
     @Transactional
     public PedidoDTO crear(PedidoDTO pedidoDTO) {
         PedidoEntidad pedido = new PedidoEntidad();
-        pedido.setCustomerName(pedidoDTO.getCustomerName());
-        pedido.setCustomerPhone(pedidoDTO.getCustomerPhone());
-        pedido.setCustomerAddress(pedidoDTO.getCustomerAddress());
-        pedido.setDeliveryCost(pedidoDTO.getDeliveryCost());
-        pedido.setType(pedidoDTO.getType());
-        pedido.setPaymentMethod(pedidoDTO.getPaymentMethod());
+        String name = (pedidoDTO.getCustomerName() == null || pedidoDTO.getCustomerName().trim().isEmpty())
+                ? "Anónimo"
+                : pedidoDTO.getCustomerName().trim();
+        String phone = (pedidoDTO.getCustomerPhone() == null || pedidoDTO.getCustomerPhone().trim().isEmpty())
+                ? "000000000"
+                : pedidoDTO.getCustomerPhone().trim();
+        String address = (pedidoDTO.getCustomerAddress() == null || pedidoDTO.getCustomerAddress().trim().isEmpty())
+                ? "Sin Dirección"
+                : pedidoDTO.getCustomerAddress().trim();
+
+        pedido.setCustomerName(name);
+        pedido.setCustomerPhone(phone);
+        pedido.setCustomerAddress(address);
+        pedido.setDeliveryCost(pedidoDTO.getDeliveryCost() != null ? pedidoDTO.getDeliveryCost() : 0.0);
+        pedido.setType(pedidoDTO.getType() != null ? pedidoDTO.getType() : "DELIVERY");
+        pedido.setPaymentMethod(pedidoDTO.getPaymentMethod() != null ? pedidoDTO.getPaymentMethod() : "EFECTIVO");
         pedido.setStatus("PENDIENTE");
         pedido.setOrderDate(LocalDateTime.now());
 
@@ -95,8 +105,7 @@ public class PedidoServicio {
             ClienteEntidad cliente = clienteRepositorio.findById(pedidoDTO.getClienteId())
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
             pedido.setClienteEntidad(cliente);
-        } else if (pedidoDTO.getCustomerPhone() != null && !pedidoDTO.getCustomerPhone().trim().isEmpty()) {
-            String phone = pedidoDTO.getCustomerPhone().trim();
+        } else {
             java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findByPhone(phone);
             if (optCliente.isPresent()) {
                 ClienteEntidad cliente = optCliente.get();
@@ -108,10 +117,11 @@ public class PedidoServicio {
                 pedido.setClienteEntidad(cliente);
             } else {
                 ClienteEntidad nuevoCliente = new ClienteEntidad();
-                nuevoCliente.setName(pedidoDTO.getCustomerName());
+                nuevoCliente.setName(name);
                 nuevoCliente.setPhone(phone);
-                nuevoCliente.setAddress(pedidoDTO.getCustomerAddress());
-                nuevoCliente.setEmail(pedidoDTO.getCustomerEmail() != null ? pedidoDTO.getCustomerEmail().trim() : null);
+                nuevoCliente.setAddress(address);
+                nuevoCliente.setEmail(pedidoDTO.getCustomerEmail() != null && !pedidoDTO.getCustomerEmail().trim().isEmpty() 
+                        ? pedidoDTO.getCustomerEmail().trim() : null);
                 nuevoCliente.setTotalOrders(0);
                 nuevoCliente.setTotalSpent(0.0);
                 nuevoCliente.setPoints(0);

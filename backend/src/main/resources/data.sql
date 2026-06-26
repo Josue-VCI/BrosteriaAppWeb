@@ -50,10 +50,14 @@ INSERT INTO productos (id, name, description, price, category, image_url, active
 (22, 'Gaseosa Personal', 'Gaseosa Inka Cola o Coca Cola helada en botella', 3.00, 'BEBIDAS', 'images/bebidas.png', true),
 (23, 'Gaseosa 1.5 Litros', 'Gaseosa Inka Cola o Coca Cola de litro y medio helada', 8.00, 'BEBIDAS', 'images/bebidas.png', true),
 (24, 'Limonada Frozen', 'Limonada helada tipo frappe de 500ml', 5.00, 'BEBIDAS', 'images/bebidas.png', true),
--- Extras
-(25, 'Porción Extra de Papas', 'Porción adicional de papas fritas', 3.00, 'EXTRAS', 'images/salchipapas.png', true),
-(26, 'Ensalada Extra', 'Ensalada fresca de lechuga, tomate y pepino', 2.00, 'EXTRAS', 'images/salchipapas.png', true),
-(27, 'Porción de Arroz Blanco', 'Porción de arroz blanco bien graneado', 3.00, 'EXTRAS', 'images/salchipapas.png', true)
+-- Extras (moved to Clásicos/Salchipapas)
+(25, 'Porción Extra de Papas', 'Porción adicional de papas fritas', 3.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+(26, 'Ensalada Extra', 'Ensalada fresca de lechuga, tomate y pepino', 2.00, 'CLASICOS', 'images/salchipapas.png', true),
+(27, 'Porción de Arroz Blanco', 'Porción de arroz blanco bien graneado', 3.00, 'CLASICOS', 'images/salchipapas.png', true),
+-- Promociones Exclusivas
+(28, 'Promo Dúo Crujiente', '1/4 de Pollo Broster Pecho + 1 Salchipapa Personal + 2 Vasos de Chicha Morada Helada', 22.00, 'PROMOS', 'images/combo_pecho.png', true),
+(29, 'Mega Balde Brosterero', '10 Piezas crujientes de Broster + Papas fritas gigantes + Ensalada familiar + Gaseosa 1.5L + Cremas', 69.00, 'PROMOS', 'images/combo_familiar.png', true),
+(30, 'Promo Burger Lover', '2 Hamburguesas Broster + Porción de Papas Fritas Mediana + 2 Gaseosas Personales', 25.00, 'PROMOS', 'images/hamburguesa.png', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Ajustar secuencias de productos

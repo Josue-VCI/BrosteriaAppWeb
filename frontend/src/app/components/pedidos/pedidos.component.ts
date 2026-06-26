@@ -327,9 +327,43 @@ export class PedidosComponent implements OnInit, OnDestroy {
       .trim();
   }
 
+  agregarFilaDetalle() {
+    this.formPedido.detalles.push({
+      productoId: null,
+      productoName: '',
+      productoPrice: 0.0,
+      quantity: 1,
+      subtotal: 0.0,
+      creams: '',
+      noCoincide: true
+    });
+    this.recalcularTotal();
+  }
+
+  eliminarFilaDetalle(index: number) {
+    this.formPedido.detalles.splice(index, 1);
+    this.recalcularTotal();
+  }
+
+  onQuantityChange(detalle: any) {
+    if (detalle.quantity < 1) {
+      detalle.quantity = 1;
+    }
+    detalle.subtotal = detalle.quantity * (detalle.productoPrice || 0);
+    this.recalcularTotal();
+  }
+
   onProductoChange(detalle: any, event: any) {
     const val = event.target.value;
-    if (!val) return;
+    if (!val) {
+      detalle.productoId = null;
+      detalle.productoName = '';
+      detalle.productoPrice = 0.0;
+      detalle.subtotal = 0.0;
+      detalle.noCoincide = true;
+      this.recalcularTotal();
+      return;
+    }
     const prodId = parseInt(val, 10);
     if (isNaN(prodId)) return;
 
@@ -346,19 +380,19 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   recalcularTotal() {
     this.formPedido.deliveryCost = this.formPedido.type === 'PICKUP' ? 0.00 : 5.00;
-    const subtotal = this.formPedido.detalles.reduce((sum: number, d: any) => sum + d.subtotal, 0);
+    const subtotal = this.formPedido.detalles.reduce((sum: number, d: any) => sum + (d.subtotal || 0), 0);
     this.formPedido.total = subtotal + this.formPedido.deliveryCost;
   }
 
   guardarNuevoPedido() {
-    if (!this.formPedido.customerName || this.formPedido.detalles.length === 0) {
-      alert('Datos de pedido incompletos.');
+    if (this.formPedido.detalles.length === 0) {
+      alert('Debe agregar al menos un producto al pedido.');
       return;
     }
 
     const tieneNoCoincidentes = this.formPedido.detalles.some((d: any) => !d.productoId);
     if (tieneNoCoincidentes) {
-      alert('Por favor, selecciona un producto válido para todos los elementos no coincidentes.');
+      alert('Por favor, selecciona un producto válido para todos los elementos.');
       return;
     }
 
@@ -404,5 +438,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   trackByPedido(index: number, item: any): number {
     return item.id;
+  }
+
+  tieneFilasSinProducto(): boolean {
+    return this.formPedido.detalles && this.formPedido.detalles.some((d: any) => !d.productoId);
   }
 }

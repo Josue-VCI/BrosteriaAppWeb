@@ -12,7 +12,7 @@
     </div>
     
     <nav class="sidebar-menu">
-      <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+      <a *ngIf="esAdmin" routerLink="/dashboard" routerLinkActive="active" class="menu-item">
         <span class="menu-icon"><i class="fa-solid fa-chart-line"></i></span> Dashboard
       </a>
       <a routerLink="/pedidos" routerLinkActive="active" class="menu-item">
