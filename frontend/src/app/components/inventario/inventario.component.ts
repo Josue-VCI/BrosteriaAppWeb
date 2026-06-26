@@ -13,6 +13,7 @@ import { API_BASE_URL } from '../../config';
 })
 export class InventarioComponent implements OnInit {
   insumos: any[] = [];
+  esAdmin = false;
   
   // Ordenación
   columnaOrden = '';
@@ -42,6 +43,7 @@ export class InventarioComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
     this.cargarInsumos();
   }
 

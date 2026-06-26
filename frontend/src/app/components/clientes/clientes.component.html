@@ -82,12 +82,12 @@
           <td class="number-font">{{ cliente.totalOrders }}</td>
           <td class="number-font text-success">S/. {{ cliente.totalSpent | number:'1.2-2' }}</td>
           <td>
-            <span class="points-badge number-font"><i class="fa-solid fa-star"></i> {{ cliente.points }} pts</span>
+            <span class="points-badge number-font">{{ cliente.points }} pts</span>
           </td>
           <td>
             <div class="action-buttons">
               <button class="brand-btn edit-btn" (click)="abrirEditarCliente(cliente)"><i class="fa-solid fa-pen"></i></button>
-              <button class="brand-btn delete-btn" (click)="eliminarCliente(cliente.id)"><i class="fa-solid fa-trash"></i></button>
+              <button *ngIf="esAdmin" class="brand-btn delete-btn" (click)="eliminarCliente(cliente.id)"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -110,7 +110,7 @@
     <div class="mobile-cliente-card glass-card" *ngFor="let cliente of clientesFiltrados">
       <div class="card-row row-top">
         <span class="cliente-name"><strong>{{ cliente.name }}</strong></span>
-        <span class="points-badge"><i class="fa-solid fa-star"></i> {{ cliente.points || 0 }} pts</span>
+        <span class="points-badge">{{ cliente.points || 0 }} pts</span>
       </div>
       <div class="card-details-row">
         <p class="phone"><i class="fa-solid fa-phone"></i> {{ cliente.phone }}</p>
@@ -121,7 +121,7 @@
         <span>Gasto: <strong class="number-font text-success">S/. {{ (cliente.totalSpent || 0) | number:'1.2-2' }}</strong></span>
         <div class="action-buttons">
           <button class="brand-btn edit-btn-sm" (click)="abrirEditarCliente(cliente)"><i class="fa-solid fa-pen"></i></button>
-          <button class="brand-btn delete-btn-sm" (click)="eliminarCliente(cliente.id)"><i class="fa-solid fa-trash"></i></button>
+          <button *ngIf="esAdmin" class="brand-btn delete-btn-sm" (click)="eliminarCliente(cliente.id)"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
     </div>

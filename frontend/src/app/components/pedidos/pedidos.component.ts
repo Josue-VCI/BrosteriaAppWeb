@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-pedidos',
@@ -38,7 +39,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     total: 5.0
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toastService: ToastService) {}
 
   ngOnInit() {
     this.cargarTodosLosPedidos();
@@ -143,7 +144,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error al actualizar estado del pedido', err);
-        alert('No se pudo actualizar el estado del pedido en el servidor. Revirtiendo cambios...');
+        this.toastService.error('No se pudo actualizar el estado del pedido en el servidor. Revirtiendo cambios...');
         // Revertir UI al estado anterior
         this.pedidosCocina = copiaCocina;
         this.pedidosDespacho = copiaDespacho;
@@ -380,19 +381,22 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   recalcularTotal() {
     this.formPedido.deliveryCost = this.formPedido.type === 'PICKUP' ? 0.00 : 5.00;
+    if (this.formPedido.type === 'PICKUP') {
+      this.formPedido.distrito = 'Surquillo';
+    }
     const subtotal = this.formPedido.detalles.reduce((sum: number, d: any) => sum + (d.subtotal || 0), 0);
     this.formPedido.total = subtotal + this.formPedido.deliveryCost;
   }
 
   guardarNuevoPedido() {
     if (this.formPedido.detalles.length === 0) {
-      alert('Debe agregar al menos un producto al pedido.');
+      this.toastService.error('Debe agregar al menos un producto al pedido.');
       return;
     }
 
     const tieneNoCoincidentes = this.formPedido.detalles.some((d: any) => !d.productoId);
     if (tieneNoCoincidentes) {
-      alert('Por favor, selecciona un producto válido para todos los elementos.');
+      this.toastService.warning('Por favor, selecciona un producto válido para todos los elementos.');
       return;
     }
 
@@ -427,11 +431,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
       next: () => {
         this.cargarTodosLosPedidos();
         this.cerrarModalNuevoPedido();
-        alert('Pedido registrado con éxito.');
+        this.toastService.success('Pedido registrado con éxito.');
       },
       error: (err) => {
         console.error('Error al guardar pedido', err);
-        alert('Ocurrió un error al registrar el pedido.');
+        this.toastService.error('Ocurrió un error al registrar el pedido.');
       }
     });
   }
@@ -442,5 +446,34 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   tieneFilasSinProducto(): boolean {
     return this.formPedido.detalles && this.formPedido.detalles.some((d: any) => !d.productoId);
+  }
+
+  // Ver pedidos entregados de hoy
+  mostrarModalEntregados = false;
+  pedidosEntregadosHoy: any[] = [];
+  cargandoEntregados = false;
+
+  verPedidosEntregadosHoy() {
+    this.cargandoEntregados = true;
+    this.mostrarModalEntregados = true;
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/estado/ENTREGADO`).subscribe({
+      next: (data) => {
+        const todayStr = new Date().toDateString();
+        this.pedidosEntregadosHoy = data.filter(p => {
+          if (!p.orderDate) return false;
+          return new Date(p.orderDate).toDateString() === todayStr;
+        });
+        this.cargandoEntregados = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar entregados de hoy', err);
+        this.cargandoEntregados = false;
+        this.toastService.error('No se pudieron cargar los pedidos entregados.');
+      }
+    });
+  }
+
+  cerrarModalEntregados() {
+    this.mostrarModalEntregados = false;
   }
 }

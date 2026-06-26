@@ -45,4 +45,18 @@
   <main class="main-content" [class.no-sidebar]="!mostrarSidebar">
     <router-outlet></router-outlet>
   </main>
+
+  <!-- Toasts Flotantes Personalizados -->
+  <div class="toast-container" *ngIf="toasts.length > 0">
+    <div class="toast-item" *ngFor="let t of toasts" [class]="t.type">
+      <span class="toast-icon">
+        <span *ngIf="t.type === 'success'">✔️</span>
+        <span *ngIf="t.type === 'error'">❌</span>
+        <span *ngIf="t.type === 'warning'">⚠️</span>
+        <span *ngIf="t.type === 'info'">ℹ️</span>
+      </span>
+      <span class="toast-text">{{ t.message }}</span>
+      <button class="toast-close" (click)="removeToast(t.id)">×</button>
+    </div>
+  </div>
 </div>

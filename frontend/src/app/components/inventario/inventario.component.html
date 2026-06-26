@@ -4,7 +4,7 @@
     <p>Visualiza niveles de ingredientes críticos y realiza operaciones CRUD</p>
   </div>
 
-  <div class="actions-bar">
+  <div class="actions-bar" *ngIf="esAdmin">
     <button class="brand-btn" (click)="abrirNuevoInsumo()">Agregar Nuevo Insumo</button>
   </div>
 
@@ -49,8 +49,8 @@
           <td>
             <div class="action-buttons">
               <button class="brand-btn refill-btn" (click)="abrirIngreso(insumo)">Abastecer</button>
-              <button class="brand-btn edit-btn" (click)="abrirEditarInsumo(insumo)"><i class="fa-solid fa-pen"></i></button>
-              <button class="brand-btn delete-btn" (click)="eliminarInsumo(insumo.id)"><i class="fa-solid fa-trash"></i></button>
+              <button *ngIf="esAdmin" class="brand-btn edit-btn" (click)="abrirEditarInsumo(insumo)"><i class="fa-solid fa-pen"></i></button>
+              <button *ngIf="esAdmin" class="brand-btn delete-btn" (click)="eliminarInsumo(insumo.id)"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -75,8 +75,8 @@
         </span>
         <div class="action-buttons">
           <button class="brand-btn refill-btn-sm" (click)="abrirIngreso(insumo)">Abastecer</button>
-          <button class="brand-btn edit-btn-sm" (click)="abrirEditarInsumo(insumo)"><i class="fa-solid fa-pen"></i></button>
-          <button class="brand-btn delete-btn-sm" (click)="eliminarInsumo(insumo.id)"><i class="fa-solid fa-trash"></i></button>
+          <button *ngIf="esAdmin" class="brand-btn edit-btn-sm" (click)="abrirEditarInsumo(insumo)"><i class="fa-solid fa-pen"></i></button>
+          <button *ngIf="esAdmin" class="brand-btn delete-btn-sm" (click)="eliminarInsumo(insumo.id)"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WORLD_CUP_TEMPLATE, COMBO_PROMO_TEMPLATE, WEEKEND_PROMO_TEMPLATE } from './templates';
 import { API_BASE_URL } from '../../config';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-clientes',
@@ -16,6 +17,7 @@ export class ClientesComponent implements OnInit {
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
   busqueda = '';
+  esAdmin = false;
   
   // Filtros Avanzados
   filtroDistrito = '';
@@ -63,9 +65,10 @@ export class ClientesComponent implements OnInit {
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/clientes`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toastService: ToastService) {}
 
   ngOnInit() {
+    this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
     this.cargarClientes();
   }
 
@@ -291,12 +294,12 @@ export class ClientesComponent implements OnInit {
       next: () => {
         this.enviandoCorreo = false;
         this.cerrarModalCorreo();
-        alert('Campaña de Gmail enviada con éxito a ' + destinatarios.length + ' clientes.');
+        this.toastService.success('Campaña de Gmail enviada con éxito a ' + destinatarios.length + ' clientes.');
       },
       error: (err) => {
         this.enviandoCorreo = false;
         console.error('Error al enviar correo masivo', err);
-        alert('Ocurrió un error al despachar los correos por SMTP.');
+        this.toastService.error('Ocurrió un error al despachar los correos por SMTP.');
       }
     });
   }

@@ -5,6 +5,7 @@ import { Chart, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
+import { ToastService } from '../../services/toast.service';
 
 Chart.register(...registerables);
 
@@ -30,7 +31,7 @@ export class ReportesComponent implements OnInit {
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/reportes`;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private toastService: ToastService) {}
 
   ngOnInit(): void {
     if (localStorage.getItem('brosteria_role') !== 'ADMIN') {
@@ -141,12 +142,19 @@ export class ReportesComponent implements OnInit {
     }
 
     const labels = Object.keys(metodosPago);
-    const data = Object.values(metodosPago);
+    const data = Object.values(metodosPago) as number[];
+    const total = data.reduce((sum, val) => sum + val, 0);
+    
+    const labelsWithPercent = labels.map((label, idx) => {
+      const val = data[idx];
+      const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+      return `${label} (${pct}%)`;
+    });
 
     this.pagosChartRef = new Chart('pagosChart', {
-      type: 'doughnut',
+      type: 'pie',
       data: {
-        labels: labels,
+        labels: labelsWithPercent,
         datasets: [{
           data: data,
           backgroundColor: ['#00C853', '#00B0FF', '#FFB703', '#FF2A6D'],
@@ -198,14 +206,22 @@ export class ReportesComponent implements OnInit {
     if (this.horasChartRef) {
       this.horasChartRef.destroy();
     }
-    const labels = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+    
+    // Solo mostrar las horas operativas activas de 11:00 a 23:00 (11 AM a 11 PM)
+    const labels = [];
+    const data = [];
+    for (let i = 11; i <= 23; i++) {
+      labels.push(`${i.toString().padStart(2, '0')}:00`);
+      data.push(pedidosPorHora[i] || 0);
+    }
+
     this.horasChartRef = new Chart('horasChart', {
       type: 'bar',
       data: {
         labels: labels,
         datasets: [{
           label: 'Pedidos por Hora',
-          data: pedidosPorHora,
+          data: data,
           backgroundColor: '#FFB703',
           borderRadius: 4
         }]
@@ -309,7 +325,7 @@ export class ReportesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al descargar el reporte PDF', err);
-        alert('No se pudo descargar el reporte. Verifica tu conexión al servidor.');
+        this.toastService.error('No se pudo descargar el reporte. Verifica tu conexión al servidor.');
       }
     });
   }
@@ -321,12 +337,12 @@ export class ReportesComponent implements OnInit {
 
     this.http.post(`${this.apiBaseUrl}/limpiar-historico`, {}).subscribe({
       next: (res: any) => {
-        alert(res.mensaje || 'Historial de base de datos purgado con éxito.');
+        this.toastService.success(res.mensaje || 'Historial de base de datos purgado con éxito.');
         this.aplicarFiltros();
       },
       error: (err) => {
         console.error('Error al purgar base de datos', err);
-        alert('Ocurrió un error al ejecutar el mantenimiento.');
+        this.toastService.error('Ocurrió un error al ejecutar el mantenimiento.');
       }
     });
   }

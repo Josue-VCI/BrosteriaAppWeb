@@ -180,3 +180,15 @@
     padding: 70px 15px 30px 15px !important; /* Espacio para el botón de hamburguesa arriba */
   }
 }
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .sidebar {
+    width: 230px;
+    margin: 3vh 10px;
+    padding: 20px 10px;
+  }
+  .main-content {
+    margin-left: 260px;
+    padding: 20px;
+  }
+}

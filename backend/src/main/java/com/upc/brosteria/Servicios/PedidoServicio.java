@@ -189,22 +189,72 @@ public class PedidoServicio {
 
     private void descontarInventarioAsociado(Long productoId, int cantidad) {
         try {
-            // Descuentos estimados basados en IDs de productos insertados en data.sql
+            double cantDouble = (double) cantidad;
             if (productoId == 1) { // Combo El Hincha
-                insumoServicio.descontarStock(1L, (double) cantidad); // 1 pollo
-                insumoServicio.descontarStock(2L, 0.2 * cantidad); // 200g papas
-                insumoServicio.descontarStock(8L, (double) cantidad); // 1 bebida
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.2 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
             } else if (productoId == 2) { // Combo La Jugada Familiar
-                insumoServicio.descontarStock(1L, 3.0 * cantidad); // 3 pollos
-                insumoServicio.descontarStock(2L, 0.4 * cantidad); // 400g papas
-                insumoServicio.descontarStock(8L, (double) cantidad); // 1 gaseosa familiar
-            } else if (productoId >= 5 && productoId <= 7) { // Clásicos por piezas individuales
-                insumoServicio.descontarStock(1L, (double) cantidad); // 1 pollo
-                insumoServicio.descontarStock(2L, 0.2 * cantidad); // 200g papas
+                insumoServicio.descontarStock(1L, 6.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.6 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId == 3) { // Combo Gol de Media Cancha
+                insumoServicio.descontarStock(1L, 3.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.25 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId == 4) { // Combo Tiempo Extra
+                insumoServicio.descontarStock(1L, 8.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.8 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId >= 5 && productoId <= 7) { // Clásicos por piezas
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.2 * cantDouble);
+            } else if (productoId == 8) { // 1/4 Pollo
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.25 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId == 9) { // 1/2 Pollo
+                insumoServicio.descontarStock(1L, 2.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.5 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId == 10) { // Pollo Entero
+                insumoServicio.descontarStock(1L, 4.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.8 * cantDouble);
             } else if (productoId == 11) { // Salchipapa Personal
-                insumoServicio.descontarStock(2L, 0.25 * cantidad); // 250g papas
+                insumoServicio.descontarStock(2L, 0.25 * cantDouble);
             } else if (productoId == 12) { // Salchipapa Familiar
-                insumoServicio.descontarStock(2L, 0.6 * cantidad); // 600g papas
+                insumoServicio.descontarStock(2L, 0.5 * cantDouble);
+            } else if (productoId == 13) { // Papas Solas
+                insumoServicio.descontarStock(2L, 0.3 * cantDouble);
+            } else if (productoId == 14) { // Brosteipapa
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.3 * cantDouble);
+            } else if (productoId == 15) { // Burger Clásica
+                insumoServicio.descontarStock(2L, 0.1 * cantDouble);
+            } else if (productoId == 16) { // Burger Broster
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.1 * cantDouble);
+            } else if (productoId == 17) { // Burger Doble
+                insumoServicio.descontarStock(2L, 0.1 * cantDouble);
+            } else if (productoId >= 18 && productoId <= 20) { // Alitas
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.2 * cantDouble);
+            } else if (productoId >= 21 && productoId <= 24) { // Bebidas
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId == 25) { // Extras Papas
+                insumoServicio.descontarStock(2L, 0.3 * cantDouble);
+            } else if (productoId == 28) { // Promo Dúo
+                insumoServicio.descontarStock(1L, 1.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.5 * cantDouble);
+                insumoServicio.descontarStock(8L, 2.0 * cantDouble);
+            } else if (productoId == 29) { // Mega Balde
+                insumoServicio.descontarStock(1L, 10.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.8 * cantDouble);
+                insumoServicio.descontarStock(8L, 1.0 * cantDouble);
+            } else if (productoId == 30) { // Promo Burger Lover
+                insumoServicio.descontarStock(1L, 2.0 * cantDouble);
+                insumoServicio.descontarStock(2L, 0.5 * cantDouble);
+                insumoServicio.descontarStock(8L, 2.0 * cantDouble);
             }
         } catch (Exception e) {
             System.err.println("No se pudo descontar stock de inventario: " + e.getMessage());

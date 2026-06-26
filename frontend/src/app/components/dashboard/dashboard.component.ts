@@ -48,8 +48,14 @@ export class DashboardComponent implements OnInit {
   cargarPedidosRecientes() {
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/recientes?limite=5`).subscribe({
       next: (data) => {
-        // Guardar la lista completa ordenada por fecha
+        // Guardar la lista completa ordenada por fecha y limpiar nombres
         this.pedidosRecientes = data
+          .map(p => {
+            if (p.customerName) {
+              p.customerName = p.customerName.replace(/\s*\(\d+\)\s*$/, '');
+            }
+            return p;
+          })
           .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
           .slice(0, 5);
 

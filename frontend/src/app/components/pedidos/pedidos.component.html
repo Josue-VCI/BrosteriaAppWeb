@@ -4,7 +4,8 @@
       <h2>Control de Pedidos y Cocina (Kanban)</h2>
       <p>Actualiza y monitorea los pedidos en tiempo real</p>
     </div>
-    <div>
+    <div style="display: flex; gap: 10px;">
+      <button class="brand-btn cancel-btn" (click)="verPedidosEntregadosHoy()">Ver Entregados Hoy</button>
       <button class="brand-btn" (click)="abrirNuevoPedido()">Registrar Pedido (WhatsApp)</button>
     </div>
   </div>
@@ -211,14 +212,10 @@
               </button>
             </div>
 
-            <!-- Fila inferior: Alertas y Cremas -->
+            <!-- Fila inferior: Alertas -->
             <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 58px; width: 100%;">
               <div *ngIf="det.noCoincide && det.productoName" class="select-error-container" style="margin-bottom: 2px;">
                 <span class="error-text" style="font-size: 11px; color: var(--error);">⚠️ No vinculado automático: <strong>"{{ det.productoName }}"</strong></span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <span style="font-size: 11px; color: var(--text-muted); min-width: 45px;">Cremas:</span>
-                <input type="text" [(ngModel)]="det.creams" placeholder="Ej. Mayonesa, Mostaza..." class="modal-input" style="padding: 4px 8px; font-size: 12px; flex-grow: 1; height: auto; background: rgba(0,0,0,0.15);">
               </div>
             </div>
             
@@ -247,6 +244,47 @@
       <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
         <button class="brand-btn cancel-btn" (click)="cerrarModalNuevoPedido()">Cancelar</button>
         <button class="brand-btn" [disabled]="formPedido.detalles.length === 0 || tieneFilasSinProducto()" (click)="guardarNuevoPedido()">Registrar Pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Pedidos Entregados Hoy -->
+  <div class="modal-backdrop" *ngIf="mostrarModalEntregados">
+    <div class="modal-card glass-card" style="max-width: 600px !important;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Pedidos Entregados Hoy</h3>
+        <button (click)="cerrarModalEntregados()" style="background: none; border: none; color: var(--text-light); font-size: 24px; cursor: pointer; line-height: 1;">×</button>
+      </div>
+
+      <div *ngIf="cargandoEntregados" style="text-align: center; padding: 20px;">
+        <span>Cargando pedidos...</span>
+      </div>
+
+      <div *ngIf="!cargandoEntregados && pedidosEntregadosHoy.length === 0" style="text-align: center; padding: 20px; color: var(--text-muted);">
+        <span>No hay pedidos entregados/pagados registrados hoy.</span>
+      </div>
+
+      <div *ngIf="!cargandoEntregados && pedidosEntregadosHoy.length > 0" class="entregados-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 5px;">
+        <div class="pedido-entregado-item glass-card" *ngFor="let pedido of pedidosEntregadosHoy" style="padding: 15px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 8px; border-radius: 12px; border: 1px solid var(--glass-border);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold; color: var(--secondary);">#{{ pedido.id }} - {{ pedido.customerName }}</span>
+            <span class="number-font" style="font-weight: bold; color: var(--success);">S/. {{ pedido.total | number:'1.2-2' }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
+            <span>Hora: {{ pedido.orderDate | date:'HH:mm' }}</span>
+            <span>Tipo: {{ pedido.type }} | Pago: {{ pedido.paymentMethod }}</span>
+          </div>
+          <div style="font-size: 13px; border-top: 1px dashed var(--glass-border); padding-top: 6px; margin-top: 4px;">
+            <div *ngFor="let det of pedido.detalles" style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+              <span>{{ det.quantity }}x {{ det.productoName }}</span>
+              <span style="color: var(--text-muted); font-size: 11px;" *ngIf="det.creams">Cremas: {{ det.creams }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 15px;">
+        <button class="brand-btn cancel-btn" (click)="cerrarModalEntregados()">Cerrar</button>
       </div>
     </div>
   </div>
