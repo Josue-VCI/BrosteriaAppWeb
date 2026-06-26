@@ -60,7 +60,7 @@
   gap: 30px;
 }
 
-@media (max-width: 1300px) {
+@media (max-width: 1366px) {
   .details-grid {
     grid-template-columns: 1fr;
   }
