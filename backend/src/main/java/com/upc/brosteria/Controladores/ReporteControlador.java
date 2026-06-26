@@ -175,6 +175,7 @@ public class ReporteControlador {
             return "Retiro en Local";
         }
         String dirLower = direccion.toLowerCase();
+        if (dirLower.contains("surquillo")) return "Surquillo";
         if (dirLower.contains("carabayllo")) return "Carabayllo";
         if (dirLower.contains("comas")) return "Comas";
         if (dirLower.contains("surco")) return "Surco";

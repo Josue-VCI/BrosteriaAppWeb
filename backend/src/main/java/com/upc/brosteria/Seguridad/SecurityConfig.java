@@ -43,8 +43,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/insumos/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/insumos", "/api/v1/insumos/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )

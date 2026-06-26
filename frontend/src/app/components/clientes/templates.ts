@@ -18,7 +18,7 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                         <td align="center" style="background: linear-gradient(135deg, #FF6B00 0%, #CC5500 100%); padding: 40px 20px; text-align: center;">
                             <span style="font-size: 50px; display: block; margin-bottom: 10px;"></span>
                             <h1 style="color: #ffffff; margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">¡GOL DE SABOR MUNDIALISTA!</h1>
-                            <p style="color: #ffca3a; margin: 10px 0 0 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">Alienta a la Selección con el Sabor Más Crujiente de Carabayllo</p>
+                            <p style="color: #ffca3a; margin: 10px 0 0 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">Alienta a la Selección con el Sabor Más Crujiente de Surquillo</p>
                         </td>
                     </tr>
 
@@ -94,7 +94,7 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                     <tr>
                         <td align="center" style="background-color: #09090b; padding: 30px 20px; border-top: 1px solid #27272a; text-align: center;">
                             <h4 style="color: #ffffff; margin: 0 0 10px 0; font-family: Arial, sans-serif;">LA BROSTERÍA</h4>
-                            <p style="color: #a0a0a8; font-size: 12px; margin: 0 0 5px 0;"> Carabayllo, Lima, Perú (paradero principal)</p>
+                            <p style="color: #a0a0a8; font-size: 12px; margin: 0 0 5px 0;"> Surquillo, Lima, Perú (Cerca al Mercado de Surquillo)</p>
                             <p style="color: #a0a0a8; font-size: 12px; margin: 0 0 15px 0;"> Pedidos: 960 373 555 | Horario: Lun a Dom 5:00 PM – 11:00 PM</p>
                             <p style="color: #71717a; font-size: 11px; margin: 0;">© 2026 La Brostería. Todos los derechos reservados.</p>
                         </td>
@@ -174,7 +174,7 @@ export const COMBO_PROMO_TEMPLATE = `<!DOCTYPE html>
                     <tr>
                         <td align="center" style="background-color: #09090b; padding: 25px 20px; border-top: 1px solid #27272a;">
                             <h4 style="color: #ffffff; margin: 0 0 5px 0;">LA BROSTERÍA</h4>
-                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Carabayllo, Lima, Perú |  Pedidos: 960 373 555</p>
+                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Surquillo, Lima, Perú |  Pedidos: 960 373 555</p>
                             <p style="color: #71717a; font-size: 10px; margin: 0;">Recibiste este correo automático de fidelización de La Brostería.</p>
                         </td>
                     </tr>
@@ -241,7 +241,7 @@ export const WEEKEND_PROMO_TEMPLATE = `<!DOCTYPE html>
                     <tr>
                         <td align="center" style="background-color: #09090b; padding: 25px 20px; border-top: 1px solid #27272a;">
                             <h4 style="color: #ffffff; margin: 0 0 5px 0;">LA BROSTERÍA</h4>
-                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Carabayllo, Lima, Perú |  Pedidos: 960 373 555</p>
+                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Surquillo, Lima, Perú |  Pedidos: 960 373 555</p>
                             <p style="color: #71717a; font-size: 10px; margin: 0;">Recibiste este correo automático de fidelización de La Brostería.</p>
                         </td>
                     </tr>
