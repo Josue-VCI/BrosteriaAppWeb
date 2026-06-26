@@ -262,21 +262,25 @@ export class PedidosComponent implements OnInit, OnDestroy {
         inDetail = false;
       }
 
-      if (inDetail && cleanLine.startsWith('-')) {
-        // Formato esperado: "- 2x Combo Pecho Crujiente 🤤 (S/. 26.00)"
-        const match = cleanLine.match(/^-\s*(\d+)x\s*([^(]+)/);
+      // Detectar líneas de productos con mayor flexibilidad (soporta viñetas de guion, asterisco, números o directo)
+      const isProductLine = cleanLine.match(/^[-\*\d\.\s]*\d+x\s*/i);
+      if (inDetail && isProductLine) {
+        const match = cleanLine.match(/^[-\*\d\.\s]*(\d+)x\s*([^(]+)/i);
         if (match) {
           const quantity = parseInt(match[1], 10);
           let productName = match[2].trim();
 
           productName = this.limpiarNombreProducto(productName);
 
-          // Buscar coincidencia en catálogo
-          const product = this.productosCatalogo.find(p => {
-            const cleanCatName = this.limpiarNombreProducto(p.name).toLowerCase();
-            const cleanInputName = productName.toLowerCase();
-            return cleanCatName.includes(cleanInputName) || cleanInputName.includes(cleanCatName);
-          });
+          // Extraer cremas específicas de la fila si están indicadas entre paréntesis (ej: (Cremas: Mayo, Ketchup))
+          let creamsDeFila = parsedCreams;
+          const creamsInLineMatch = cleanLine.match(/\(Cremas:\s*([^)]+)\)/i);
+          if (creamsInLineMatch) {
+            creamsDeFila = creamsInLineMatch[1].trim();
+          }
+
+          // Buscar coincidencia ultra-robusta en el catálogo
+          const product = this.buscarCoincidencia(productName);
 
           if (product) {
             detalles.push({
@@ -285,7 +289,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
               productoPrice: product.price,
               quantity: quantity,
               subtotal: quantity * product.price,
-              creams: parsedCreams
+              creams: creamsDeFila
             });
           } else {
             // Producto no emparejado: se asume precio 0 y se marca para resolución manual
@@ -295,7 +299,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
               productoPrice: 0.0,
               quantity: quantity,
               subtotal: 0.0,
-              creams: parsedCreams,
+              creams: creamsDeFila,
               noCoincide: true
             });
           }
@@ -326,6 +330,54 @@ export class PedidosComponent implements OnInit, OnDestroy {
       .replace(/[⚽🏆🥅⏱️🤤🍗🦴🍟🍔🌶️😎🎉]/g, '')
       .replace(/[^\w\s\d().,áéíóúÁÉÍÓÚñÑ-]/g, '')
       .trim();
+  }
+
+  normalizarParaComparar(text: string): string {
+    if (!text) return '';
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Quitar tildes y diacríticos
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Eliminar caracteres especiales
+      .replace(/\s+/g, ' ') // Colapsar espacios múltiples
+      .trim();
+  }
+
+  buscarCoincidencia(productName: string): any {
+    const cleanInput = this.normalizarParaComparar(productName);
+    if (!cleanInput) return null;
+
+    // 1. Coincidencia exacta o contención directa
+    let match = this.productosCatalogo.find(p => {
+      const cleanCat = this.normalizarParaComparar(p.name);
+      return cleanCat === cleanInput || cleanCat.includes(cleanInput) || cleanInput.includes(cleanCat);
+    });
+    if (match) return match;
+
+    // 2. Coincidencia por palabras significativas (token matching)
+    const inputWords = cleanInput.split(' ').filter(w => w.length > 2);
+    if (inputWords.length === 0) return null;
+
+    let mejorProducto = null;
+    let maxPalabrasCoincidentes = 0;
+
+    for (const prod of this.productosCatalogo) {
+      const cleanCat = this.normalizarParaComparar(prod.name);
+      const catWords = cleanCat.split(' ').filter(w => w.length > 2);
+      
+      const coincidentes = inputWords.filter(w => catWords.includes(w)).length;
+      if (coincidentes > maxPalabrasCoincidentes) {
+        maxPalabrasCoincidentes = coincidentes;
+        mejorProducto = prod;
+      }
+    }
+
+    // Si coincide al menos el 60% de las palabras significativas, se considera coincidencia
+    if (mejorProducto && (maxPalabrasCoincidentes / inputWords.length) >= 0.6) {
+      return mejorProducto;
+    }
+
+    return null;
   }
 
   agregarFilaDetalle() {

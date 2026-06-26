@@ -10,9 +10,11 @@
   border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
-  height: 94vh;
-  margin: 3vh 15px 3vh 20px;
-  padding: 25px 15px;
+  height: auto;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  margin: 20px 15px 20px 20px;
+  padding: 18px 12px;
   position: fixed;
   left: 0;
   z-index: 100;
@@ -23,7 +25,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   padding-left: 10px;
 }
 
@@ -43,27 +45,27 @@
 .sidebar-menu {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex-grow: 1;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   color: var(--text-muted);
   text-decoration: none;
   font-family: var(--font-brand);
-  padding: 12px 15px;
+  padding: 10px 12px;
   border-radius: 12px;
   transition: all 0.3s ease;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .menu-item:hover {
   background: rgba(255, 107, 0, 0.08);
   color: var(--text-light);
-  padding-left: 20px;
+  padding-left: 15px;
 }
 
 .menu-item.active {
@@ -75,10 +77,10 @@
 
 .sidebar-footer {
   border-top: 1px solid var(--glass-border);
-  padding-top: 20px;
+  padding-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
 .user-info {
@@ -181,14 +183,15 @@
   }
 }
 
-@media (min-width: 769px) and (max-width: 1200px) {
+@media (min-width: 769px) and (max-width: 1366px) {
   .sidebar {
     width: 230px;
-    margin: 3vh 10px;
-    padding: 20px 10px;
+    margin: 15px 10px;
+    padding: 15px 10px;
+    max-height: calc(100vh - 30px);
   }
   .main-content {
-    margin-left: 260px;
+    margin-left: 250px;
     padding: 20px;
   }
 }
