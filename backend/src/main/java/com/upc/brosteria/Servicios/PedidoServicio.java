@@ -99,13 +99,19 @@ public class PedidoServicio {
             String phone = pedidoDTO.getCustomerPhone().trim();
             java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findByPhone(phone);
             if (optCliente.isPresent()) {
-                pedido.setClienteEntidad(optCliente.get());
+                ClienteEntidad cliente = optCliente.get();
+                if ((cliente.getEmail() == null || cliente.getEmail().trim().isEmpty()) 
+                        && pedidoDTO.getCustomerEmail() != null && !pedidoDTO.getCustomerEmail().trim().isEmpty()) {
+                    cliente.setEmail(pedidoDTO.getCustomerEmail().trim());
+                    clienteRepositorio.save(cliente);
+                }
+                pedido.setClienteEntidad(cliente);
             } else {
                 ClienteEntidad nuevoCliente = new ClienteEntidad();
                 nuevoCliente.setName(pedidoDTO.getCustomerName());
                 nuevoCliente.setPhone(phone);
                 nuevoCliente.setAddress(pedidoDTO.getCustomerAddress());
-                nuevoCliente.setEmail(null);
+                nuevoCliente.setEmail(pedidoDTO.getCustomerEmail() != null ? pedidoDTO.getCustomerEmail().trim() : null);
                 nuevoCliente.setTotalOrders(0);
                 nuevoCliente.setTotalSpent(0.0);
                 nuevoCliente.setPoints(0);

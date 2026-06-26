@@ -133,9 +133,15 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: 10px;">
-          <label>Dirección de Entrega</label>
-          <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Dirección extraída" [disabled]="formPedido.type === 'PICKUP'">
+        <div class="preview-grid" style="margin-top: 10px;">
+          <div class="form-group">
+            <label>Email (Opcional)</label>
+            <input type="email" [(ngModel)]="formPedido.customerEmail" class="modal-input" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="form-group">
+            <label>Dirección de Entrega</label>
+            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Dirección extraída" [disabled]="formPedido.type === 'PICKUP'">
+          </div>
         </div>
 
         <div class="preview-grid" style="margin-top: 10px;">

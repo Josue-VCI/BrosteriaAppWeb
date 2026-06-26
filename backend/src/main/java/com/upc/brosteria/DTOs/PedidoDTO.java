@@ -11,6 +11,7 @@ public class PedidoDTO {
     private String customerName;
     private String customerPhone;
     private String customerAddress;
+    private String customerEmail;
     private Double deliveryCost;
     private String type;
     private String paymentMethod;

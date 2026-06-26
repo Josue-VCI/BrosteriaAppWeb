@@ -10,6 +10,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -213,13 +215,78 @@ public class ReporteControlador {
                 .mapToDouble(PedidoEntidad::getTotal)
                 .sum();
  
-        byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(pedidos, totalVentas, formato);
+        byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(pedidos, totalVentas, formato, fechaInicio, fechaFin, tipoPedido, diaSemana);
  
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename("reporte_ventas_filtrado.pdf").build());
  
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/descargar-csv")
+    public ResponseEntity<byte[]> descargarReporteCsv(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
+        
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
+        if (fechaInicio != null) {
+            pedidos = pedidos.stream()
+                    .filter(p -> p.getOrderDate().isAfter(fechaInicio.minusNanos(1)))
+                    .collect(Collectors.toList());
+        }
+        if (fechaFin != null) {
+            pedidos = pedidos.stream()
+                    .filter(p -> p.getOrderDate().isBefore(fechaFin.plusNanos(1)))
+                    .collect(Collectors.toList());
+        }
+
+        List<Long> pedidoIds = pedidos.stream().map(PedidoEntidad::getId).collect(Collectors.toList());
+        List<DetallePedidoEntidad> detalles = pedidoIds.isEmpty() ? new ArrayList<>() 
+                : detallePedidoRepositorio.findByPedidoEntidadIdIn(pedidoIds);
+        
+        Map<Long, List<DetallePedidoEntidad>> detallesPorPedido = detalles.stream()
+                .collect(Collectors.groupingBy(d -> d.getPedidoEntidad().getId()));
+
+        StringBuilder csv = new StringBuilder();
+        csv.append('\ufeff');
+        csv.append("ID Pedido,Cliente,Telefono,Direccion,Fecha,Canal,Metodo Pago,Total,Estado,Detalle Productos\n");
+
+        for (PedidoEntidad ped : pedidos) {
+            String productosSummary = "";
+            List<DetallePedidoEntidad> pDetalles = detallesPorPedido.get(ped.getId());
+            if (pDetalles != null) {
+                productosSummary = pDetalles.stream()
+                        .map(d -> d.getQuantity() + "x " + (d.getProductoEntidad() != null ? d.getProductoEntidad().getName() : "Producto"))
+                        .collect(Collectors.joining(" | "));
+            }
+
+            csv.append(ped.getId()).append(",")
+               .append(escapeCsvField(ped.getCustomerName())).append(",")
+               .append(escapeCsvField(ped.getClienteEntidad() != null ? ped.getClienteEntidad().getPhone() : "-")).append(",")
+               .append(escapeCsvField(ped.getClienteEntidad() != null ? ped.getClienteEntidad().getAddress() : "-")).append(",")
+               .append(ped.getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",")
+               .append(ped.getType()).append(",")
+               .append(ped.getPaymentMethod()).append(",")
+               .append(String.format(Locale.US, "%.2f", ped.getTotal())).append(",")
+               .append(ped.getStatus()).append(",")
+               .append(escapeCsvField(productosSummary)).append("\n");
+        }
+
+        byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename("respaldo_pedidos.csv").build());
+
+        return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
+    }
+
+    private String escapeCsvField(String field) {
+        if (field == null) return "";
+        if (field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r")) {
+            return "\"" + field.replace("\"", "\"\"") + "\"";
+        }
+        return field;
     }
 
     @org.springframework.transaction.annotation.Transactional

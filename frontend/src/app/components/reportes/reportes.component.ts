@@ -264,21 +264,20 @@ export class ReportesComponent implements OnInit {
   }
 
   descargarReportePDF90Dias() {
-    let url = `${this.apiBaseUrl}/descargar-pdf?`;
     const ahora = new Date();
     const fecha = new Date();
     fecha.setMonth(ahora.getMonth() - 3);
-    url += `fechaInicio=${fecha.toISOString()}&formato=${this.formatoPdf}`;
+    const url = `${this.apiBaseUrl}/descargar-csv?fechaInicio=${fecha.toISOString()}`;
 
-    const filename = `Respaldo_Ventas_Trimestral_${new Date().toISOString().slice(0,10)}.pdf`;
-    this.descargarBlobComoArchivo(url, filename);
+    const filename = `Respaldo_Ventas_Trimestral_${new Date().toISOString().slice(0,10)}.csv`;
+    this.descargarBlobComoArchivo(url, filename, 'text/csv');
   }
 
   /** Descarga un blob como archivo, compatible con iOS Safari, Chrome Android y Desktop */
-  private descargarBlobComoArchivo(url: string, filename: string) {
+  private descargarBlobComoArchivo(url: string, filename: string, mimeType: string = 'application/pdf') {
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
-        const blobConTipo = new Blob([blob], { type: 'application/pdf' });
+        const blobConTipo = new Blob([blob], { type: mimeType });
         const urlBlob = window.URL.createObjectURL(blobConTipo);
 
         // Detectar iOS Safari (no soporta <a download> creado dinámicamente)

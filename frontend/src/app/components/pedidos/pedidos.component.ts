@@ -198,6 +198,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       customerName: '',
       customerPhone: '',
       customerAddress: '',
+      customerEmail: '',
       deliveryCost: 5.0,
       type: 'DELIVERY',
       paymentMethod: 'YAPE',
@@ -298,6 +299,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       customerName: parsedName,
       customerPhone: '', // Se llena a mano
       customerAddress: type === 'PICKUP' ? 'Retiro en local' : parsedAddress,
+      customerEmail: '',
       deliveryCost: deliveryCost,
       type: type,
       paymentMethod: paymentMethod,
@@ -363,6 +365,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       customerName: this.formPedido.customerName,
       customerPhone: this.formPedido.customerPhone,
       customerAddress: this.formPedido.customerAddress,
+      customerEmail: this.formPedido.customerEmail,
       deliveryCost: this.formPedido.deliveryCost,
       type: this.formPedido.type,
       paymentMethod: this.formPedido.paymentMethod,
