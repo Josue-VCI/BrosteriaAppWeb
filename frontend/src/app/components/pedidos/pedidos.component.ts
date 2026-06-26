@@ -219,20 +219,31 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     // Regex para extraer campos estructurados
     const nameMatch = text.match(/- Nombre completo:\s*(.*)/i);
+    const phoneMatch = text.match(/- Telefono Celular:\s*(.*)/i) || text.match(/- Celular:\s*(.*)/i) || text.match(/- Telefono:\s*(.*)/i);
     const typeMatch = text.match(/- Tipo de entrega.*:\s*(.*)/i);
+    const districtMatch = text.match(/- Distrito:\s*(.*)/i);
     const addressMatch = text.match(/- Direccion de entrega.*:\s*(.*)/i);
-    const creamsMatch = text.match(/- Cremas.*:\s*(.*)/i);
+    const creamsMatch = text.match(/- Cremas.*:\s*(.*)/i) || text.match(/\*Cremas:\*\s*(.*)/i);
     const paymentMatch = text.match(/- Metodo de pago.*:\s*(.*)/i);
+    const emailMatch = text.match(/- Correo:\s*(.*)/i) || text.match(/- Email:\s*(.*)/i);
 
     const parsedName = nameMatch ? nameMatch[1].trim() : '';
+    const parsedPhone = phoneMatch ? phoneMatch[1].trim() : '';
     const parsedTypeStr = typeMatch ? typeMatch[1].trim().toUpperCase() : 'DELIVERY';
+    const parsedDistrict = districtMatch ? districtMatch[1].trim() : '';
     const parsedAddress = addressMatch ? addressMatch[1].trim() : '';
     const parsedCreams = creamsMatch ? creamsMatch[1].trim() : '';
     const parsedPaymentStr = paymentMatch ? paymentMatch[1].trim().toUpperCase() : 'EFECTIVO';
+    const parsedEmail = emailMatch ? emailMatch[1].trim() : '';
 
     const isPickup = parsedTypeStr.includes('RECOJO') || parsedTypeStr.includes('PICKUP') || parsedTypeStr.includes('LOCAL');
     const type = isPickup ? 'PICKUP' : 'DELIVERY';
     const deliveryCost = isPickup ? 0.00 : 5.00;
+
+    let address = parsedAddress;
+    if (type === 'DELIVERY' && parsedDistrict && !address.toLowerCase().includes(parsedDistrict.toLowerCase())) {
+      address = `${address}, ${parsedDistrict}`;
+    }
 
     let paymentMethod = 'EFECTIVO';
     if (parsedPaymentStr.includes('YAPE')) paymentMethod = 'YAPE';
@@ -297,9 +308,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     this.formPedido = {
       customerName: parsedName,
-      customerPhone: '', // Se llena a mano
-      customerAddress: type === 'PICKUP' ? 'Retiro en local' : parsedAddress,
-      customerEmail: '',
+      customerPhone: parsedPhone,
+      customerAddress: type === 'PICKUP' ? 'Retiro en local' : address,
+      customerEmail: parsedEmail,
       deliveryCost: deliveryCost,
       type: type,
       paymentMethod: paymentMethod,
