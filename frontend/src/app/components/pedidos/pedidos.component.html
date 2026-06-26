@@ -110,26 +110,26 @@
   <div class="modal-backdrop" *ngIf="mostrarModalNuevoPedido">
     <div class="modal-card glass-card" style="max-height: 90vh; overflow-y: auto;">
       <h3>Registrar Pedido desde WhatsApp</h3>
-      <p class="destination-sub">Pega el texto completo copiado del mensaje de WhatsApp del cliente para procesarlo automáticamente.</p>
+      <p class="destination-sub">Pega el texto del mensaje de WhatsApp para auto-rellenar el formulario, o complétalo manualmente.</p>
 
       <!-- Entrada de texto -->
       <div class="form-group">
-        <label for="textoRaw">Mensaje de WhatsApp</label>
-        <textarea id="textoRaw" [(ngModel)]="textoWhatsApp" (input)="procesarTextoWhatsApp()" placeholder="Pegue aquí el texto completo..." rows="5" class="modal-textarea"></textarea>
+        <label for="textoRaw">Mensaje de WhatsApp (Opcional)</label>
+        <textarea id="textoRaw" [(ngModel)]="textoWhatsApp" (input)="procesarTextoWhatsApp()" placeholder="Pega aquí el mensaje del cliente para auto-rellenar..." rows="4" class="modal-textarea"></textarea>
       </div>
 
-      <!-- Vista previa si hay datos procesados -->
-      <div class="parsed-preview" *ngIf="formPedido.customerName || formPedido.detalles.length > 0" style="margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 15px;">
-        <h4 class="preview-title" style="color: var(--secondary); margin-bottom: 12px; font-size: 15px;">DETALLES EXTRAÍDOS</h4>
+      <!-- Formulario de datos del cliente (siempre visible) -->
+      <div class="parsed-preview" style="margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 15px;">
+        <h4 class="preview-title" style="color: var(--secondary); margin-bottom: 12px; font-size: 15px;">DATOS DEL PEDIDO</h4>
         
         <div class="preview-grid">
           <div class="form-group">
             <label>Cliente (Nombre) *</label>
-            <input type="text" [(ngModel)]="formPedido.customerName" class="modal-input" placeholder="Nombre extraído">
+            <input type="text" [(ngModel)]="formPedido.customerName" class="modal-input" placeholder="Nombre del cliente">
           </div>
           <div class="form-group">
             <label>Teléfono Celular *</label>
-            <input type="text" [(ngModel)]="formPedido.customerPhone" class="modal-input" placeholder="Ej. 960373555">
+            <input type="tel" [(ngModel)]="formPedido.customerPhone" class="modal-input" placeholder="Ej. 960373555" inputmode="numeric">
           </div>
         </div>
 
@@ -139,8 +139,26 @@
             <input type="email" [(ngModel)]="formPedido.customerEmail" class="modal-input" placeholder="correo@ejemplo.com">
           </div>
           <div class="form-group">
-            <label>Dirección de Entrega</label>
-            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Dirección extraída" [disabled]="formPedido.type === 'PICKUP'">
+            <label>Distrito (Opcional)</label>
+            <select [(ngModel)]="formPedido.distrito" class="modal-input" [disabled]="formPedido.type === 'PICKUP'">
+              <option value="">-- Seleccionar --</option>
+              <option value="Surquillo">Surquillo</option>
+              <option value="Miraflores">Miraflores</option>
+              <option value="Surco">Surco</option>
+              <option value="San Isidro">San Isidro</option>
+              <option value="Barranco">Barranco</option>
+              <option value="La Molina">La Molina</option>
+              <option value="Chorrillos">Chorrillos</option>
+              <option value="Comas">Comas</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="preview-grid" style="margin-top: 10px;">
+          <div class="form-group" [style.grid-column]="formPedido.type === 'PICKUP' ? '1 / -1' : '1'">
+            <label>Dirección de Entrega{{ formPedido.type === 'DELIVERY' ? ' *' : '' }}</label>
+            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Dirección exacta" [disabled]="formPedido.type === 'PICKUP'">
           </div>
         </div>
 
@@ -163,7 +181,7 @@
           </div>
         </div>
 
-        <!-- Tabla de Productos Extraídos -->
+        <!-- Tabla de Productos (manual o desde WhatsApp) -->
         <div class="parsed-items-table" style="margin-top: 15px; background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;">
           <h5 style="margin: 0 0 10px 0; font-size: 13px; color: var(--text-light);">Productos Solicitados</h5>
           
@@ -202,7 +220,7 @@
 
       <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
         <button class="brand-btn cancel-btn" (click)="cerrarModalNuevoPedido()">Cancelar</button>
-        <button class="brand-btn" [disabled]="!formPedido.customerName || formPedido.detalles.length === 0" (click)="guardarNuevoPedido()">Registrar Pedido</button>
+        <button class="brand-btn" [disabled]="!formPedido.customerName || !formPedido.customerPhone || formPedido.detalles.length === 0" (click)="guardarNuevoPedido()">Registrar Pedido</button>
       </div>
     </div>
   </div>

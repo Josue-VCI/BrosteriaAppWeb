@@ -5,13 +5,8 @@
       <p>Métricas consolidadas de ventas e ingresos en base a la cola de caja</p>
     </div>
     
-    <!-- Selección del Formato del PDF y descarga -->
+    <!-- Descarga de Reporte PDF -->
     <div class="pdf-download-actions">
-      <select [(ngModel)]="formatoPdf" class="filter-select format-select">
-        <option value="naranja">Diseño Corporativo Naranja</option>
-        <option value="monocromo">Diseño Monocromo Clásico</option>
-        <option value="compacto">Diseño Compacto Ejecutivo</option>
-      </select>
       <button class="brand-btn pdf-btn" (click)="descargarReportePdf()">Descargar Reporte PDF</button>
     </div>
   </div>

@@ -45,6 +45,11 @@ export class ReportesComponent implements OnInit {
     this.cargarDatosGrafico();
   }
 
+  private formatLocalISO(date: Date): string {
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
   cargarResumen() {
     let fechaInicio = '';
     const ahora = new Date();
@@ -52,15 +57,15 @@ export class ReportesComponent implements OnInit {
     if (this.filtroRango === 'semana') {
       const fecha = new Date();
       fecha.setDate(ahora.getDate() - 7);
-      fechaInicio = fecha.toISOString();
+      fechaInicio = this.formatLocalISO(fecha);
     } else if (this.filtroRango === 'mes') {
       const fecha = new Date();
       fecha.setMonth(ahora.getMonth() - 1);
-      fechaInicio = fecha.toISOString();
+      fechaInicio = this.formatLocalISO(fecha);
     } else if (this.filtroRango === 'trimestre') {
       const fecha = new Date();
       fecha.setMonth(ahora.getMonth() - 3);
-      fechaInicio = fecha.toISOString();
+      fechaInicio = this.formatLocalISO(fecha);
     }
 
     let url = `${this.apiBaseUrl}/resumen?`;
@@ -168,15 +173,15 @@ export class ReportesComponent implements OnInit {
     if (this.filtroRango === 'semana') {
       const fecha = new Date();
       fecha.setDate(ahora.getDate() - 7);
-      fechaInicio = fecha.toISOString();
+      fechaInicio = this.formatLocalISO(fecha);
     } else if (this.filtroRango === 'mes') {
       const fecha = new Date();
       fecha.setMonth(ahora.getMonth() - 1);
-      fechaInicio = fecha.toISOString();
+      fechaInicio = this.formatLocalISO(fecha);
     } else if (this.filtroRango === 'trimestre') {
       const fecha = new Date();
       fecha.setMonth(ahora.getMonth() - 3);
-      fechaInicio = fecha.toISOString();
+      fechaInicio = this.formatLocalISO(fecha);
     }
 
     let url = `${this.apiBaseUrl}/descargar-pdf?`;
@@ -267,7 +272,7 @@ export class ReportesComponent implements OnInit {
     const ahora = new Date();
     const fecha = new Date();
     fecha.setMonth(ahora.getMonth() - 3);
-    const url = `${this.apiBaseUrl}/descargar-csv?fechaInicio=${fecha.toISOString()}`;
+    const url = `${this.apiBaseUrl}/descargar-csv?fechaInicio=${this.formatLocalISO(fecha)}`;
 
     const filename = `Respaldo_Ventas_Trimestral_${new Date().toISOString().slice(0,10)}.csv`;
     this.descargarBlobComoArchivo(url, filename, 'text/csv');

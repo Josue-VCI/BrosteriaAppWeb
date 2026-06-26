@@ -199,6 +199,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       customerPhone: '',
       customerAddress: '',
       customerEmail: '',
+      distrito: '',
       deliveryCost: 5.0,
       type: 'DELIVERY',
       paymentMethod: 'YAPE',
@@ -239,11 +240,6 @@ export class PedidosComponent implements OnInit, OnDestroy {
     const isPickup = parsedTypeStr.includes('RECOJO') || parsedTypeStr.includes('PICKUP') || parsedTypeStr.includes('LOCAL');
     const type = isPickup ? 'PICKUP' : 'DELIVERY';
     const deliveryCost = isPickup ? 0.00 : 5.00;
-
-    let address = parsedAddress;
-    if (type === 'DELIVERY' && parsedDistrict && !address.toLowerCase().includes(parsedDistrict.toLowerCase())) {
-      address = `${address}, ${parsedDistrict}`;
-    }
 
     let paymentMethod = 'EFECTIVO';
     if (parsedPaymentStr.includes('YAPE')) paymentMethod = 'YAPE';
@@ -309,8 +305,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
     this.formPedido = {
       customerName: parsedName,
       customerPhone: parsedPhone,
-      customerAddress: type === 'PICKUP' ? 'Retiro en local' : address,
+      customerAddress: parsedAddress,
       customerEmail: parsedEmail,
+      distrito: parsedDistrict,
       deliveryCost: deliveryCost,
       type: type,
       paymentMethod: paymentMethod,
@@ -372,10 +369,19 @@ export class PedidosComponent implements OnInit, OnDestroy {
       creams: d.creams
     }));
 
+    let finalAddress = this.formPedido.customerAddress;
+    if (this.formPedido.type === 'PICKUP') {
+      finalAddress = 'Retiro en local';
+    } else if (this.formPedido.distrito && finalAddress) {
+      if (!finalAddress.toLowerCase().includes(this.formPedido.distrito.toLowerCase())) {
+        finalAddress = `${finalAddress}, ${this.formPedido.distrito}`;
+      }
+    }
+
     const payload = {
       customerName: this.formPedido.customerName,
       customerPhone: this.formPedido.customerPhone,
-      customerAddress: this.formPedido.customerAddress,
+      customerAddress: finalAddress,
       customerEmail: this.formPedido.customerEmail,
       deliveryCost: this.formPedido.deliveryCost,
       type: this.formPedido.type,

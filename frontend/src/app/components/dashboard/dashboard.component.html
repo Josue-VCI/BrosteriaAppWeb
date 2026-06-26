@@ -10,28 +10,28 @@
       <div class="kpi-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
       <div class="kpi-info">
         <span class="kpi-label">Ingresos Totales</span>
-        <h3 class="number-font text-success">S/. {{ resumen.ventasTotales | number:'1.2-2' }}</h3>
+        <h3 class="number-font kpi-value text-success">S/. {{ resumen.ventasTotales | number:'1.2-2' }}</h3>
       </div>
     </div>
     <div class="glass-card kpi-card">
       <div class="kpi-icon"><i class="fa-solid fa-clipboard-list"></i></div>
       <div class="kpi-info">
         <span class="kpi-label">Total Pedidos</span>
-        <h3 class="number-font">{{ resumen.totalPedidos }}</h3>
+        <h3 class="number-font kpi-value">{{ resumen.totalPedidos }}</h3>
       </div>
     </div>
     <div class="glass-card kpi-card">
       <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
       <div class="kpi-info">
         <span class="kpi-label">Completados</span>
-        <h3 class="number-font text-success">{{ resumen.completados }}</h3>
+        <h3 class="number-font kpi-value text-success">{{ resumen.completados }}</h3>
       </div>
     </div>
     <div class="glass-card kpi-card">
       <div class="kpi-icon"><i class="fa-solid fa-circle-xmark"></i></div>
       <div class="kpi-info">
         <span class="kpi-label">Cancelados</span>
-        <h3 class="number-font text-error">{{ resumen.cancelados }}</h3>
+        <h3 class="number-font kpi-value text-error">{{ resumen.cancelados }}</h3>
       </div>
     </div>
   </div>
