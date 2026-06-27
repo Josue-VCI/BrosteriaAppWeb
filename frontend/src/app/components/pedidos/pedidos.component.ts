@@ -528,4 +528,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
   cerrarModalEntregados() {
     this.mostrarModalEntregados = false;
   }
+
+  setDeliveryType(type: string) {
+    this.formPedido.type = type;
+    this.recalcularTotal();
+  }
 }
+
+

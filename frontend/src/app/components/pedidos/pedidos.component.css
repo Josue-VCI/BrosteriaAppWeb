@@ -291,3 +291,16 @@
   transform: none !important;
 }
 
+.delivery-option-btn.active {
+  background: linear-gradient(135deg, var(--secondary), var(--primary)) !important;
+  color: #000000 !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.35) !important;
+}
+
+.delivery-option-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-light) !important;
+  border-color: var(--primary) !important;
+}
+
