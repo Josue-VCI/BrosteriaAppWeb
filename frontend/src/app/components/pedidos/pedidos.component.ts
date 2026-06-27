@@ -107,10 +107,6 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   actualizarEstado(pedidoId: number, nuevoEstado: string) {
-    if (nuevoEstado === 'ENTREGADO') {
-      const confirmar = confirm('¿Esta seguro de marcar este pedido como Pagado y Entregado? Se archivara del tablero.');
-      if (!confirmar) return;
-    }
 
     // Copias del estado actual para rollback en caso de error
     const copiaCocina = [...this.pedidosCocina];
