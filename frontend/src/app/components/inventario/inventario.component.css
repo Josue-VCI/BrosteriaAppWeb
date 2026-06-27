@@ -176,7 +176,7 @@
 }
 
 .mobile-only-inventory {
-  display: none;
+  display: none !important;
 }
 
 .mobile-insumos-list {

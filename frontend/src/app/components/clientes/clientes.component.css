@@ -152,7 +152,7 @@
 }
 
 .mobile-only-crm {
-  display: none;
+  display: none !important;
 }
 
 .crm-placeholder-card {

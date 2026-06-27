@@ -74,7 +74,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let cliente of clientesFiltrados">
+        <tr *ngFor="let cliente of clientesPaginados">
           <td><strong>{{ cliente.name }}</strong></td>
           <td class="number-font">{{ cliente.phone }}</td>
           <td>{{ cliente.email || 'No registrado' }}</td>
@@ -96,6 +96,11 @@
         </tr>
       </tbody>
     </table>
+    
+    <!-- Boton Ver Mas Desktop -->
+    <div class="ver-mas-container" *ngIf="clientesFiltrados.length > limiteMostrar" style="text-align: center; margin-top: 20px; margin-bottom: 10px;">
+      <button class="brand-btn" (click)="verMas()">Ver mas clientes</button>
+    </div>
   </div>
 
   <!-- Vista Movil: Listado de Tarjetas por Cliente (Oculto en Desktop) -->
@@ -107,7 +112,7 @@
       </button>
     </div>
     
-    <div class="mobile-cliente-card glass-card" *ngFor="let cliente of clientesFiltrados">
+    <div class="mobile-cliente-card glass-card" *ngFor="let cliente of clientesPaginados">
       <div class="card-row row-top">
         <span class="cliente-name"><strong>{{ cliente.name }}</strong></span>
         <span class="points-badge">{{ cliente.points || 0 }} pts</span>
@@ -126,6 +131,11 @@
       </div>
     </div>
     <div class="no-pedidos" *ngIf="clientesFiltrados.length === 0" style="text-align: center; padding: 20px;">Sin resultados</div>
+    
+    <!-- Boton Ver Mas Movil -->
+    <div class="ver-mas-container" *ngIf="clientesFiltrados.length > limiteMostrar" style="text-align: center; margin-top: 15px; margin-bottom: 10px; width: 100%;">
+      <button class="brand-btn" (click)="verMas()" style="width: 100%;">Ver mas clientes</button>
+    </div>
   </div>
 
   <!-- Modal de Redaccion de Gmail Masivo -->

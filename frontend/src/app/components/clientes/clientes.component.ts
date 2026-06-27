@@ -16,6 +16,8 @@ import { ToastService } from '../../services/toast.service';
 export class ClientesComponent implements OnInit {
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
+  clientesPaginados: any[] = [];
+  limiteMostrar = 50;
   busqueda = '';
   esAdmin = false;
   
@@ -76,6 +78,7 @@ export class ClientesComponent implements OnInit {
     this.http.get<any[]>(this.apiBaseUrl).subscribe({
       next: (data) => {
         this.clientes = data;
+        this.limiteMostrar = 50;
         this.filtrarClientes();
       },
       error: (err) => console.error('Error al cargar clientes', err)
@@ -121,6 +124,9 @@ export class ClientesComponent implements OnInit {
     // Re-aplicar ordenacion si hay una columna activa
     if (this.columnaOrden) {
       this.ordenarPorColumnaActiva();
+    } else {
+      this.limiteMostrar = 50;
+      this.actualizarClientesPaginados();
     }
   }
 
@@ -153,6 +159,16 @@ export class ClientesComponent implements OnInit {
           : (valB - valA);
       }
     });
+    this.actualizarClientesPaginados();
+  }
+
+  actualizarClientesPaginados() {
+    this.clientesPaginados = this.clientesFiltrados.slice(0, this.limiteMostrar);
+  }
+
+  verMas() {
+    this.limiteMostrar += 50;
+    this.actualizarClientesPaginados();
   }
 
   // Validaciones del Formulario de Clientes
