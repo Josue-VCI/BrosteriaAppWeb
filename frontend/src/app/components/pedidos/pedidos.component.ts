@@ -509,7 +509,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
         const todayStr = new Date().toDateString();
         this.pedidosEntregadosHoy = data.filter(p => {
           if (!p.orderDate) return false;
-          return new Date(p.orderDate).toDateString() === todayStr;
+          const normalizedDate = p.orderDate.includes('Z') ? p.orderDate : p.orderDate + 'Z';
+          return new Date(normalizedDate).toDateString() === todayStr;
         });
         this.cargandoEntregados = false;
       },
