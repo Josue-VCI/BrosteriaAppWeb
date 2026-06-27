@@ -27,5 +27,5 @@ public class DetallePedidoEntidad {
     private Double subtotal;
 
     @Column
-    private String creams; // Lista de cremas seleccionadas por ejemplo: "Mayonesa, Ají, Ketchup"
+    private String creams; // Lista de cremas seleccionadas por ejemplo: "Mayonesa, Aji, Ketchup"
 }

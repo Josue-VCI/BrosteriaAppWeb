@@ -31,7 +31,7 @@ public class UsuarioServicio {
         UsuarioEntidad usuario = usuarioRepositorio.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el correo ingresado"));
 
-        // Comparación real con BCrypt
+        // Comparacion real con BCrypt
         if (passwordEncoder.matches(loginRequest.getPassword(), usuario.getPasswordHash())) {
             // Cargar UserDetails para generar token con el rol
             UserDetails userDetails = usuarioDetailsService.loadUserByUsername(usuario.getEmail());

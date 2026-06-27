@@ -11,12 +11,12 @@ Este bloque regula el control de accesos y la visualización diferenciada según
 1. **Prueba de Acceso de Administrador:**
    - Ve a la pantalla de login e ingresa con:
      - **Email:** `admin@brosteria.com`
-     - **Contraseña:** `123456`
+     - **Contraseña:** `BrosteriaCRM2026!`
    - **Resultado Esperado:** Debes ser redirigido automáticamente al **Dashboard** (`/dashboard`). En el menú lateral deben verse todos los enlaces, incluyendo *Dashboard* y *Reportes Analíticos*.
 2. **Prueba de Acceso de Cajero:**
    - Cierra sesión y ahora inicia con:
      - **Email:** `cajero@brosteria.com`
-     - **Contraseña:** `123456`
+     - **Contraseña:** `BrosteriaCRM2026!`
    - **Resultado Esperado:** Debes ser redirigido directamente a la pantalla de **Pedidos / Cocina** (`/pedidos`). El enlace de *Dashboard* y el de *Reportes Analíticos* deben estar completamente ocultos en la barra de navegación lateral.
 3. **Prueba de Bloqueo por URL (Intrusión):**
    - Estando logueado como Cajero, escribe directamente en la barra de direcciones del navegador: `http://localhost:4200/dashboard` o `http://localhost:4200/reportes` (o la URL de producción).

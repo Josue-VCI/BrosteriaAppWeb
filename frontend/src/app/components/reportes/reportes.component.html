@@ -1,8 +1,8 @@
 <div class="reportes-container">
   <div class="header-section">
     <div>
-      <h2>Reportes y Analítica de Ventas</h2>
-      <p>Métricas consolidadas de ventas e ingresos en base a la cola de caja</p>
+      <h2>Reportes y Analitica de Ventas</h2>
+      <p>Metricas consolidadas de ventas e ingresos en base a la cola de caja</p>
     </div>
     
     <!-- Descarga de Reporte PDF -->
@@ -16,9 +16,9 @@
     <div class="filter-group">
       <label for="filtroRango">Intervalo de Fecha</label>
       <select id="filtroRango" [(ngModel)]="filtroRango" (change)="aplicarFiltros()" class="filter-select">
-        <option value="semana">Últimos 7 días (Semana)</option>
-        <option value="mes">Últimos 30 días (Mes)</option>
-        <option value="trimestre">Últimos 90 días (Trimestre)</option>
+        <option value="semana">Ultimos 7 dias (Semana)</option>
+        <option value="mes">Ultimos 30 dias (Mes)</option>
+        <option value="trimestre">Ultimos 90 dias (Trimestre)</option>
       </select>
     </div>
 
@@ -32,15 +32,15 @@
     </div>
 
     <div class="filter-group">
-      <label for="diaSemana">Día de la Semana</label>
+      <label for="diaSemana">Dia de la Semana</label>
       <select id="diaSemana" [(ngModel)]="diaSemana" (change)="aplicarFiltros()" class="filter-select">
-        <option value="">Todos los Días</option>
+        <option value="">Todos los Dias</option>
         <option value="MONDAY">Lunes</option>
         <option value="TUESDAY">Martes</option>
-        <option value="WEDNESDAY">Miércoles</option>
+        <option value="WEDNESDAY">Miercoles</option>
         <option value="THURSDAY">Jueves</option>
         <option value="FRIDAY">Viernes</option>
-        <option value="SATURDAY">Sábado</option>
+        <option value="SATURDAY">Sabado</option>
         <option value="SUNDAY">Domingo</option>
       </select>
     </div>
@@ -66,30 +66,30 @@
     </div>
   </div>
 
-  <!-- Aviso Móvil de Rotación (Se muestra en móviles verticales mediante CSS) -->
+  <!-- Aviso Movil de Rotacion (Se muestra en moviles verticales mediante CSS) -->
   <div class="glass-card mobile-rotate-notice">
     <div class="rotate-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
-    <p>Gira tu pantalla en orientación horizontal (paisaje) para visualizar los gráficos interactivos de analítica y tendencias de demanda.</p>
+    <p>Gira tu pantalla en orientacion horizontal (paisaje) para visualizar los graficos interactivos de analitica y tendencias de demanda.</p>
   </div>
 
-  <!-- Fila de Gráficas -->
+  <!-- Fila de Graficas -->
   <div class="charts-grid">
     <div class="glass-card chart-wrapper">
-      <h4>Tendencia Histórica de Ventas</h4>
+      <h4>Tendencia Historica de Ventas</h4>
       <div class="canvas-container">
         <canvas id="ventasChart"></canvas>
       </div>
     </div>
     
     <div class="glass-card chart-wrapper">
-      <h4>Distribución por Método de Pago</h4>
+      <h4>Distribucion por Metodo de Pago</h4>
       <div class="canvas-container compact">
         <canvas id="pagosChart"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- Segunda Fila de Gráficas (Predicciones) -->
+  <!-- Segunda Fila de Graficas (Predicciones) -->
   <div class="charts-grid">
     <div class="glass-card chart-wrapper">
       <h4>Horarios de Mayor Demanda (Pedidos por Hora)</h4>
@@ -99,7 +99,7 @@
     </div>
     
     <div class="glass-card chart-wrapper">
-      <h4>Zonas / Distritos con Más Pedidos</h4>
+      <h4>Zonas / Distritos con Mas Pedidos</h4>
       <div class="canvas-container compact">
         <canvas id="distritosChart"></canvas>
       </div>
@@ -124,14 +124,14 @@
   <div class="glass-card maintenance-wrapper" style="margin-top: 25px;">
     <h4>Mantenimiento de Base de Datos</h4>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">
-      Mantén el sistema fluido y rápido. Se recomienda realizar una purga manual cada 3 meses para conservar únicamente los pedidos de los últimos 90 días.
+      Manten el sistema fluido y rapido. Se recomienda realizar una purga manual cada 3 meses para conservar unicamente los pedidos de los ultimos 90 dias.
     </p>
     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
       <button class="brand-btn" (click)="descargarReportePDF90Dias()" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-light)) !important; color: #000 !important;">
-        Descargar Respaldo CSV (90 días)
+        Descargar Respaldo CSV (90 dias)
       </button>
       <button class="brand-btn logout-btn" (click)="limpiarHistorico()" style="padding: 10px 24px !important;">
-        Purgar Pedidos antiguos (> 90 días)
+        Purgar Pedidos antiguos (> 90 dias)
       </button>
     </div>
   </div>

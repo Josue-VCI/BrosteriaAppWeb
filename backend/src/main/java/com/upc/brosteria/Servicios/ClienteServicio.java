@@ -46,7 +46,7 @@ public class ClienteServicio {
         }
         cliente = clienteRepositorio.save(cliente);
         
-        // Vincular pedidos anteriores y recalcular estadísticas
+        // Vincular pedidos anteriores y recalcular estadisticas
         linkOrdersAndRecalculateStats(cliente);
         
         return modelMapper.map(cliente, ClienteDTO.class);

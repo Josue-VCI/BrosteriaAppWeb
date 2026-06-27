@@ -1,12 +1,12 @@
 <div class="clientes-container">
   <div class="header-section">
-    <h2>Control y Fidelización de Clientes (CRM)</h2>
+    <h2>Control y Fidelizacion de Clientes (CRM)</h2>
     <p>Historial de compras, puntos acumulados y CRM de clientes</p>
   </div>
 
   <div class="actions-bar">
     <div class="search-and-filters">
-      <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="Buscar por nombre, celular o dirección..." class="search-input">
+      <input type="text" [(ngModel)]="busqueda" (input)="filtrarClientes()" placeholder="Buscar por nombre, celular o direccion..." class="search-input">
       
       <!-- Filtro de Distrito -->
       <select [(ngModel)]="filtroDistrito" (change)="filtrarClientes()" class="filter-select">
@@ -54,7 +54,7 @@
             <span class="sort-arrow" *ngIf="columnaOrden === 'email'">{{ ordenAscendente ? '▲' : '▼' }}</span>
             <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'email'">↕</span>
           </th>
-          <th>Dirección</th>
+          <th>Direccion</th>
           <th (click)="ordenarPor('totalOrders')" class="sortable-header">
             Pedidos
             <span class="sort-arrow" *ngIf="columnaOrden === 'totalOrders'">{{ ordenAscendente ? '▲' : '▼' }}</span>
@@ -98,9 +98,9 @@
     </table>
   </div>
 
-  <!-- Vista Móvil: Listado de Tarjetas por Cliente (Oculto en Desktop) -->
+  <!-- Vista Movil: Listado de Tarjetas por Cliente (Oculto en Desktop) -->
   <div class="mobile-only-crm mobile-clientes-list">
-    <!-- Botón de acción rápida en móvil -->
+    <!-- Boton de accion rapida en movil -->
     <div class="mobile-action-card glass-card" style="margin-bottom: 15px; text-align: center; padding: 15px !important;">
       <button class="brand-btn" (click)="abrirRedactarMasivo()" style="width: 100%;">
         Campaña Filtrada ({{ obtenerDestinatariosValidosCount() }} destinatarios)
@@ -128,18 +128,18 @@
     <div class="no-pedidos" *ngIf="clientesFiltrados.length === 0" style="text-align: center; padding: 20px;">Sin resultados</div>
   </div>
 
-  <!-- Modal de Redacción de Gmail Masivo -->
+  <!-- Modal de Redaccion de Gmail Masivo -->
   <div class="modal-backdrop" *ngIf="mostrarModalCorreo">
     <div class="modal-card glass-card">
-      <h3>Redactar Campaña de Fidelización (Gmail)</h3>
-      <p class="destination-sub">Se enviará a los clientes filtrados con correo registrado (Destinatarios: {{ obtenerDestinatariosValidosCount() }}).</p>
+      <h3>Redactar Campaña de Fidelizacion (Gmail)</h3>
+      <p class="destination-sub">Se enviara a los clientes filtrados con correo registrado (Destinatarios: {{ obtenerDestinatariosValidosCount() }}).</p>
       
       <div class="form-group">
         <label for="plantilla">Plantilla de Campaña</label>
         <select id="plantilla" [(ngModel)]="plantillaSeleccionada" (change)="onTemplateChange()" class="modal-input">
           <option value="libre">Texto Libre (Escribe tu propio mensaje)</option>
           <option value="mundial">Campaña Mundialista (Diseño Premium)</option>
-          <option value="combo">Campaña Súper 2x1 (Salchipapas y Pollo)</option>
+          <option value="combo">Campaña Super 2x1 (Salchipapas y Pollo)</option>
           <option value="finsemana">Campaña Fin de Semana (Descuento Locura)</option>
         </select>
       </div>
@@ -151,7 +151,7 @@
       
       <div class="form-group">
         <label for="cuerpo">Cuerpo del Mensaje</label>
-        <textarea id="cuerpo" [(ngModel)]="cuerpoCampana" [disabled]="plantillaSeleccionada !== 'libre'" placeholder="Hola, te escribimos de La Brostería..." rows="6" class="modal-textarea"></textarea>
+        <textarea id="cuerpo" [(ngModel)]="cuerpoCampana" [disabled]="plantillaSeleccionada !== 'libre'" placeholder="Hola, te escribimos de La Brosteria..." rows="6" class="modal-textarea"></textarea>
       </div>
       
       <div class="modal-actions">
@@ -170,26 +170,26 @@
       
       <div class="form-group">
         <label for="crudName">Nombre Completo *</label>
-        <input type="text" id="crudName" [(ngModel)]="formCliente.name" placeholder="Ej. Juan Pérez" class="modal-input" [class.input-error]="formCliente.name && !esNombreValido()">
+        <input type="text" id="crudName" [(ngModel)]="formCliente.name" placeholder="Ej. Juan Perez" class="modal-input" [class.input-error]="formCliente.name && !esNombreValido()">
         <span class="error-text" *ngIf="formCliente.name && !esNombreValido()">El nombre debe tener al menos 3 caracteres</span>
       </div>
 
       <div class="form-group">
-        <label for="crudPhone">Teléfono / Celular *</label>
+        <label for="crudPhone">Telefono / Celular *</label>
         <input type="text" id="crudPhone" [(ngModel)]="formCliente.phone" placeholder="Ej. 960373555" class="modal-input" [class.input-error]="formCliente.phone && !esCelularValido()">
-        <span class="error-text" *ngIf="formCliente.phone && !esCelularValido()">Debe ser un celular peruano válido (9 dígitos, inicia con 9)</span>
+        <span class="error-text" *ngIf="formCliente.phone && !esCelularValido()">Debe ser un celular peruano valido (9 digitos, inicia con 9)</span>
       </div>
       
       <div class="form-group">
-        <label for="crudEmail">Correo Electrónico</label>
+        <label for="crudEmail">Correo Electronico</label>
         <input type="email" id="crudEmail" [(ngModel)]="formCliente.email" placeholder="Ej. juan.perez@gmail.com" class="modal-input" [class.input-error]="formCliente.email && !esEmailValido()">
-        <span class="error-text" *ngIf="formCliente.email && !esEmailValido()">Ingrese un formato de correo válido</span>
+        <span class="error-text" *ngIf="formCliente.email && !esEmailValido()">Ingrese un formato de correo valido</span>
       </div>
 
       <div class="form-group">
-        <label for="crudCalle">Dirección (Calle, Av., Nro, Dpto) *</label>
+        <label for="crudCalle">Direccion (Calle, Av., Nro, Dpto) *</label>
         <input type="text" id="crudCalle" [(ngModel)]="formCliente.calle" placeholder="Ej. Av. Angamos 123" class="modal-input" [class.input-error]="formCliente.calle && !esDireccionValido()">
-        <span class="error-text" *ngIf="formCliente.calle && !esDireccionValido()">La dirección debe tener al menos 5 caracteres</span>
+        <span class="error-text" *ngIf="formCliente.calle && !esDireccionValido()">La direccion debe tener al menos 5 caracteres</span>
       </div>
 
       <div class="form-group">

@@ -51,7 +51,7 @@ public class PdfServicio {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // Colores corporativos según formato
+            // Colores corporativos segun formato
             java.awt.Color brandOrange = new java.awt.Color(255, 107, 0);
             java.awt.Color darkGray = new java.awt.Color(33, 33, 33);
             java.awt.Color lightGray = new java.awt.Color(245, 245, 245);
@@ -73,18 +73,18 @@ public class PdfServicio {
             Font fontBoldText = FontFactory.getFont(FontFactory.HELVETICA_BOLD, isCompact ? 8 : 9, Font.BOLD, textDark);
             Font fontTableHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, isCompact ? 8 : 9, Font.BOLD, java.awt.Color.WHITE);
 
-            // Título Principal
-            Paragraph titulo = new Paragraph("LA BROSTERÍA - REPORTE ANALÍTICO DE VENTAS", fontHeader);
+            // Titulo Principal
+            Paragraph titulo = new Paragraph("LA BROSTERIA - REPORTE ANALITICO DE VENTAS", fontHeader);
             titulo.setAlignment(Element.ALIGN_CENTER);
             titulo.setSpacingAfter(isCompact ? 2 : 5);
             document.add(titulo);
 
-            Paragraph subtitulo = new Paragraph("Informe de Métricas de Negocio, Canales y Rendimiento Operativo", FontFactory.getFont(FontFactory.HELVETICA, isCompact ? 8 : 10, Font.ITALIC, darkGray));
+            Paragraph subtitulo = new Paragraph("Informe de Metricas de Negocio, Canales y Rendimiento Operativo", FontFactory.getFont(FontFactory.HELVETICA, isCompact ? 8 : 10, Font.ITALIC, darkGray));
             subtitulo.setAlignment(Element.ALIGN_CENTER);
             subtitulo.setSpacingAfter(isCompact ? 8 : 15);
             document.add(subtitulo);
 
-            // Calcular Métricas
+            // Calcular Metricas
             long totalPedidos = pedidos.size();
             long completados = pedidos.stream().filter(p -> "ENTREGADO".equals(p.getStatus())).count();
             long cancelados = pedidos.stream().filter(p -> "CANCELADO".equals(p.getStatus())).count();
@@ -144,12 +144,12 @@ public class PdfServicio {
 
             document.add(tableKpi);
 
-            // Cargar detalles para estadísticas de productos
+            // Cargar detalles para estadisticas de productos
             List<Long> pedidoIds = pedidos.stream().map(PedidoEntidad::getId).collect(Collectors.toList());
             List<DetallePedidoEntidad> detalles = pedidoIds.isEmpty() ? new ArrayList<>() 
                     : detallePedidoRepositorio.findByPedidoEntidadIdIn(pedidoIds);
 
-            // Calcular productos más vendidos
+            // Calcular productos mas vendidos
             Map<String, Integer> prodCounts = new HashMap<>();
             for (DetallePedidoEntidad det : detalles) {
                 if (det.getProductoEntidad() != null) {
@@ -162,7 +162,7 @@ public class PdfServicio {
                     .limit(5)
                     .collect(Collectors.toList());
 
-            // Dos Columnas: Top Productos (Izquierda) y Métodos de Pago (Derecha)
+            // Dos Columnas: Top Productos (Izquierda) y Metodos de Pago (Derecha)
             PdfPTable tableTopRow = new PdfPTable(2);
             tableTopRow.setWidthPercentage(100);
             tableTopRow.setSpacingAfter(isCompact ? 10 : 20);
@@ -172,7 +172,7 @@ public class PdfServicio {
             PdfPCell cellLeft = new PdfPCell();
             cellLeft.setBorder(Rectangle.NO_BORDER);
             cellLeft.setPaddingRight(10);
-            Paragraph titleProducts = new Paragraph("TOP 5 PRODUCTOS MÁS VENDIDOS", fontSubHeader);
+            Paragraph titleProducts = new Paragraph("TOP 5 PRODUCTOS MAS VENDIDOS", fontSubHeader);
             titleProducts.setSpacingAfter(8);
             cellLeft.addElement(titleProducts);
 
@@ -198,11 +198,11 @@ public class PdfServicio {
             cellLeft.addElement(tableProducts);
             tableTopRow.addCell(cellLeft);
 
-            // B. Métodos de Pago
+            // B. Metodos de Pago
             PdfPCell cellRight = new PdfPCell();
             cellRight.setBorder(Rectangle.NO_BORDER);
             cellRight.setPaddingLeft(10);
-            Paragraph titlePayments = new Paragraph("VENTAS POR MÉTODO DE PAGO", fontSubHeader);
+            Paragraph titlePayments = new Paragraph("VENTAS POR METODO DE PAGO", fontSubHeader);
             titlePayments.setSpacingAfter(8);
             cellRight.addElement(titlePayments);
 
@@ -210,7 +210,7 @@ public class PdfServicio {
             tablePayments.setWidthPercentage(100);
             tablePayments.setWidths(new float[]{1f, 0.6f, 0.6f});
 
-            addTableHeader(tablePayments, "Método", darkGray, fontTableHeader);
+            addTableHeader(tablePayments, "Metodo", darkGray, fontTableHeader);
             addTableHeader(tablePayments, "Pedidos", darkGray, fontTableHeader);
             addTableHeader(tablePayments, "Porcent.", darkGray, fontTableHeader);
 
@@ -233,17 +233,17 @@ public class PdfServicio {
 
             document.add(tableTopRow);
 
-            // Segunda Fila: Análisis por Día de la Semana (Izquierda) y Bloques Horarios (Derecha)
+            // Segunda Fila: Analisis por Dia de la Semana (Izquierda) y Bloques Horarios (Derecha)
             PdfPTable tableBottomRow = new PdfPTable(2);
             tableBottomRow.setWidthPercentage(100);
             tableBottomRow.setSpacingAfter(isCompact ? 10 : 20);
             tableBottomRow.setWidths(new float[]{1f, 1f});
 
-            // C. Análisis por Día de la Semana
+            // C. Analisis por Dia de la Semana
             PdfPCell cellBottomLeft = new PdfPCell();
             cellBottomLeft.setBorder(Rectangle.NO_BORDER);
             cellBottomLeft.setPaddingRight(10);
-            Paragraph titleDays = new Paragraph("VENTAS POR DÍA DE LA SEMANA", fontSubHeader);
+            Paragraph titleDays = new Paragraph("VENTAS POR DIA DE LA SEMANA", fontSubHeader);
             titleDays.setSpacingAfter(8);
             cellBottomLeft.addElement(titleDays);
 
@@ -251,9 +251,9 @@ public class PdfServicio {
             tableDays.setWidthPercentage(100);
             tableDays.setWidths(new float[]{0.8f, 0.7f, 1.5f});
             
-            addTableHeader(tableDays, "Día", brandOrange, fontTableHeader);
+            addTableHeader(tableDays, "Dia", brandOrange, fontTableHeader);
             addTableHeader(tableDays, "Monto", brandOrange, fontTableHeader);
-            addTableHeader(tableDays, "Distribución", brandOrange, fontTableHeader);
+            addTableHeader(tableDays, "Distribucion", brandOrange, fontTableHeader);
 
             Map<java.time.DayOfWeek, Double> ventasDia = pedidos.stream()
                     .filter(p -> "ENTREGADO".equals(p.getStatus()))
@@ -276,7 +276,7 @@ public class PdfServicio {
             cellBottomLeft.addElement(tableDays);
             tableBottomRow.addCell(cellBottomLeft);
 
-            // D. Análisis de Bloques Horarios
+            // D. Analisis de Bloques Horarios
             PdfPCell cellBottomRight = new PdfPCell();
             cellBottomRight.setBorder(Rectangle.NO_BORDER);
             cellBottomRight.setPaddingLeft(10);
@@ -416,8 +416,8 @@ public class PdfServicio {
 
             document.add(tableThreeRow);
 
-            // Pie de página de generación
-            Paragraph footer = new Paragraph("\nReporte Analítico emitido por La Brostería CRM el " + 
+            // Pie de pagina de generacion
+            Paragraph footer = new Paragraph("\nReporte Analitico emitido por La Brosteria CRM el " + 
                     java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")), 
                     FontFactory.getFont(FontFactory.HELVETICA, 8, Font.ITALIC, java.awt.Color.GRAY));
             footer.setAlignment(Element.ALIGN_CENTER);
@@ -470,10 +470,10 @@ public class PdfServicio {
         switch (day) {
             case MONDAY: return "Lunes";
             case TUESDAY: return "Martes";
-            case WEDNESDAY: return "Miércoles";
+            case WEDNESDAY: return "Miercoles";
             case THURSDAY: return "Jueves";
             case FRIDAY: return "Viernes";
-            case SATURDAY: return "Sábado";
+            case SATURDAY: return "Sabado";
             case SUNDAY: return "Domingo";
             default: return "";
         }

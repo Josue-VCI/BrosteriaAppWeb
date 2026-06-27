@@ -39,7 +39,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.sidebarAbierto = false;
     });
 
-    // Suscripción a Toasts
+    // Suscripcion a Toasts
     this.toastSubscription = this.toastService.toasts$.subscribe(toast => {
       this.toasts.push(toast);
       setTimeout(() => {
@@ -99,7 +99,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
     }
-    // Solo si está logueado
+    // Solo si esta logueado
     if (localStorage.getItem('brosteria_token')) {
       this.timeoutId = setTimeout(() => {
         this.logoutPorInactividad();
@@ -109,6 +109,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private logoutPorInactividad() {
     this.logout();
-    this.toastService.warning('Tu sesión ha expirado por inactividad de 5 minutos.', 8000);
+    this.toastService.warning('Tu sesion ha expirado por inactividad de 5 minutos.', 8000);
   }
 }

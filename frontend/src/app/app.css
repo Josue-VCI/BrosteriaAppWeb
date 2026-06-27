@@ -139,7 +139,7 @@
   padding: 0;
 }
 
-/* Hamburguesa móvil */
+/* Hamburguesa movil */
 .mobile-toggle {
   display: none;
   position: fixed;
@@ -164,7 +164,7 @@
   .sidebar {
     position: fixed;
     top: 0;
-    left: -280px; /* Oculto por defecto en móvil */
+    left: -280px; /* Oculto por defecto en movil */
     margin: 0;
     height: 100vh;
     width: 260px;
@@ -179,7 +179,7 @@
 
   .main-content {
     margin-left: 0 !important;
-    padding: 70px 15px 30px 15px !important; /* Espacio para el botón de hamburguesa arriba */
+    padding: 70px 15px 30px 15px !important; /* Espacio para el boton de hamburguesa arriba */
   }
 }
 

@@ -172,7 +172,7 @@
   font-weight: 500;
 }
 
-/* Descargas de PDF, selector de formato y aviso de rotación responsivo */
+/* Descargas de PDF, selector de formato y aviso de rotacion responsivo */
 .pdf-download-actions {
   display: flex;
   gap: 15px;

@@ -89,7 +89,7 @@ export class ReportesComponent implements OnInit {
         this.renderizarGraficoDistritos(data.distritos || {});
         this.topProductos = data.topProductos || [];
       },
-      error: (err) => console.error('Error al cargar datos del gráfico', err)
+      error: (err) => console.error('Error al cargar datos del grafico', err)
     });
   }
 
@@ -301,7 +301,7 @@ export class ReportesComponent implements OnInit {
         const blobConTipo = new Blob([blob], { type: mimeType });
         const urlBlob = window.URL.createObjectURL(blobConTipo);
 
-        // Detectar iOS Safari (no soporta <a download> creado dinámicamente)
+        // Detectar iOS Safari (no soporta <a download> creado dinamicamente)
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
@@ -325,24 +325,24 @@ export class ReportesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al descargar el reporte PDF', err);
-        this.toastService.error('No se pudo descargar el reporte. Verifica tu conexión al servidor.');
+        this.toastService.error('No se pudo descargar el reporte. Verifica tu conexion al servidor.');
       }
     });
   }
 
   limpiarHistorico() {
-    if (!confirm('¿Está seguro de eliminar de forma permanente todos los pedidos de la base de datos que tengan más de 90 días? Se conservará el total acumulado de cada cliente.')) {
+    if (!confirm('¿Esta seguro de eliminar de forma permanente todos los pedidos de la base de datos que tengan mas de 90 dias? Se conservara el total acumulado de cada cliente.')) {
       return;
     }
 
     this.http.post(`${this.apiBaseUrl}/limpiar-historico`, {}).subscribe({
       next: (res: any) => {
-        this.toastService.success(res.mensaje || 'Historial de base de datos purgado con éxito.');
+        this.toastService.success(res.mensaje || 'Historial de base de datos purgado con exito.');
         this.aplicarFiltros();
       },
       error: (err) => {
         console.error('Error al purgar base de datos', err);
-        this.toastService.error('Ocurrió un error al ejecutar el mantenimiento.');
+        this.toastService.error('Ocurrio un error al ejecutar el mantenimiento.');
       }
     });
   }

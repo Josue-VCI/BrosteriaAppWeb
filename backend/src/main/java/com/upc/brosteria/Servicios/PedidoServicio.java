@@ -83,13 +83,13 @@ public class PedidoServicio {
     public PedidoDTO crear(PedidoDTO pedidoDTO) {
         PedidoEntidad pedido = new PedidoEntidad();
         String name = (pedidoDTO.getCustomerName() == null || pedidoDTO.getCustomerName().trim().isEmpty())
-                ? "Anónimo"
+                ? "Anonimo"
                 : pedidoDTO.getCustomerName().trim();
         String phone = (pedidoDTO.getCustomerPhone() == null || pedidoDTO.getCustomerPhone().trim().isEmpty())
                 ? "000000000"
                 : pedidoDTO.getCustomerPhone().trim();
         String address = (pedidoDTO.getCustomerAddress() == null || pedidoDTO.getCustomerAddress().trim().isEmpty())
-                ? "Sin Dirección"
+                ? "Sin Direccion"
                 : pedidoDTO.getCustomerAddress().trim();
 
         pedido.setCustomerName(name);
@@ -158,7 +158,7 @@ public class PedidoServicio {
             detallePedidoRepositorio.save(det);
         }
 
-        // Recalcular estadísticas del cliente si está registrado
+        // Recalcular estadisticas del cliente si esta registrado
         if (pedido.getClienteEntidad() != null) {
             recalcularYGuardarStatsCliente(pedido.getClienteEntidad());
         }
@@ -179,7 +179,7 @@ public class PedidoServicio {
             enviarComprobantePorCorreo(pedido);
         }
 
-        // Recalcular estadísticas del cliente
+        // Recalcular estadisticas del cliente
         if (pedido.getClienteEntidad() != null) {
             recalcularYGuardarStatsCliente(pedido.getClienteEntidad());
         }
@@ -206,7 +206,7 @@ public class PedidoServicio {
                 insumoServicio.descontarStock(1L, 8.0 * cantDouble);
                 insumoServicio.descontarStock(2L, 0.8 * cantDouble);
                 insumoServicio.descontarStock(8L, 1.0 * cantDouble);
-            } else if (productoId >= 5 && productoId <= 7) { // Clásicos por piezas
+            } else if (productoId >= 5 && productoId <= 7) { // Clasicos por piezas
                 insumoServicio.descontarStock(1L, 1.0 * cantDouble);
                 insumoServicio.descontarStock(2L, 0.2 * cantDouble);
             } else if (productoId == 8) { // 1/4 Pollo
@@ -229,7 +229,7 @@ public class PedidoServicio {
             } else if (productoId == 14) { // Brosteipapa
                 insumoServicio.descontarStock(1L, 1.0 * cantDouble);
                 insumoServicio.descontarStock(2L, 0.3 * cantDouble);
-            } else if (productoId == 15) { // Burger Clásica
+            } else if (productoId == 15) { // Burger Clasica
                 insumoServicio.descontarStock(2L, 0.1 * cantDouble);
             } else if (productoId == 16) { // Burger Broster
                 insumoServicio.descontarStock(1L, 1.0 * cantDouble);
@@ -243,7 +243,7 @@ public class PedidoServicio {
                 insumoServicio.descontarStock(8L, 1.0 * cantDouble);
             } else if (productoId == 25) { // Extras Papas
                 insumoServicio.descontarStock(2L, 0.3 * cantDouble);
-            } else if (productoId == 28) { // Promo Dúo
+            } else if (productoId == 28) { // Promo Duo
                 insumoServicio.descontarStock(1L, 1.0 * cantDouble);
                 insumoServicio.descontarStock(2L, 0.5 * cantDouble);
                 insumoServicio.descontarStock(8L, 2.0 * cantDouble);
@@ -263,7 +263,7 @@ public class PedidoServicio {
 
     private void enviarComprobantePorCorreo(PedidoEntidad pedido) {
         String destinatario = pedido.getClienteEntidad().getEmail();
-        String asunto = "🍗 ¡Gracias por tu compra en La Brostería! - Pedido #" + pedido.getId();
+        String asunto = "🍗 ¡Gracias por tu compra en La Brosteria! - Pedido #" + pedido.getId();
 
         StringBuilder itemsHtml = new StringBuilder();
         List<DetallePedidoEntidad> detalles = detallePedidoRepositorio.findByPedidoEntidadId(pedido.getId());
@@ -274,8 +274,8 @@ public class PedidoServicio {
 
         String html = """
             <div style="font-family: Arial, sans-serif; border: 1px solid #FF6B00; border-radius: 8px; padding: 20px; max-width: 600px;">
-                <h2 style="color: #FF6B00; margin-top: 0;">¡Hola %s! Aquí tienes el detalle de tu orden</h2>
-                <p>Tu pedido ha sido entregado con éxito. ¡Que lo disfrutes!</p>
+                <h2 style="color: #FF6B00; margin-top: 0;">¡Hola %s! Aqui tienes el detalle de tu orden</h2>
+                <p>Tu pedido ha sido entregado con exito. ¡Que lo disfrutes!</p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
                 <h3 style="color: #333;">Detalle del Pedido #%d</h3>
                 <ul>
@@ -283,9 +283,9 @@ public class PedidoServicio {
                 </ul>
                 <p><strong>Costo de Delivery:</strong> S/. %.2f</p>
                 <h3 style="color: #FF6B00;">Total Pagado: S/. %.2f (%s)</h3>
-                <p style="font-size: 12px; color: #888;">Dirección de Entrega: %s</p>
+                <p style="font-size: 12px; color: #888;">Direccion de Entrega: %s</p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
-                <p style="font-size: 12px; color: #888; text-align: center;">La Brostería - Sabor Crujiente Premium</p>
+                <p style="font-size: 12px; color: #888; text-align: center;">La Brosteria - Sabor Crujiente Premium</p>
             </div>
             """.formatted(pedido.getCustomerName(), pedido.getId(), itemsHtml.toString(), pedido.getDeliveryCost(), pedido.getTotal(), pedido.getPaymentMethod(), pedido.getCustomerAddress());
 

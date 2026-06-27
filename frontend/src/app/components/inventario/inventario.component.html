@@ -1,7 +1,7 @@
 <div class="inventario-container">
   <div class="header-section">
     <h2>Control de Inventario e Insumos</h2>
-    <p>Visualiza niveles de ingredientes críticos y realiza operaciones CRUD</p>
+    <p>Visualiza niveles de ingredientes criticos y realiza operaciones CRUD</p>
   </div>
 
   <div class="actions-bar" *ngIf="esAdmin">
@@ -25,12 +25,12 @@
           </th>
           <th>Unidad</th>
           <th (click)="ordenarPor('minimumStock')" class="sortable-header">
-            Stock Mínimo
+            Stock Minimo
             <span class="sort-arrow" *ngIf="columnaOrden === 'minimumStock'">{{ ordenAscendente ? '▲' : '▼' }}</span>
             <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'minimumStock'">↕</span>
           </th>
           <th>Estado</th>
-          <th>Última Actualización</th>
+          <th>Ultima Actualizacion</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -42,7 +42,7 @@
           <td class="number-font">{{ insumo.minimumStock | number:'1.1-2' }}</td>
           <td>
             <span class="badge" [class.badge-success]="insumo.quantity > insumo.minimumStock" [class.badge-danger]="insumo.quantity <= insumo.minimumStock">
-              {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico' }}
+              {{ insumo.quantity > insumo.minimumStock ? 'Optimo' : 'Critico' }}
             </span>
           </td>
           <td>{{ insumo.updatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -58,17 +58,17 @@
     </table>
   </div>
 
-  <!-- Vista Móvil: Listado de Doble Fila por Insumo (Oculto en Desktop) -->
+  <!-- Vista Movil: Listado de Doble Fila por Insumo (Oculto en Desktop) -->
   <div class="mobile-only-inventory mobile-insumos-list">
     <div class="mobile-insumo-card glass-card" *ngFor="let insumo of insumos" [class.alert-card]="insumo.quantity <= insumo.minimumStock">
       <!-- Fila 1: Nombre del insumo (izquierda) y badge de estado (derecha) -->
       <div class="card-row row-top">
         <span class="insumo-name"><strong>{{ insumo.name }}</strong></span>
         <span class="badge" [class.badge-success]="insumo.quantity > insumo.minimumStock" [class.badge-danger]="insumo.quantity <= insumo.minimumStock">
-          {{ insumo.quantity > insumo.minimumStock ? 'Óptimo' : 'Crítico' }}
+          {{ insumo.quantity > insumo.minimumStock ? 'Optimo' : 'Critico' }}
         </span>
       </div>
-      <!-- Fila 2: Cantidad disponible (izquierda) y botones de acción rápidos (derecha) -->
+      <!-- Fila 2: Cantidad disponible (izquierda) y botones de accion rapidos (derecha) -->
       <div class="card-row row-bottom">
         <span class="insumo-qty number-font">
           {{ insumo.quantity | number:'1.1-2' }} <small>{{ insumo.unit }}</small>
@@ -127,9 +127,9 @@
       </div>
 
       <div class="form-group">
-        <label for="crudMin">Stock de Alerta Mínimo *</label>
+        <label for="crudMin">Stock de Alerta Minimo *</label>
         <input type="number" id="crudMin" [(ngModel)]="formInsumo.minimumStock" min="0" step="0.1" class="modal-input" [class.input-error]="formInsumo.minimumStock !== null && !esStockMinimoValido()">
-        <span class="error-text" *ngIf="formInsumo.minimumStock !== null && !esStockMinimoValido()">El stock mínimo debe ser mayor o igual a 0</span>
+        <span class="error-text" *ngIf="formInsumo.minimumStock !== null && !esStockMinimoValido()">El stock minimo debe ser mayor o igual a 0</span>
       </div>
       
       <div class="modal-actions">

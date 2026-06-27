@@ -15,14 +15,14 @@ import { ToastService } from '../../services/toast.service';
 export class PedidosComponent implements OnInit, OnDestroy {
   pedidosCocina: any[] = [];
   pedidosDespacho: any[] = [];
-  columnaActiva = 'COCINA'; // Control para móviles: COCINA, DESPACHO
+  columnaActiva = 'COCINA'; // Control para moviles: COCINA, DESPACHO
 
   // Polling y Alerta Sonora
   intervalId: any;
   cantidadPendientesAnterior = -1; // Sentinel -1 evita que suene en el primer load
   audioCtx: AudioContext | null = null;
 
-  // Catálogo y Modal de Parser
+  // Catalogo y Modal de Parser
   productosCatalogo: any[] = [];
   mostrarModalNuevoPedido = false;
   textoWhatsApp = '';
@@ -45,12 +45,12 @@ export class PedidosComponent implements OnInit, OnDestroy {
     this.cargarTodosLosPedidos();
     this.cargarProductos();
 
-    // Polling automático cada 10 segundos
+    // Polling automatico cada 10 segundos
     this.intervalId = setInterval(() => {
       this.cargarTodosLosPedidos();
     }, 10000);
 
-    // Escuchar cambios de visibilidad de pestaña para ahorrar llamadas e impedir acumulación de audio
+    // Escuchar cambios de visibilidad de pestaña para ahorrar llamadas e impedir acumulacion de audio
     document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
@@ -83,7 +83,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   cargarProductos() {
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/productos`).subscribe({
       next: (data) => this.productosCatalogo = data,
-      error: (err) => console.error('Error al cargar catálogo de productos', err)
+      error: (err) => console.error('Error al cargar catalogo de productos', err)
     });
   }
 
@@ -108,7 +108,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   actualizarEstado(pedidoId: number, nuevoEstado: string) {
     if (nuevoEstado === 'ENTREGADO') {
-      const confirmar = confirm('¿Está seguro de marcar este pedido como Pagado y Entregado? Se archivará del tablero.');
+      const confirmar = confirm('¿Esta seguro de marcar este pedido como Pagado y Entregado? Se archivara del tablero.');
       if (!confirmar) return;
     }
 
@@ -117,7 +117,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     const copiaDespacho = [...this.pedidosDespacho];
     const copiaCantidadPendientes = this.cantidadPendientesAnterior;
 
-    // Actualización optimista de UI
+    // Actualizacion optimista de UI
     if (nuevoEstado === 'PREPARANDO') {
       // El pedido se queda en Cocina pero cambia su estado a PREPARANDO
       this.pedidosCocina = this.pedidosCocina.map(p => 
@@ -192,7 +192,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     osc.stop(ctx.currentTime + retraso + duracion);
   }
 
-  // Lógica del Parser de WhatsApp
+  // Logica del Parser de WhatsApp
   abrirNuevoPedido() {
     this.textoWhatsApp = '';
     this.formPedido = {
@@ -247,7 +247,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     else if (parsedPaymentStr.includes('PLIN')) paymentMethod = 'PLIN';
     else if (parsedPaymentStr.includes('TARJETA')) paymentMethod = 'TARJETA';
 
-    // Procesar líneas de productos
+    // Procesar lineas de productos
     const detalles: any[] = [];
     const lines = text.split('\n');
     let inDetail = false;
@@ -262,7 +262,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
         inDetail = false;
       }
 
-      // Detectar líneas de productos con mayor flexibilidad (soporta viñetas de guion, asterisco, números o directo)
+      // Detectar lineas de productos con mayor flexibilidad (soporta viñetas de guion, asterisco, numeros o directo)
       const isProductLine = cleanLine.match(/^[-\*\d\.\s]*\d+x\s*/i);
       if (inDetail && isProductLine) {
         const match = cleanLine.match(/^[-\*\d\.\s]*(\d+)x\s*([^(]+)/i);
@@ -272,14 +272,14 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
           productName = this.limpiarNombreProducto(productName);
 
-          // Extraer cremas específicas de la fila si están indicadas entre paréntesis (ej: (Cremas: Mayo, Ketchup))
+          // Extraer cremas especificas de la fila si estan indicadas entre parentesis (ej: (Cremas: Mayo, Ketchup))
           let creamsDeFila = parsedCreams;
           const creamsInLineMatch = cleanLine.match(/\(Cremas:\s*([^)]+)\)/i);
           if (creamsInLineMatch) {
             creamsDeFila = creamsInLineMatch[1].trim();
           }
 
-          // Buscar coincidencia ultra-robusta en el catálogo
+          // Buscar coincidencia ultra-robusta en el catalogo
           const product = this.buscarCoincidencia(productName);
 
           if (product) {
@@ -292,7 +292,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
               creams: creamsDeFila
             });
           } else {
-            // Producto no emparejado: se asume precio 0 y se marca para resolución manual
+            // Producto no emparejado: se asume precio 0 y se marca para resolucion manual
             detalles.push({
               productoId: null,
               productoName: productName,
@@ -328,7 +328,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     return name
       .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '')
       .replace(/[⚽🏆🥅⏱️🤤🍗🦴🍟🍔🌶️😎🎉]/g, '')
-      .replace(/[^\w\s\d().,áéíóúÁÉÍÓÚñÑ-]/g, '')
+      .replace(/[^\w\s\d().,aeiouAEIOUñÑ-]/g, '')
       .trim();
   }
 
@@ -336,10 +336,10 @@ export class PedidosComponent implements OnInit, OnDestroy {
     if (!text) return '';
     return text
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Quitar tildes y diacríticos
+      .replace(/[\u0300-\u036f]/g, '') // Quitar tildes y diacriticos
       .toLowerCase()
       .replace(/[^\w\s]/g, '') // Eliminar caracteres especiales
-      .replace(/\s+/g, ' ') // Colapsar espacios múltiples
+      .replace(/\s+/g, ' ') // Colapsar espacios multiples
       .trim();
   }
 
@@ -347,7 +347,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     const cleanInput = this.normalizarParaComparar(productName);
     if (!cleanInput) return null;
 
-    // 1. Coincidencia exacta o contención directa
+    // 1. Coincidencia exacta o contencion directa
     let match = this.productosCatalogo.find(p => {
       const cleanCat = this.normalizarParaComparar(p.name);
       return cleanCat === cleanInput || cleanCat.includes(cleanInput) || cleanInput.includes(cleanCat);
@@ -448,11 +448,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     const tieneNoCoincidentes = this.formPedido.detalles.some((d: any) => !d.productoId);
     if (tieneNoCoincidentes) {
-      this.toastService.warning('Por favor, selecciona un producto válido para todos los elementos.');
+      this.toastService.warning('Por favor, selecciona un producto valido para todos los elementos.');
       return;
     }
 
-    // Limpiar el payload enviando únicamente los campos esperados por el backend DTO
+    // Limpiar el payload enviando unicamente los campos esperados por el backend DTO
     const cleanDetalles = this.formPedido.detalles.map((d: any) => ({
       productoId: d.productoId,
       quantity: d.quantity,
@@ -483,11 +483,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
       next: () => {
         this.cargarTodosLosPedidos();
         this.cerrarModalNuevoPedido();
-        this.toastService.success('Pedido registrado con éxito.');
+        this.toastService.success('Pedido registrado con exito.');
       },
       error: (err) => {
         console.error('Error al guardar pedido', err);
-        this.toastService.error('Ocurrió un error al registrar el pedido.');
+        this.toastService.error('Ocurrio un error al registrar el pedido.');
       }
     });
   }

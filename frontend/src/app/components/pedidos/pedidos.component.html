@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  <!-- Selector de Pestañas en Móvil -->
+  <!-- Selector de Pestañas en Movil -->
   <div class="mobile-tabs">
     <button [class.active]="columnaActiva === 'COCINA'" (click)="columnaActiva = 'COCINA'">
       Cocina ({{ pedidosCocina.length }})
@@ -58,7 +58,7 @@
             </div>
           </div>
           <div class="card-actions">
-            <!-- Si está PENDIENTE, permitir pasar a PREPARANDO (Cocina), si está en PREPARANDO, pasar a ENVIADO (Despachado) -->
+            <!-- Si esta PENDIENTE, permitir pasar a PREPARANDO (Cocina), si esta en PREPARANDO, pasar a ENVIADO (Despachado) -->
             <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')">Empezar a Cocinar</button>
             <button *ngIf="pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')">Listo para Despachar</button>
           </div>
@@ -111,12 +111,12 @@
   <div class="modal-backdrop" *ngIf="mostrarModalNuevoPedido">
     <div class="modal-card glass-card">
       <h3>Registrar Pedido desde WhatsApp</h3>
-      <p class="destination-sub">Pega el texto del mensaje de WhatsApp para auto-rellenar el formulario, o complétalo manualmente.</p>
+      <p class="destination-sub">Pega el texto del mensaje de WhatsApp para auto-rellenar el formulario, o completalo manualmente.</p>
 
       <!-- Entrada de texto -->
       <div class="form-group">
         <label for="textoRaw">Mensaje de WhatsApp (Opcional)</label>
-        <textarea id="textoRaw" [(ngModel)]="textoWhatsApp" (input)="procesarTextoWhatsApp()" placeholder="Pega aquí el mensaje del cliente para auto-rellenar..." rows="4" class="modal-textarea"></textarea>
+        <textarea id="textoRaw" [(ngModel)]="textoWhatsApp" (input)="procesarTextoWhatsApp()" placeholder="Pega aqui el mensaje del cliente para auto-rellenar..." rows="4" class="modal-textarea"></textarea>
       </div>
 
       <!-- Formulario de datos del cliente (siempre visible) -->
@@ -129,7 +129,7 @@
             <input type="text" [(ngModel)]="formPedido.customerName" class="modal-input" placeholder="Nombre del cliente">
           </div>
           <div class="form-group">
-            <label>Teléfono Celular (Opcional)</label>
+            <label>Telefono Celular (Opcional)</label>
             <input type="tel" [(ngModel)]="formPedido.customerPhone" class="modal-input" placeholder="Ej. 960373555" inputmode="numeric">
           </div>
         </div>
@@ -150,8 +150,8 @@
 
         <div class="preview-grid" style="margin-top: 10px;">
           <div class="form-group">
-            <label>Dirección de Entrega (Opcional)</label>
-            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Dirección exacta" [disabled]="formPedido.type === 'PICKUP'">
+            <label>Direccion de Entrega (Opcional)</label>
+            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Direccion exacta" [disabled]="formPedido.type === 'PICKUP'">
           </div>
           <div class="form-group">
             <label>Distrito (Opcional)</label>
@@ -172,11 +172,11 @@
 
         <div class="preview-grid" style="margin-top: 10px;">
           <div class="form-group" style="grid-column: 1 / -1;">
-            <label>Método de Pago</label>
+            <label>Metodo de Pago</label>
             <select [(ngModel)]="formPedido.paymentMethod" class="modal-input">
               <option value="YAPE">Yape</option>
               <option value="PLIN">Plin</option>
-              <option value="TARJETA">Tarjeta de Crédito/Débito</option>
+              <option value="TARJETA">Tarjeta de Credito/Debito</option>
               <option value="EFECTIVO">Efectivo</option>
             </select>
           </div>
@@ -188,13 +188,13 @@
           
           <div class="parsed-item-row" *ngFor="let det of formPedido.detalles; let i = index" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--glass-border);">
             
-            <!-- Fila superior: Cantidad y Selector del Catálogo -->
+            <!-- Fila superior: Cantidad y Selector del Catalogo -->
             <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
               <input type="number" [(ngModel)]="det.quantity" (ngModelChange)="onQuantityChange(det)" style="width: 50px; text-align: center; padding: 6px; border-radius: 4px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: var(--text-light);" min="1" placeholder="Cant.">
               
               <div style="flex-grow: 1;">
                 <select [ngModel]="det.productoId" (change)="onProductoChange(det, $event)" class="modal-input" style="padding: 6px; font-size: 13px; width: 100%;" [style.border-color]="!det.productoId ? 'var(--error)' : 'var(--glass-border)'">
-                  <option value="">-- Selecciona el producto del catálogo --</option>
+                  <option value="">-- Selecciona el producto del catalogo --</option>
                   <option *ngFor="let p of productosCatalogo" [value]="p.id">
                     {{ p.name }} (S/. {{ p.price | number:'1.2-2' }})
                   </option>
@@ -215,13 +215,13 @@
             <!-- Fila inferior: Alertas -->
             <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 58px; width: 100%;">
               <div *ngIf="det.noCoincide && det.productoName" class="select-error-container" style="margin-bottom: 2px;">
-                <span class="error-text" style="font-size: 11px; color: var(--error);">⚠️ No vinculado automático: <strong>"{{ det.productoName }}"</strong></span>
+                <span class="error-text" style="font-size: 11px; color: var(--error);">⚠️ No vinculado automatico: <strong>"{{ det.productoName }}"</strong></span>
               </div>
             </div>
             
           </div>
 
-          <!-- Botón de Agregar Producto Manual -->
+          <!-- Boton de Agregar Producto Manual -->
           <div style="display: flex; justify-content: flex-start; margin-top: 5px;">
             <button type="button" class="brand-btn" (click)="agregarFilaDetalle()" style="padding: 6px 12px; font-size: 12px; background: var(--secondary) !important;">
               ➕ Agregar Producto
@@ -231,7 +231,7 @@
 
         <div class="preview-totals" style="margin-top: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
           <div class="total-row" style="font-size: 13px; color: var(--text-muted);">
-            <span>Envío: </span>
+            <span>Envio: </span>
             <span class="number-font" style="margin-left: 10px;">S/. {{ formPedido.deliveryCost | number:'1.2-2' }}</span>
           </div>
           <div class="total-row grand-total" style="font-size: 16px; font-weight: bold; border-top: 1px solid var(--glass-border); padding-top: 6px;">

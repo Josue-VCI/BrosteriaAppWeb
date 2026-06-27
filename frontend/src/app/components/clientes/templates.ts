@@ -3,14 +3,14 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Alienta a la Selección con La Brostería! </title>
+    <title>¡Alienta a la Seleccion con La Brosteria! </title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #1f2937;">
 
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5; padding: 20px 0;">
         <tr>
             <td align="center">
-                <!-- Contenedor Principal (Max 600px para óptima visualización en móviles y desktop) -->
+                <!-- Contenedor Principal (Max 600px para optima visualizacion en moviles y desktop) -->
                 <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #0b0b0c; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #27272a;">
                     
                     <!-- 1. Cabecera con Naranja Broster y Banner del Mundial -->
@@ -18,7 +18,7 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                         <td align="center" style="background: linear-gradient(135deg, #FF6B00 0%, #CC5500 100%); padding: 40px 20px; text-align: center;">
                             <span style="font-size: 50px; display: block; margin-bottom: 10px;"></span>
                             <h1 style="color: #ffffff; margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">¡GOL DE SABOR MUNDIALISTA!</h1>
-                            <p style="color: #ffca3a; margin: 10px 0 0 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">Alienta a la Selección con el Sabor Más Crujiente de Surquillo</p>
+                            <p style="color: #ffca3a; margin: 10px 0 0 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">Alienta a la Seleccion con el Sabor Mas Crujiente de Surquillo</p>
                         </td>
                     </tr>
 
@@ -27,13 +27,13 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                         <td style="padding: 40px 30px; background-color: #121214;">
                             <h2 style="color: #ffffff; font-size: 20px; margin-top: 0; font-family: Arial, sans-serif;">¡Hola, Broster Lover! </h2>
                             <p style="color: #a0a0a8; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
-                                La fiesta del fútbol se vive en la cancha, pero el verdadero aliento se disfruta en la mesa. En <strong>La Brostería</strong> nos pusimos la camiseta para traerte los mejores combos crujientes con descuento para que grites cada gol con sabor premium.
+                                La fiesta del futbol se vive en la cancha, pero el verdadero aliento se disfruta en la mesa. En <strong>La Brosteria</strong> nos pusimos la camiseta para traerte los mejores combos crujientes con descuento para que grites cada gol con sabor premium.
                             </p>
 
                             <!-- Divisor -->
                             <hr style="border: 0; border-top: 1px solid #27272a; margin: 25px 0;">
 
-                            <!-- 3. Sección de Combos Mundialistas destacados -->
+                            <!-- 3. Seccion de Combos Mundialistas destacados -->
                             <h3 style="color: #FFB703; font-size: 18px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px;"> Combos en la Cancha:</h3>
                             
                             <!-- Combo 1 -->
@@ -43,7 +43,7 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                                         <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                             <tr>
                                                 <td>
-                                                    <span style="background-color: #FF6B00; color: #ffffff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; font-family: sans-serif;">Más Vendido ⭐</span>
+                                                    <span style="background-color: #FF6B00; color: #ffffff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; font-family: sans-serif;">Mas Vendido ⭐</span>
                                                     <h4 style="color: #ffffff; font-size: 16px; margin: 10px 0 5px 0; font-family: Arial, sans-serif;">Combo El Hincha </h4>
                                                     <p style="color: #a0a0a8; font-size: 13px; margin: 0 0 10px 0;">1 Pieza de pollo broster crujiente + Papas fritas abundantes + Bebida helada personal.</p>
                                                 </td>
@@ -76,12 +76,12 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                                 </tr>
                             </table>
 
-                            <!-- 4. Botón de Llamada a la Acción (WhatsApp Link) -->
+                            <!-- 4. Boton de Llamada a la Accion (WhatsApp Link) -->
                             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td align="center" style="padding-top: 10px;">
                                         <a href="https://wa.me/51960373555?text=Hola!%20Quiero%20pedir%20el%20Combo%20Mundialista%20por%20favor" target="_blank" style="background: linear-gradient(135deg, #FF6B00 0%, #FF8A33 100%); color: #ffffff; display: inline-block; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; text-decoration: none; padding: 15px 35px; border-radius: 50px; box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">
-                                            🟢 Pide por WhatsApp Aquí
+                                            🟢 Pide por WhatsApp Aqui
                                         </a>
                                     </td>
                                 </tr>
@@ -90,13 +90,13 @@ export const WORLD_CUP_TEMPLATE = `<!DOCTYPE html>
                         </td>
                     </tr>
 
-                    <!-- 5. Pie de Página con Info de Contacto -->
+                    <!-- 5. Pie de Pagina con Info de Contacto -->
                     <tr>
                         <td align="center" style="background-color: #09090b; padding: 30px 20px; border-top: 1px solid #27272a; text-align: center;">
-                            <h4 style="color: #ffffff; margin: 0 0 10px 0; font-family: Arial, sans-serif;">LA BROSTERÍA</h4>
-                            <p style="color: #a0a0a8; font-size: 12px; margin: 0 0 5px 0;"> Surquillo, Lima, Perú (Cerca al Mercado de Surquillo)</p>
+                            <h4 style="color: #ffffff; margin: 0 0 10px 0; font-family: Arial, sans-serif;">LA BROSTERIA</h4>
+                            <p style="color: #a0a0a8; font-size: 12px; margin: 0 0 5px 0;"> Surquillo, Lima, Peru (Cerca al Mercado de Surquillo)</p>
                             <p style="color: #a0a0a8; font-size: 12px; margin: 0 0 15px 0;"> Pedidos: 960 373 555 | Horario: Lun a Dom 5:00 PM – 11:00 PM</p>
-                            <p style="color: #71717a; font-size: 11px; margin: 0;">© 2026 La Brostería. Todos los derechos reservados.</p>
+                            <p style="color: #71717a; font-size: 11px; margin: 0;">© 2026 La Brosteria. Todos los derechos reservados.</p>
                         </td>
                     </tr>
                 </table>
@@ -129,9 +129,9 @@ export const COMBO_PROMO_TEMPLATE = `<!DOCTYPE html>
                     </tr>
                     <tr>
                         <td style="padding: 35px 25px; background-color: #121214;">
-                            <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">¡Prepárate para duplicar el sabor! </h2>
+                            <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">¡Preparate para duplicar el sabor! </h2>
                             <p style="color: #a0a0a8; font-size: 14px; line-height: 1.6;">
-                                Este mes tiramos la casa por la ventana. Compra cualquiera de nuestros combos seleccionados y llévate el segundo **completamente gratis**. ¡Sí, leíste bien, 2x1 en sabor crujiente!
+                                Este mes tiramos la casa por la ventana. Compra cualquiera de nuestros combos seleccionados y llevate el segundo **completamente gratis**. ¡Si, leiste bien, 2x1 en sabor crujiente!
                             </p>
                             <hr style="border: 0; border-top: 1px solid #27272a; margin: 20px 0;">
                             <h3 style="color: #FFB703; font-size: 16px; margin-bottom: 15px;"> COMBOS SELECCIONADOS:</h3>
@@ -140,7 +140,7 @@ export const COMBO_PROMO_TEMPLATE = `<!DOCTYPE html>
                                 <tr>
                                     <td>
                                         <h4 style="color: #ffffff; font-size: 15px; margin: 0 0 5px 0;">2x1 Brosteipapa Extrema </h4>
-                                        <p style="color: #a0a0a8; font-size: 12px; margin: 0;">Doble porción de papas crujientes + Tiras abundantes de pollo broster + Todas las cremas.</p>
+                                        <p style="color: #a0a0a8; font-size: 12px; margin: 0;">Doble porcion de papas crujientes + Tiras abundantes de pollo broster + Todas las cremas.</p>
                                     </td>
                                     <td width="90" align="right" valign="middle">
                                         <span style="color: #FFB703; font-size: 18px; font-weight: bold;">S/. 12.00</span>
@@ -152,7 +152,7 @@ export const COMBO_PROMO_TEMPLATE = `<!DOCTYPE html>
                                 <tr>
                                     <td>
                                         <h4 style="color: #ffffff; font-size: 15px; margin: 0 0 5px 0;">2x1 Salchipapa Familiar Especial </h4>
-                                        <p style="color: #a0a0a8; font-size: 12px; margin: 0;">Dos súper fuentes de papas fritas + Hot dog de la casa abundante + Cremas.</p>
+                                        <p style="color: #a0a0a8; font-size: 12px; margin: 0;">Dos super fuentes de papas fritas + Hot dog de la casa abundante + Cremas.</p>
                                     </td>
                                     <td width="90" align="right" valign="middle">
                                         <span style="color: #FFB703; font-size: 18px; font-weight: bold;">S/. 15.00</span>
@@ -173,9 +173,9 @@ export const COMBO_PROMO_TEMPLATE = `<!DOCTYPE html>
                     </tr>
                     <tr>
                         <td align="center" style="background-color: #09090b; padding: 25px 20px; border-top: 1px solid #27272a;">
-                            <h4 style="color: #ffffff; margin: 0 0 5px 0;">LA BROSTERÍA</h4>
-                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Surquillo, Lima, Perú |  Pedidos: 960 373 555</p>
-                            <p style="color: #71717a; font-size: 10px; margin: 0;">Recibiste este correo automático de fidelización de La Brostería.</p>
+                            <h4 style="color: #ffffff; margin: 0 0 5px 0;">LA BROSTERIA</h4>
+                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Surquillo, Lima, Peru |  Pedidos: 960 373 555</p>
+                            <p style="color: #71717a; font-size: 10px; margin: 0;">Recibiste este correo automatico de fidelizacion de La Brosteria.</p>
                         </td>
                     </tr>
                 </table>
@@ -191,7 +191,7 @@ export const WEEKEND_PROMO_TEMPLATE = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Fin de Semana de Locura en La Brostería! </title>
+    <title>¡Fin de Semana de Locura en La Brosteria! </title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937;">
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5; padding: 20px 0;">
@@ -207,9 +207,9 @@ export const WEEKEND_PROMO_TEMPLATE = `<!DOCTYPE html>
                     </tr>
                     <tr>
                         <td style="padding: 35px 25px; background-color: #121214;">
-                            <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">¡Relájate y disfruta del mejor broster! </h2>
+                            <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">¡Relajate y disfruta del mejor broster! </h2>
                             <p style="color: #a0a0a8; font-size: 14px; line-height: 1.6;">
-                                Llegó el fin de semana y en **La Brostería** queremos que te olvides de la cocina. Por eso, te traemos una promoción increíble: **descuentos especiales en todos nuestros combos familiares** y gaseosa de cortesía.
+                                Llego el fin de semana y en **La Brosteria** queremos que te olvides de la cocina. Por eso, te traemos una promocion increible: **descuentos especiales en todos nuestros combos familiares** y gaseosa de cortesia.
                             </p>
                             <hr style="border: 0; border-top: 1px solid #27272a; margin: 20px 0;">
                             <h3 style="color: #FFB703; font-size: 16px; margin-bottom: 15px;"> PROMO FIN DE SEMANA:</h3>
@@ -240,9 +240,9 @@ export const WEEKEND_PROMO_TEMPLATE = `<!DOCTYPE html>
                     </tr>
                     <tr>
                         <td align="center" style="background-color: #09090b; padding: 25px 20px; border-top: 1px solid #27272a;">
-                            <h4 style="color: #ffffff; margin: 0 0 5px 0;">LA BROSTERÍA</h4>
-                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Surquillo, Lima, Perú |  Pedidos: 960 373 555</p>
-                            <p style="color: #71717a; font-size: 10px; margin: 0;">Recibiste este correo automático de fidelización de La Brostería.</p>
+                            <h4 style="color: #ffffff; margin: 0 0 5px 0;">LA BROSTERIA</h4>
+                            <p style="color: #a0a0a8; font-size: 11px; margin: 0 0 10px 0;"> Surquillo, Lima, Peru |  Pedidos: 960 373 555</p>
+                            <p style="color: #71717a; font-size: 10px; margin: 0;">Recibiste este correo automatico de fidelizacion de La Brosteria.</p>
                         </td>
                     </tr>
                 </table>

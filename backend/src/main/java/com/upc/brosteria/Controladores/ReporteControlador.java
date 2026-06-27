@@ -94,7 +94,7 @@ public class ReporteControlador {
         } else if ("mes".equalsIgnoreCase(filtroRango)) {
             limite = LocalDateTime.now().minusMonths(1);
         } else {
-            limite = LocalDateTime.now().minusMonths(3); // Por defecto últimos 3 meses
+            limite = LocalDateTime.now().minusMonths(3); // Por defecto ultimos 3 meses
         }
 
         final LocalDateTime finalLimite = limite;
@@ -109,21 +109,21 @@ public class ReporteControlador {
                     .collect(Collectors.toList());
         }
 
-        // Aplicar filtro por día de la semana si existe
+        // Aplicar filtro por dia de la semana si existe
         if (diaSemana != null && !diaSemana.isEmpty()) {
             pedidos = pedidos.stream()
                     .filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana))
                     .collect(Collectors.toList());
         }
 
-        // 1. Agrupar ventas por día/fecha para el gráfico de línea
+        // 1. Agrupar ventas por dia/fecha para el grafico de linea
         Map<String, Double> ventasPorFecha = new LinkedHashMap<>();
         for (PedidoEntidad p : pedidos) {
             String fechaKey = p.getOrderDate().toLocalDate().toString();
             ventasPorFecha.put(fechaKey, ventasPorFecha.getOrDefault(fechaKey, 0.0) + p.getTotal());
         }
 
-        // 2. Agrupar métodos de pago para dona
+        // 2. Agrupar metodos de pago para dona
         Map<String, Long> pagosMap = pedidos.stream()
                 .collect(Collectors.groupingBy(PedidoEntidad::getPaymentMethod, Collectors.counting()));
 
@@ -134,7 +134,7 @@ public class ReporteControlador {
             pedidosPorHora[hora]++;
         }
 
-        // 4. Distritos con más pedidos
+        // 4. Distritos con mas pedidos
         Map<String, Long> distritosMap = pedidos.stream()
                 .collect(Collectors.groupingBy(p -> extraerDistrito(p.getCustomerAddress()), Collectors.counting()));
 
@@ -294,7 +294,7 @@ public class ReporteControlador {
     public ResponseEntity<Map<String, Object>> limpiarHistorico() {
         LocalDateTime limite = LocalDateTime.now().minusDays(90);
         
-        // Contar cuántos pedidos se van a eliminar
+        // Contar cuantos pedidos se van a eliminar
         long totalAEliminar = pedidoRepositorio.countByOrderDateBefore(limite);
         
         if (totalAEliminar > 0) {

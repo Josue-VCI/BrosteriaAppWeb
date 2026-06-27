@@ -1,14 +1,14 @@
 <div class="app-layout" [class.sidebar-active]="sidebarAbierto">
-  <!-- Botón hamburguesa para móvil -->
+  <!-- Boton hamburguesa para movil -->
   <button class="mobile-toggle" *ngIf="mostrarSidebar" (click)="toggleSidebar()">
     ☰
   </button>
 
-  <!-- Sidebar de Navegación Lateral -->
+  <!-- Sidebar de Navegacion Lateral -->
   <aside class="sidebar glass-card" *ngIf="mostrarSidebar">
     <div class="sidebar-brand">
       <span class="brand-icon"><i class="fa-solid fa-drumstick-bite"></i></span>
-      <h3>La Brostería CRM</h3>
+      <h3>La Brosteria CRM</h3>
     </div>
     
     <nav class="sidebar-menu">
@@ -25,7 +25,7 @@
         <span class="menu-icon"><i class="fa-solid fa-users"></i></span> Clientes
       </a>
       <a *ngIf="esAdmin" routerLink="/reportes" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"><i class="fa-solid fa-chart-pie"></i></span> Reportes Analíticos
+        <span class="menu-icon"><i class="fa-solid fa-chart-pie"></i></span> Reportes Analiticos
       </a>
     </nav>
     
@@ -34,10 +34,10 @@
         <span class="user-avatar"><i class="fa-solid fa-user"></i></span>
         <div class="user-text">
           <span class="user-name">{{ usuarioNombre }}</span>
-          <span class="user-status text-success">● En línea</span>
+          <span class="user-status text-success">● En linea</span>
         </div>
       </div>
-      <button class="logout-btn brand-btn" (click)="logout()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
+      <button class="logout-btn brand-btn" (click)="logout()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesion</button>
     </div>
   </aside>
 

@@ -2,13 +2,13 @@
   <div class="login-card glass-card">
     <div class="login-header">
       <div class="logo-circle"><i class="fa-solid fa-drumstick-bite"></i></div>
-      <h2>La Brostería</h2>
-      <p>Panel de Gestión de Ventas y CRM</p>
+      <h2>La Brosteria</h2>
+      <p>Panel de Gestion de Ventas y CRM</p>
     </div>
 
     <form (ngSubmit)="onSubmit()" class="login-form">
       <div class="form-group">
-        <label for="email">Correo Electrónico</label>
+        <label for="email">Correo Electronico</label>
         <input type="email" id="email" name="email" [(ngModel)]="email" required placeholder="cajero@brosteria.com">
       </div>
 
@@ -22,7 +22,7 @@
       </div>
 
       <button type="submit" class="brand-btn submit-btn" [disabled]="cargando">
-        {{ cargando ? 'Ingresando...' : 'Iniciar Sesión' }}
+        {{ cargando ? 'Ingresando...' : 'Iniciar Sesion' }}
       </button>
     </form>
     

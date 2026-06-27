@@ -40,11 +40,11 @@ export class ClientesComponent implements OnInit {
 
   onTemplateChange() {
     if (this.plantillaSeleccionada === 'mundial') {
-      this.asuntoCampana = '¡GOL DE SABOR MUNDIALISTA! Alienta a la Selección con La Brostería';
-      this.cuerpoCampana = '[Cargada plantilla de correo de promoción mundialista]';
+      this.asuntoCampana = '¡GOL DE SABOR MUNDIALISTA! Alienta a la Seleccion con La Brosteria';
+      this.cuerpoCampana = '[Cargada plantilla de correo de promocion mundialista]';
     } else if (this.plantillaSeleccionada === 'combo') {
       this.asuntoCampana = '¡SUPER PROMO 2X1! Duplica el sabor de tus Salchipapas y Pollo';
-      this.cuerpoCampana = '[Cargada plantilla de correo de promoción 2x1]';
+      this.cuerpoCampana = '[Cargada plantilla de correo de promocion 2x1]';
     } else if (this.plantillaSeleccionada === 'finsemana') {
       this.asuntoCampana = 'FIN DE SEMANA DE LOCURA: ¡Pollo Broster y Gaseosa Gratis!';
       this.cuerpoCampana = '[Cargada plantilla de correo de fin de semana]';
@@ -86,7 +86,7 @@ export class ClientesComponent implements OnInit {
     const query = this.busqueda.toLowerCase().trim();
     let temp = [...this.clientes];
 
-    // 1. Filtrado por búsqueda de texto
+    // 1. Filtrado por busqueda de texto
     if (query) {
       temp = temp.filter(c => 
         (c.name && c.name.toLowerCase().includes(query)) || 
@@ -118,7 +118,7 @@ export class ClientesComponent implements OnInit {
 
     this.clientesFiltrados = temp;
 
-    // Re-aplicar ordenación si hay una columna activa
+    // Re-aplicar ordenacion si hay una columna activa
     if (this.columnaOrden) {
       this.ordenarPorColumnaActiva();
     }
@@ -162,7 +162,7 @@ export class ClientesComponent implements OnInit {
 
   esCelularValido(): boolean {
     const phone = this.formCliente.phone ? this.formCliente.phone.trim() : '';
-    // Celulares de Perú: 9 dígitos iniciando con 9
+    // Celulares de Peru: 9 digitos iniciando con 9
     return /^9\d{8}$/.test(phone);
   }
 
@@ -180,7 +180,7 @@ export class ClientesComponent implements OnInit {
     return this.esNombreValido() && this.esCelularValido() && this.esEmailValido() && this.esDireccionValido();
   }
 
-  // Lógica CRUD
+  // Logica CRUD
   abrirNuevoCliente() {
     this.esEdicion = false;
     this.formCliente = {
@@ -199,7 +199,7 @@ export class ClientesComponent implements OnInit {
     this.esEdicion = true;
     this.formCliente = { ...cliente };
     
-    // Extraer calle y distrito de la dirección
+    // Extraer calle y distrito de la direccion
     const address = cliente.address || '';
     const parts = address.split(', ');
     if (parts.length > 1) {
@@ -233,7 +233,7 @@ export class ClientesComponent implements OnInit {
   }
 
   eliminarCliente(id: number) {
-    if (!confirm('¿Está seguro de eliminar a este cliente? Se perderá su historial de fidelización.')) return;
+    if (!confirm('¿Esta seguro de eliminar a este cliente? Se perdera su historial de fidelizacion.')) return;
 
     this.http.delete(`${this.apiBaseUrl}/${id}`).subscribe({
       next: () => {
@@ -249,7 +249,7 @@ export class ClientesComponent implements OnInit {
       .length;
   }
 
-  // Lógica Masivos
+  // Logica Masivos
   abrirRedactarMasivo() {
     this.asuntoCampana = '';
     this.cuerpoCampana = '';
@@ -277,10 +277,10 @@ export class ClientesComponent implements OnInit {
       htmlContent = WEEKEND_PROMO_TEMPLATE;
     } else {
       htmlContent = `<div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; border: 1px solid #FF6B00; border-radius: 8px;">
-                     <h2 style="color: #FF6B00;">La Brostería - ¡Promoción Especial!</h2>
+                     <h2 style="color: #FF6B00;">La Brosteria - ¡Promocion Especial!</h2>
                      <p>${this.cuerpoCampana.replace(/\n/g, '<br>')}</p>
                      <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
-                     <p style="font-size: 11px; color: #888;">Recibes este correo porque estás registrado en el club de fidelidad de La Brostería.</p>
+                     <p style="font-size: 11px; color: #888;">Recibes este correo porque estas registrado en el club de fidelidad de La Brosteria.</p>
                      </div>`;
     }
 
@@ -294,12 +294,12 @@ export class ClientesComponent implements OnInit {
       next: () => {
         this.enviandoCorreo = false;
         this.cerrarModalCorreo();
-        this.toastService.success('Campaña de Gmail enviada con éxito a ' + destinatarios.length + ' clientes.');
+        this.toastService.success('Campaña de Gmail enviada con exito a ' + destinatarios.length + ' clientes.');
       },
       error: (err) => {
         this.enviandoCorreo = false;
         console.error('Error al enviar correo masivo', err);
-        this.toastService.error('Ocurrió un error al despachar los correos por SMTP.');
+        this.toastService.error('Ocurrio un error al despachar los correos por SMTP.');
       }
     });
   }

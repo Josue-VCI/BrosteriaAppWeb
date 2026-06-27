@@ -1,6 +1,6 @@
--- Script SQL Semilla de Base de Datos y Simulación Matemática de 100 Pedidos
+-- Script SQL Semilla de Base de Datos y Simulacion Matematica de 100 Pedidos
 -- Base de datos: PostgreSQL
--- Ubicación: backend/src/main/resources/data.sql
+-- Ubicacion: backend/src/main/resources/data.sql
 
 -- 1. Insertar Roles por Defecto
 INSERT INTO roles (id, name) VALUES 
@@ -9,55 +9,55 @@ INSERT INTO roles (id, name) VALUES
 (3, 'COCINERO')
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Insertar Usuarios del Personal (2 Administradores y 3 Cajeros de Atención con BCrypt)
+-- 2. Insertar Usuarios del Personal (2 Administradores y 3 Cajeros de Atencion con BCrypt)
 INSERT INTO users (id, name, email, password_hash, role_id, created_at) VALUES
 (1, 'Josue Espinoza (Admin 1)', 'admin@brosteria.com', '$2a$10$h9XoD8G34VqmQfkYwMBPy.l2rK/XeGfu./uEDPUjlBpwJ2Zwr.ET.', 1, NOW()),
 (2, 'Carlos Cajero (Cajero 1)', 'cajero@brosteria.com', '$2a$10$yYtR4Y7IGtThzZWscWf0T.TASnWVLtb3EzTZ//1xfg8SLcns832n.', 2, NOW()),
 (3, 'Administrador 2', 'admin2@brosteria.com', '$2a$10$9F49nqvBe8t9iNC3xqRqW.pfTldvsljd90GBJuin/6bF0e/veuJDW', 1, NOW()),
-(4, 'Atención 2', 'cajero2@brosteria.com', '$2a$10$rQInnKsrHRIldi1LeMZcE.shKxteS8oLcNClDyHhBaHone9s.txym', 2, NOW()),
-(5, 'Atención 3', 'cajero3@brosteria.com', '$2a$10$K879BTLFnflTta3bahV7YuAlOGiIRwKvSofchUhRrv6DcVsEnRl.W', 2, NOW())
+(4, 'Atencion 2', 'cajero2@brosteria.com', '$2a$10$rQInnKsrHRIldi1LeMZcE.shKxteS8oLcNClDyHhBaHone9s.txym', 2, NOW()),
+(5, 'Atencion 3', 'cajero3@brosteria.com', '$2a$10$K879BTLFnflTta3bahV7YuAlOGiIRwKvSofchUhRrv6DcVsEnRl.W', 2, NOW())
 ON CONFLICT (id) DO NOTHING;
 
--- 3. Insertar Catálogo de Productos Reales de La Brostería
+-- 3. Insertar Catalogo de Productos Reales de La Brosteria
 INSERT INTO productos (id, name, description, price, category, image_url, active) VALUES
 -- Combos Mundialistas
 (1, 'Combo El Hincha', '1 Pieza de pollo broster + Papas fritas + Chicha helada o gaseosa personal', 15.00, 'COMBOS', 'images/combo_pecho.png', true),
 (2, 'Combo La Jugada Familiar', '3 Piezas de pollo broster + 2 Salchipapas personales + Gaseosa de 1.5 Litros', 45.00, 'COMBOS', 'images/combo_familiar.png', true),
 (3, 'Combo Gol de Media Cancha', '2 Piezas de pollo broster + Papas fritas + 1 gaseosa personal', 25.00, 'COMBOS', 'images/combo_pecho.png', true),
 (4, 'Combo Tiempo Extra', '4 Piezas de pollo broster + Papas familiares + Ensalada + Gaseosa 1.5L', 55.00, 'COMBOS', 'images/combo_familiar.png', true),
--- Clásicos de Siempre
-(5, 'Combo Pecho Crujiente', '1 Pecho broster crocante + Porción generosa de papas fritas', 13.00, 'CLASICOS', 'images/combo_pecho.png', true),
-(6, 'Combo Pierna Jugosa', '1 Pierna broster jugosa + Porción de papas fritas', 11.00, 'CLASICOS', 'images/combo_pierna.png', true),
-(7, 'Combo Ala Dorada', '1 Ala broster crocante + Porción de papas fritas', 9.00, 'CLASICOS', 'images/combo_pierna.png', true),
+-- Clasicos de Siempre
+(5, 'Combo Pecho Crujiente', '1 Pecho broster crocante + Porcion generosa de papas fritas', 13.00, 'CLASICOS', 'images/combo_pecho.png', true),
+(6, 'Combo Pierna Jugosa', '1 Pierna broster jugosa + Porcion de papas fritas', 11.00, 'CLASICOS', 'images/combo_pierna.png', true),
+(7, 'Combo Ala Dorada', '1 Ala broster crocante + Porcion de papas fritas', 9.00, 'CLASICOS', 'images/combo_pierna.png', true),
 (8, '1/4 de Pollo Broster', 'Cuarto de pollo broster (pecho o pierna) + Papas + Ensalada', 18.00, 'CLASICOS', 'images/combo_pecho.png', true),
 (9, '1/2 Pollo Broster', 'Medio pollo broster (2 piezas) + Papas + Ensalada + Cremas', 32.00, 'CLASICOS', 'images/combo_familiar.png', true),
 (10, 'Pollo Entero Broster', 'Pollo entero broster (4 piezas) + Papas familiares + Ensalada', 55.00, 'CLASICOS', 'images/combo_familiar.png', true),
 -- Salchipapas
 (11, 'Salchipapa Personal', 'Papas fritas crocantes + Hot dog en rodajas + Cremas', 8.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
-(12, 'Salchipapa Familiar Especial', 'Doble porción de papas + Hot dog abundante + Cremas', 15.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
-(13, 'Papas Fritas Solas', 'Porción clásica de papas fritas crujientes', 5.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+(12, 'Salchipapa Familiar Especial', 'Doble porcion de papas + Hot dog abundante + Cremas', 15.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+(13, 'Papas Fritas Solas', 'Porcion clasica de papas fritas crujientes', 5.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
 (14, 'Brosteipapa Extrema', 'Papas fritas + Tiras de pollo broster crujiente encima + Cremas', 12.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
 -- Hamburguesas
-(15, 'Hamburguesa Clásica', 'Carne smash simple + Lechuga + Tomate + Cremas', 10.00, 'BURGERS', 'images/hamburguesa.png', true),
+(15, 'Hamburguesa Clasica', 'Carne smash simple + Lechuga + Tomate + Cremas', 10.00, 'BURGERS', 'images/hamburguesa.png', true),
 (16, 'Hamburguesa Broster', 'Filete de pollo broster + Lechuga + Tomate + Cremas de la casa', 12.00, 'BURGERS', 'images/hamburguesa.png', true),
 (17, 'Hamburguesa Doble Smash', 'Doble carne smash + Doble queso cheddar + Tocino', 15.00, 'BURGERS', 'images/hamburguesa.png', true),
 -- Alitas
 (18, 'Alitas BBQ (6 unidades)', '6 Alitas bañadas en salsa BBQ premium + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
-(19, 'Alitas Picantes (6 unidades)', '6 Alitas en salsa búfalo picante + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
+(19, 'Alitas Picantes (6 unidades)', '6 Alitas en salsa bufalo picante + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
 (20, 'Alitas Broster (6 unidades)', '6 Alitas fritas al estilo broster crujiente + Papas', 14.00, 'ALITAS', 'images/alitas.png', true),
 -- Bebidas
 (21, 'Chicha Morada Helada', 'Chicha morada natural hecha en casa de 500ml', 3.00, 'BEBIDAS', 'images/bebidas.png', true),
 (22, 'Gaseosa Personal', 'Gaseosa Inka Cola o Coca Cola helada en botella', 3.00, 'BEBIDAS', 'images/bebidas.png', true),
 (23, 'Gaseosa 1.5 Litros', 'Gaseosa Inka Cola o Coca Cola de litro y medio helada', 8.00, 'BEBIDAS', 'images/bebidas.png', true),
 (24, 'Limonada Frozen', 'Limonada helada tipo frappe de 500ml', 5.00, 'BEBIDAS', 'images/bebidas.png', true),
--- Extras (moved to Clásicos/Salchipapas)
-(25, 'Porción Extra de Papas', 'Porción adicional de papas fritas', 3.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
+-- Extras (moved to Clasicos/Salchipapas)
+(25, 'Porcion Extra de Papas', 'Porcion adicional de papas fritas', 3.00, 'SALCHIPAPAS', 'images/salchipapas.png', true),
 (26, 'Ensalada Extra', 'Ensalada fresca de lechuga, tomate y pepino', 2.00, 'CLASICOS', 'images/salchipapas.png', true),
-(27, 'Porción de Arroz Blanco', 'Porción de arroz blanco bien graneado', 3.00, 'CLASICOS', 'images/salchipapas.png', true),
+(27, 'Porcion de Arroz Blanco', 'Porcion de arroz blanco bien graneado', 3.00, 'CLASICOS', 'images/salchipapas.png', true),
 -- Promociones Exclusivas
-(28, 'Promo Dúo Crujiente', '1/4 de Pollo Broster Pecho + 1 Salchipapa Personal + 2 Vasos de Chicha Morada Helada', 22.00, 'PROMOS', 'images/combo_pecho.png', true),
+(28, 'Promo Duo Crujiente', '1/4 de Pollo Broster Pecho + 1 Salchipapa Personal + 2 Vasos de Chicha Morada Helada', 22.00, 'PROMOS', 'images/combo_pecho.png', true),
 (29, 'Mega Balde Brosterero', '10 Piezas crujientes de Broster + Papas fritas gigantes + Ensalada familiar + Gaseosa 1.5L + Cremas', 69.00, 'PROMOS', 'images/combo_familiar.png', true),
-(30, 'Promo Burger Lover', '2 Hamburguesas Broster + Porción de Papas Fritas Mediana + 2 Gaseosas Personales', 25.00, 'PROMOS', 'images/hamburguesa.png', true)
+(30, 'Promo Burger Lover', '2 Hamburguesas Broster + Porcion de Papas Fritas Mediana + 2 Gaseosas Personales', 25.00, 'PROMOS', 'images/hamburguesa.png', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Ajustar secuencias de productos
@@ -68,45 +68,45 @@ INSERT INTO insumos (id, name, quantity, unit, minimum_stock, updated_at) VALUES
 (1, 'Pollo trozado fresco', 0.0, 'unidades', 50.0, NOW()),
 (2, 'Papas amarillas cortadas', 0.0, 'kg', 35.0, NOW()),
 (3, 'Aceite vegetal de cocina', 0.0, 'litros', 20.0, NOW()),
-(4, 'Crema Mayonesa (Galón)', 0.0, 'galones', 2.0, NOW()),
-(5, 'Ketchup clásico (Galón)', 0.0, 'galones', 1.5, NOW()),
-(6, 'Ají de la casa especial', 0.0, 'litros', 3.0, NOW()),
-(7, 'Cajas de cartón combo', 0.0, 'unidades', 100.0, NOW()),
+(4, 'Crema Mayonesa (Galon)', 0.0, 'galones', 2.0, NOW()),
+(5, 'Ketchup clasico (Galon)', 0.0, 'galones', 1.5, NOW()),
+(6, 'Aji de la casa especial', 0.0, 'litros', 3.0, NOW()),
+(7, 'Cajas de carton combo', 0.0, 'unidades', 100.0, NOW()),
 (8, 'Envases de gaseosa descartable', 0.0, 'unidades', 40.0, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('insumos', 'id'), coalesce(max(id), 1)) FROM insumos;
 
--- 5. Simulación Masiva condicional (3,600 pedidos, ~2.5 MB de volumen de datos, 40 pedidos/día)
+-- 5. Simulacion Masiva condicional (3,600 pedidos, ~2.5 MB de volumen de datos, 40 pedidos/dia)
 
--- A. Limpiar tablas si el total de pedidos no coincide con la meta de 3,600 para asegurar re-inicialización
+-- A. Limpiar tablas si el total de pedidos no coincide con la meta de 3,600 para asegurar re-inicializacion
 DELETE FROM detalle_pedidos WHERE (SELECT COUNT(*) FROM pedidos) <> 3600;
 DELETE FROM pedidos WHERE (SELECT COUNT(*) FROM pedidos) <> 3600;
 DELETE FROM clientes WHERE (SELECT COUNT(*) FROM clientes) > 1500;
 
--- B. Generar 200 Clientes con correos ficticios/inválidos si no se ha inicializado la base de datos
+-- B. Generar 200 Clientes con correos ficticios/invalidos si no se ha inicializado la base de datos
 INSERT INTO clientes (id, name, email, phone, address, total_orders, total_spent, points, created_at)
 SELECT 
   i,
   CASE (i % 10)
       WHEN 0 THEN 'Carlos'
-      WHEN 1 THEN 'María'
+      WHEN 1 THEN 'Maria'
       WHEN 2 THEN 'Juan'
       WHEN 3 THEN 'Ana'
       WHEN 4 THEN 'Luis'
       WHEN 5 THEN 'Laura'
       WHEN 6 THEN 'Diego'
-      WHEN 7 THEN 'Sofía'
-      WHEN 8 THEN 'José'
+      WHEN 7 THEN 'Sofia'
+      WHEN 8 THEN 'Jose'
       ELSE 'Carmen'
   END || ' ' || CASE (i % 8)
-      WHEN 0 THEN 'Pérez'
-      WHEN 1 THEN 'Gómez'
-      WHEN 2 THEN 'Rodríguez'
-      WHEN 3 THEN 'Sánchez'
-      WHEN 4 THEN 'López'
+      WHEN 0 THEN 'Perez'
+      WHEN 1 THEN 'Gomez'
+      WHEN 2 THEN 'Rodriguez'
+      WHEN 3 THEN 'Sanchez'
+      WHEN 4 THEN 'Lopez'
       WHEN 5 THEN 'Torres'
-      WHEN 6 THEN 'Díaz'
+      WHEN 6 THEN 'Diaz'
       ELSE 'Vargas'
   END || ' (' || i || ')',
   'cliente' || i || '@brosteria-invalid.local',
@@ -126,7 +126,7 @@ SELECT
 FROM generate_series(1, 200) AS i
 WHERE NOT EXISTS (SELECT 1 FROM clientes WHERE email LIKE '%@brosteria-invalid.local' LIMIT 1);
 
--- C. Generar 3600 Pedidos distribuidos en 90 días si no existen
+-- C. Generar 3600 Pedidos distribuidos en 90 dias si no existen
 INSERT INTO pedidos (id, customer_name, customer_phone, customer_address, delivery_cost, type, payment_method, total, status, order_date, cliente_id)
 SELECT 
   s.id,
@@ -150,7 +150,7 @@ SELECT
     ELSE
       CASE WHEN (s.id % 20) = 0 THEN 'CANCELADO' ELSE 'ENTREGADO' END
   END,
-  (NOW() - (s.id * INTERVAL '36 minutes')) -- 3600 pedidos distribuidos en 90 días (3600 * 36 min = 129600 min = 90 días)
+  (NOW() - (s.id * INTERVAL '36 minutes')) -- 3600 pedidos distribuidos en 90 dias (3600 * 36 min = 129600 min = 90 dias)
     + CASE (s.id % 3)
         WHEN 0 THEN INTERVAL '0 hours'
         WHEN 1 THEN INTERVAL '4 hours'
@@ -179,7 +179,7 @@ SELECT
   ((p.id % 3) + 1) * p_cat.price,
   CASE 
     WHEN p_cat.category = 'BEBIDAS' THEN NULL 
-    ELSE 'Mayonesa, Ají de la casa' 
+    ELSE 'Mayonesa, Aji de la casa' 
   END
 FROM pedidos p
 JOIN productos p_cat ON p_cat.id = ((p.id % 27) + 1)
@@ -217,7 +217,7 @@ WHERE p.id % 5 IN (1, 3)
     LIMIT 1
   );
 
--- F. Actualizar estadísticas acumulativas de Clientes usando un solo UPDATE agrupado (muy rápido)
+-- F. Actualizar estadisticas acumulativas de Clientes usando un solo UPDATE agrupado (muy rapido)
 UPDATE clientes c
 SET total_orders = sub.cnt,
     total_spent = sub.spent,

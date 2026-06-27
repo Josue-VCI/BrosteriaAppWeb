@@ -8,7 +8,7 @@
     --secondary-light: #FFCA3A; /* Amarillo claro */
     --bg-dark: #121214;         /* Fondo oscuro principal */
     --bg-card: rgba(30, 30, 35, 0.65); /* Fondo tarjetas Glassmorphic */
-    --bg-body: #0A0A0B;         /* Fondo detrás de tarjetas (near-black) */
+    --bg-body: #0A0A0B;         /* Fondo detras de tarjetas (near-black) */
     --text-light: #FAFAFA;      /* Blanco principal */
     --text-muted: #A0A0A8;      /* Gris para descripciones */
     --glass-border: rgba(255, 255, 255, 0.06);
@@ -54,7 +54,7 @@ body {
     }
 }
 
-/* Títulos y Botones de la Marca */
+/* Titulos y Botones de la Marca */
 h1, h2, h3, h4 {
     font-family: var(--font-brand);
     color: var(--text-light);
@@ -127,14 +127,14 @@ h1, h2, h3, h4 {
   font-size: 11px;
 }
 
-/* Correcciones Responsivas Globales y Prevención de Zoom en iOS Safari */
+/* Correcciones Responsivas Globales y Prevencion de Zoom en iOS Safari */
 @media (max-width: 768px) {
   input, select, textarea {
     font-size: 16px !important;
   }
 }
 
-/* Estilos de Validación de Formularios */
+/* Estilos de Validacion de Formularios */
 .input-error {
   border-color: var(--error) !important;
   box-shadow: 0 0 5px rgba(255, 23, 68, 0.4) !important;
@@ -162,7 +162,7 @@ select, option {
   color: #FAFAFA !important;
 }
 
-/* Estilos para Tarjetas Móviles (CRM e Inventario) */
+/* Estilos para Tarjetas Moviles (CRM e Inventario) */
 .card-row {
   display: flex;
   justify-content: space-between;
@@ -294,7 +294,7 @@ select, option {
   box-shadow: 0 0 10px rgba(255, 23, 68, 0.2);
 }
 
-/* Estilo para botón destructivo/danger de marca */
+/* Estilo para boton destructivo/danger de marca */
 .logout-btn {
   background: rgba(255, 23, 68, 0.15) !important;
   color: var(--error) !important;

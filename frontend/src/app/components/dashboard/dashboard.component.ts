@@ -16,7 +16,7 @@ export class DashboardComponent implements OnInit {
   insumosCriticos: any[] = [];
   pedidosRecientes: any[] = [];
 
-  // Ordenación
+  // Ordenacion
   columnaOrden = '';
   ordenAscendente = true;
 
@@ -38,7 +38,7 @@ export class DashboardComponent implements OnInit {
   cargarInventarioCritico() {
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/insumos`).subscribe({
       next: (data) => {
-        // Filtrar insumos críticos
+        // Filtrar insumos criticos
         this.insumosCriticos = data.filter(i => i.quantity <= i.minimumStock);
       },
       error: (err) => console.error('Error al cargar insumos', err)

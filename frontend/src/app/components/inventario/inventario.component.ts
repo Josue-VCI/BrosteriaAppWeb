@@ -15,7 +15,7 @@ export class InventarioComponent implements OnInit {
   insumos: any[] = [];
   esAdmin = false;
   
-  // Ordenación
+  // Ordenacion
   columnaOrden = '';
   ordenAscendente = true;
 
@@ -54,7 +54,7 @@ export class InventarioComponent implements OnInit {
         if (this.columnaOrden) {
           this.ordenarPorColumnaActiva();
         } else {
-          // Orden por defecto: Críticos primero
+          // Orden por defecto: Criticos primero
           this.insumos.sort((a, b) => {
             const aCritico = a.quantity <= a.minimumStock ? 1 : 0;
             const bCritico = b.quantity <= b.minimumStock ? 1 : 0;
@@ -97,7 +97,7 @@ export class InventarioComponent implements OnInit {
     });
   }
 
-  // Refill Modal Lógica
+  // Refill Modal Logica
   abrirIngreso(insumo: any) {
     this.insumoSeleccionadoId = insumo.id;
     this.insumoSeleccionadoNombre = insumo.name;
@@ -139,7 +139,7 @@ export class InventarioComponent implements OnInit {
     return this.esNombreValido() && this.esCantidadValida() && this.esStockMinimoValido();
   }
 
-  // CRUD Modal Lógica
+  // CRUD Modal Logica
   abrirNuevoInsumo() {
     this.esEdicion = false;
     this.formInsumo = {
@@ -187,7 +187,7 @@ export class InventarioComponent implements OnInit {
   }
 
   eliminarInsumo(id: number) {
-    if (!confirm('¿Está seguro de eliminar este insumo del inventario?')) return;
+    if (!confirm('¿Esta seguro de eliminar este insumo del inventario?')) return;
 
     this.http.delete(`${this.apiBaseUrl}/${id}`).subscribe({
       next: () => {

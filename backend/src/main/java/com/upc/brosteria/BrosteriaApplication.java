@@ -22,7 +22,7 @@ public class BrosteriaApplication {
     @Bean
     public CommandLineRunner initPasswords(UsuarioRepositorio usuarioRepositorio, RolRepositorio rolRepositorio, PasswordEncoder passwordEncoder) {
         return args -> {
-            // Asegurar que los roles básicos existen
+            // Asegurar que los roles basicos existen
             if (!rolRepositorio.existsById(1L)) {
                 rolRepositorio.save(new RolEntidad(1L, "ADMIN"));
             }
@@ -36,12 +36,12 @@ public class BrosteriaApplication {
             RolEntidad adminRol = rolRepositorio.findById(1L).orElseThrow();
             RolEntidad cajeroRol = rolRepositorio.findById(2L).orElseThrow();
 
-            // Asegurar/Actualizar los 5 usuarios requeridos (2 Admins y 3 Cajeros de Atención)
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", "123456", adminRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", "123456", adminRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", "123456", cajeroRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atención 2", "123456", cajeroRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atención 3", "123456", cajeroRol);
+            // Asegurar/Actualizar los 5 usuarios requeridos (2 Admins y 3 Cajeros de Atencion)
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", "BrosteriaCRM2026!", adminRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", "BrosteriaCRM2026!", adminRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", "BrosteriaCRM2026!", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atencion 2", "BrosteriaCRM2026!", cajeroRol);
+            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atencion 3", "BrosteriaCRM2026!", cajeroRol);
         };
     }
 
