@@ -292,36 +292,31 @@ public class PdfServicio {
             addTableHeader(tableHours, "Cant.", darkGray, fontTableHeader);
             addTableHeader(tableHours, "Frecuencia", darkGray, fontTableHeader);
 
-            int aCount = 0; int tCount = 0; int cCount = 0; int ciCount = 0; int oCount = 0;
+            int apCount = 0; int cpCount = 0; int ciCount = 0; int fhCount = 0;
             for (PedidoEntidad p : pedidos) {
                 int hour = p.getOrderDate().getHour();
-                if (hour >= 12 && hour < 15) aCount++;
-                else if (hour >= 15 && hour < 18) tCount++;
-                else if (hour >= 18 && hour < 21) cCount++;
-                else if (hour >= 21 && hour < 24) ciCount++;
-                else oCount++;
+                if (hour >= 18 && hour < 20) apCount++;
+                else if (hour >= 20 && hour < 22) cpCount++;
+                else if (hour >= 22 && hour <= 23) ciCount++;
+                else fhCount++;
             }
 
             long totalHoras = totalPedidos;
-            tableHours.addCell(createCell("Almuerzo (12-15h)", fontText, Element.ALIGN_LEFT, lightGray));
-            tableHours.addCell(createCell(String.valueOf(aCount), fontText, Element.ALIGN_CENTER, lightGray));
-            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (aCount * 100.0) / totalHoras, darkGray, new java.awt.Color(230, 230, 230)));
+            tableHours.addCell(createCell("Apertura (18-20h)", fontText, Element.ALIGN_LEFT, lightGray));
+            tableHours.addCell(createCell(String.valueOf(apCount), fontText, Element.ALIGN_CENTER, lightGray));
+            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (apCount * 100.0) / totalHoras, darkGray, new java.awt.Color(230, 230, 230)));
 
-            tableHours.addCell(createCell("Tarde (15-18h)", fontText, Element.ALIGN_LEFT, lightGray));
-            tableHours.addCell(createCell(String.valueOf(tCount), fontText, Element.ALIGN_CENTER, lightGray));
-            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (tCount * 100.0) / totalHoras, darkGray, new java.awt.Color(230, 230, 230)));
+            tableHours.addCell(createCell("Cena Pico (20-22h)", fontText, Element.ALIGN_LEFT, lightGray));
+            tableHours.addCell(createCell(String.valueOf(cpCount), fontText, Element.ALIGN_CENTER, lightGray));
+            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (cpCount * 100.0) / totalHoras, brandOrange, new java.awt.Color(230, 230, 230)));
 
-            tableHours.addCell(createCell("Cena Pico (18-21h)", fontText, Element.ALIGN_LEFT, lightGray));
-            tableHours.addCell(createCell(String.valueOf(cCount), fontText, Element.ALIGN_CENTER, lightGray));
-            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (cCount * 100.0) / totalHoras, brandOrange, new java.awt.Color(230, 230, 230)));
-
-            tableHours.addCell(createCell("Cierre (21-24h)", fontText, Element.ALIGN_LEFT, lightGray));
+            tableHours.addCell(createCell("Cierre (22-23h)", fontText, Element.ALIGN_LEFT, lightGray));
             tableHours.addCell(createCell(String.valueOf(ciCount), fontText, Element.ALIGN_CENTER, lightGray));
             tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (ciCount * 100.0) / totalHoras, darkGray, new java.awt.Color(230, 230, 230)));
 
-            tableHours.addCell(createCell("Otros Horarios", fontText, Element.ALIGN_LEFT, lightGray));
-            tableHours.addCell(createCell(String.valueOf(oCount), fontText, Element.ALIGN_CENTER, lightGray));
-            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (oCount * 100.0) / totalHoras, darkGray, new java.awt.Color(230, 230, 230)));
+            tableHours.addCell(createCell("Fuera de Horario", fontText, Element.ALIGN_LEFT, lightGray));
+            tableHours.addCell(createCell(String.valueOf(fhCount), fontText, Element.ALIGN_CENTER, lightGray));
+            tableHours.addCell(createProgressBarCell(totalHoras == 0 ? 0.0 : (fhCount * 100.0) / totalHoras, darkGray, new java.awt.Color(230, 230, 230)));
 
             cellBottomRight.addElement(tableHours);
             tableBottomRow.addCell(cellBottomRight);

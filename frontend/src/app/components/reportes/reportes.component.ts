@@ -207,10 +207,10 @@ export class ReportesComponent implements OnInit {
       this.horasChartRef.destroy();
     }
     
-    // Solo mostrar las horas operativas activas de 11:00 a 23:00 (11 AM a 11 PM)
+    // Solo mostrar las horas operativas activas de 18:00 a 23:00 (6 PM a 11 PM)
     const labels = [];
     const data = [];
-    for (let i = 11; i <= 23; i++) {
+    for (let i = 18; i <= 23; i++) {
       labels.push(`${i.toString().padStart(2, '0')}:00`);
       data.push(pedidosPorHora[i] || 0);
     }
