@@ -225,10 +225,14 @@ export class ClientesComponent implements OnInit {
 
     this.http.post(this.apiBaseUrl, this.formCliente).subscribe({
       next: () => {
+        this.toastService.success(this.esEdicion ? 'Cliente actualizado correctamente' : 'Cliente registrado correctamente');
         this.cargarClientes();
         this.cerrarModalCrud();
       },
-      error: (err) => console.error('Error al guardar cliente', err)
+      error: (err) => {
+        console.error('Error al guardar cliente', err);
+        this.toastService.error('No se pudo guardar el cliente');
+      }
     });
   }
 
@@ -237,9 +241,13 @@ export class ClientesComponent implements OnInit {
 
     this.http.delete(`${this.apiBaseUrl}/${id}`).subscribe({
       next: () => {
+        this.toastService.success('Cliente eliminado correctamente');
         this.cargarClientes();
       },
-      error: (err) => console.error('Error al eliminar cliente', err)
+      error: (err) => {
+        console.error('Error al eliminar cliente', err);
+        this.toastService.error('No se pudo eliminar el cliente');
+      }
     });
   }
 

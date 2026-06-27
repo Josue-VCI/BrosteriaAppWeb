@@ -31,4 +31,9 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     @org.springframework.data.jpa.repository.Modifying
     @Query("DELETE FROM PedidoEntidad p WHERE p.orderDate < :date")
     void deleteByOrderDateBefore(@Param("date") java.time.LocalDateTime date);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("UPDATE PedidoEntidad p SET p.clienteEntidad = null WHERE p.clienteEntidad.id = :clienteId")
+    void detachCliente(@Param("clienteId") Long clienteId);
 }

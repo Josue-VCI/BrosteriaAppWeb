@@ -79,7 +79,9 @@ public class ClienteServicio {
         clienteRepositorio.save(cliente);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void eliminar(Long id) {
+        pedidoRepositorio.detachCliente(id);
         clienteRepositorio.deleteById(id);
     }
 

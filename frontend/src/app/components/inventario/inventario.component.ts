@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-inventario',
@@ -40,7 +41,7 @@ export class InventarioComponent implements OnInit {
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/insumos`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toastService: ToastService) {}
 
   ngOnInit() {
     this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
@@ -115,10 +116,14 @@ export class InventarioComponent implements OnInit {
     
     this.http.post(`${this.apiBaseUrl}/${this.insumoSeleccionadoId}/ingreso?cantidad=${this.cantidadIngresar}`, {}).subscribe({
       next: () => {
+        this.toastService.success('Ingreso de stock registrado correctamente');
         this.cargarInsumos();
         this.cerrarModalRefill();
       },
-      error: (err) => console.error('Error al registrar ingreso', err)
+      error: (err) => {
+        console.error('Error al registrar ingreso', err);
+        this.toastService.error('No se pudo registrar el ingreso de stock');
+      }
     });
   }
 
@@ -169,19 +174,27 @@ export class InventarioComponent implements OnInit {
       // Modificar
       this.http.put(`${this.apiBaseUrl}/${this.formInsumo.id}`, this.formInsumo).subscribe({
         next: () => {
+          this.toastService.success('Insumo actualizado correctamente');
           this.cargarInsumos();
           this.cerrarModalCrud();
         },
-        error: (err) => console.error('Error al actualizar insumo', err)
+        error: (err) => {
+          console.error('Error al actualizar insumo', err);
+          this.toastService.error('No se pudo actualizar el insumo');
+        }
       });
     } else {
       // Crear nuevo
       this.http.post(this.apiBaseUrl, this.formInsumo).subscribe({
         next: () => {
+          this.toastService.success('Insumo guardado correctamente');
           this.cargarInsumos();
           this.cerrarModalCrud();
         },
-        error: (err) => console.error('Error al crear insumo', err)
+        error: (err) => {
+          console.error('Error al crear insumo', err);
+          this.toastService.error('No se pudo guardar el insumo');
+        }
       });
     }
   }
@@ -191,9 +204,13 @@ export class InventarioComponent implements OnInit {
 
     this.http.delete(`${this.apiBaseUrl}/${id}`).subscribe({
       next: () => {
+        this.toastService.success('Insumo eliminado correctamente');
         this.cargarInsumos();
       },
-      error: (err) => console.error('Error al eliminar insumo', err)
+      error: (err) => {
+        console.error('Error al eliminar insumo', err);
+        this.toastService.error('No se pudo eliminar el insumo');
+      }
     });
   }
 }
