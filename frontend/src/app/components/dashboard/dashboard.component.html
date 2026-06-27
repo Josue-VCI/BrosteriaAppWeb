@@ -44,11 +44,7 @@
         <table class="dashboard-table">
           <thead>
             <tr>
-              <th (click)="ordenarPor('id')" class="sortable-header">
-                ID
-                <span class="sort-arrow" *ngIf="columnaOrden === 'id'">{{ ordenAscendente ? '▲' : '▼' }}</span>
-                <span class="sort-arrow-placeholder" *ngIf="columnaOrden !== 'id'">↕</span>
-              </th>
+
               <th (click)="ordenarPor('customerName')" class="sortable-header">
                 Cliente
                 <span class="sort-arrow" *ngIf="columnaOrden === 'customerName'">{{ ordenAscendente ? '▲' : '▼' }}</span>
@@ -73,7 +69,6 @@
           </thead>
           <tbody>
             <tr *ngFor="let pedido of pedidosRecientes">
-              <td>#{{ pedido.id }}</td>
               <td>{{ pedido.customerName }}</td>
               <td>
                 <span class="type-badge" [class.delivery]="pedido.type === 'DELIVERY'">
