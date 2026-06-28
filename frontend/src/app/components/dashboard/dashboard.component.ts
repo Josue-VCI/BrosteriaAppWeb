@@ -5,11 +5,10 @@ import { RouterModule } from '@angular/router';
 import { API_BASE_URL } from '../../config';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+    selector: 'app-dashboard',
+    imports: [CommonModule, RouterModule],
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   resumen: any = { ventasTotales: 0, totalPedidos: 0, completados: 0, cancelados: 0 };

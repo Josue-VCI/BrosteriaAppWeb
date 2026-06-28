@@ -6,11 +6,10 @@ import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-inventario',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './inventario.component.html',
-  styleUrls: ['./inventario.component.css']
+    selector: 'app-inventario',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './inventario.component.html',
+    styleUrls: ['./inventario.component.css']
 })
 export class InventarioComponent implements OnInit {
   insumos: any[] = [];

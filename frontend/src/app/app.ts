@@ -6,11 +6,10 @@ import { ToastService, ToastMessage } from './services/toast.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './app.html',
-  styleUrls: ['./app.css']
+    selector: 'app-root',
+    imports: [CommonModule, RouterModule],
+    templateUrl: './app.html',
+    styleUrls: ['./app.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
   mostrarSidebar = false;

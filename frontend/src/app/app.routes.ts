@@ -1,19 +1,36 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { PedidosComponent } from './components/pedidos/pedidos.component';
-import { InventarioComponent } from './components/inventario/inventario.component';
-import { ClientesComponent } from './components/clientes/clientes.component';
-import { ReportesComponent } from './components/reportes/reportes.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'pedidos', component: PedidosComponent, canActivate: [authGuard] },
-  { path: 'inventario', component: InventarioComponent, canActivate: [authGuard] },
-  { path: 'clientes', component: ClientesComponent, canActivate: [authGuard] },
-  { path: 'reportes', component: ReportesComponent, canActivate: [authGuard] },
+  {
+    path: 'login',
+    loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'pedidos',
+    loadComponent: () => import('./components/pedidos/pedidos.component').then(m => m.PedidosComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'inventario',
+    loadComponent: () => import('./components/inventario/inventario.component').then(m => m.InventarioComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'clientes',
+    loadComponent: () => import('./components/clientes/clientes.component').then(m => m.ClientesComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'reportes',
+    loadComponent: () => import('./components/reportes/reportes.component').then(m => m.ReportesComponent),
+    canActivate: [authGuard]
+  },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

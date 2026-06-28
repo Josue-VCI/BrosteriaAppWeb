@@ -6,11 +6,10 @@ import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-pedidos',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './pedidos.component.html',
-  styleUrls: ['./pedidos.component.css']
+    selector: 'app-pedidos',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './pedidos.component.html',
+    styleUrls: ['./pedidos.component.css']
 })
 export class PedidosComponent implements OnInit, OnDestroy {
   pedidosCocina: any[] = [];

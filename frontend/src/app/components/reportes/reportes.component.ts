@@ -10,11 +10,10 @@ import { ToastService } from '../../services/toast.service';
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-reportes',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './reportes.component.html',
-  styleUrls: ['./reportes.component.css']
+    selector: 'app-reportes',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './reportes.component.html',
+    styleUrls: ['./reportes.component.css']
 })
 export class ReportesComponent implements OnInit {
   resumen: any = { ventasTotales: 0, totalPedidos: 0, completados: 0, cancelados: 0 };
@@ -235,7 +234,7 @@ export class ReportesComponent implements OnInit {
         scales: {
           y: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: '#A0A0A8', stepSize: 1 }
+            ticks: { color: '#A0A0A8', precision: 0, maxTicksLimit: 12 }
           },
           x: {
             grid: { display: false },
@@ -273,7 +272,7 @@ export class ReportesComponent implements OnInit {
         scales: {
           x: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: '#A0A0A8', stepSize: 1 }
+            ticks: { color: '#A0A0A8', precision: 0, maxTicksLimit: 12 }
           },
           y: {
             grid: { display: false },

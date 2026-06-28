@@ -7,11 +7,10 @@ import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
-  selector: 'app-clientes',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './clientes.component.html',
-  styleUrls: ['./clientes.component.css']
+    selector: 'app-clientes',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './clientes.component.html',
+    styleUrls: ['./clientes.component.css']
 })
 export class ClientesComponent implements OnInit {
   clientes: any[] = [];
