@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
@@ -38,22 +39,45 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
         String getNombre();
         Long getCantidad();
     }
-    
-    @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad")
-    List<PedidoEntidad> findAllWithCliente();
 
-    List<PedidoEntidad> findByCustomerPhone(String customerPhone);
+    interface EstadisticasCliente {
+        Long getTotalPedidos();
+        BigDecimal getTotalGastado();
+    }
+
+    Optional<PedidoEntidad> findByRequestId(String requestId);
+
+    @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad ORDER BY p.orderDate DESC")
+    List<PedidoEntidad> findAllWithCliente(org.springframework.data.domain.Pageable pageable);
 
     @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad WHERE p.status = :status")
     List<PedidoEntidad> findByStatusWithCliente(@Param("status") String status);
 
-    List<PedidoEntidad> findByStatus(String status);
+    @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad WHERE p.status = :status ORDER BY p.orderDate DESC")
+    List<PedidoEntidad> findByStatusWithCliente(@Param("status") String status,
+                                                org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad WHERE p.status = :status AND p.orderDate >= :inicio AND p.orderDate < :fin ORDER BY p.orderDate DESC")
+    List<PedidoEntidad> findByStatusAndRangeWithCliente(@Param("status") String status,
+                                                        @Param("inicio") LocalDateTime inicio,
+                                                        @Param("fin") LocalDateTime fin);
 
     @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad WHERE p.status IN ('PENDIENTE', 'PREPARANDO', 'ENVIADO') AND p.orderDate >= :since ORDER BY p.orderDate DESC")
     List<PedidoEntidad> findActiveWithCliente(@org.springframework.data.repository.query.Param("since") java.time.LocalDateTime since);
 
     @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad ORDER BY p.orderDate DESC")
     List<PedidoEntidad> findRecentWithCliente(org.springframework.data.domain.Pageable pageable);
+
+    @Query(value = """
+            SELECT COUNT(*) AS "totalPedidos", COALESCE(SUM(total), 0) AS "totalGastado"
+            FROM pedidos
+            WHERE customer_phone = :telefono AND status = 'ENTREGADO'
+            """, nativeQuery = true)
+    EstadisticasCliente obtenerEstadisticasCliente(@Param("telefono") String telefono);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = "UPDATE pedidos SET cliente_id = :clienteId WHERE customer_phone = :telefono AND cliente_id IS DISTINCT FROM :clienteId", nativeQuery = true)
+    int vincularPedidosPorTelefono(@Param("clienteId") Long clienteId, @Param("telefono") String telefono);
 
     @Query(value = """
             SELECT COALESCE(SUM(total) FILTER (WHERE status = 'ENTREGADO'), 0) AS "ventasTotales",

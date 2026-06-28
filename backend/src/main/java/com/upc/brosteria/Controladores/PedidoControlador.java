@@ -16,8 +16,8 @@ public class PedidoControlador {
     private PedidoServicio pedidoServicio;
 
     @GetMapping
-    public ResponseEntity<List<PedidoDTO>> listarTodos() {
-        return ResponseEntity.ok(pedidoServicio.listarTodos());
+    public ResponseEntity<List<PedidoDTO>> listarTodos(@RequestParam(defaultValue = "200") int limite) {
+        return ResponseEntity.ok(pedidoServicio.listarTodos(limite));
     }
 
     @GetMapping("/activos")
@@ -30,9 +30,15 @@ public class PedidoControlador {
         return ResponseEntity.ok(pedidoServicio.listarRecientes(limite));
     }
 
+    @GetMapping("/entregados-hoy")
+    public ResponseEntity<List<PedidoDTO>> listarEntregadosHoy() {
+        return ResponseEntity.ok(pedidoServicio.listarEntregadosHoy());
+    }
+
     @GetMapping("/estado/{status}")
-    public ResponseEntity<List<PedidoDTO>> listarPorEstado(@PathVariable String status) {
-        return ResponseEntity.ok(pedidoServicio.listarPorEstado(status));
+    public ResponseEntity<List<PedidoDTO>> listarPorEstado(@PathVariable String status,
+                                                           @RequestParam(defaultValue = "200") int limite) {
+        return ResponseEntity.ok(pedidoServicio.listarPorEstado(status, limite));
     }
 
     @PostMapping

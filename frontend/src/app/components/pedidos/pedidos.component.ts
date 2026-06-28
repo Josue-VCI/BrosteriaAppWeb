@@ -34,6 +34,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   textoWhatsApp = '';
   
   formPedido: any = {
+    requestId: '',
     customerName: '',
     customerPhone: '',
     customerAddress: '',
@@ -211,6 +212,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   abrirNuevoPedido() {
     this.textoWhatsApp = '';
     this.formPedido = {
+      requestId: this.nuevoRequestId(),
       clienteId: null,
       customerName: '',
       customerPhone: '',
@@ -372,6 +374,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     }
 
     this.formPedido = {
+      requestId: this.nuevoRequestId(),
       clienteId: null,
       customerName: parsedName,
       customerPhone: parsedPhone,
@@ -538,6 +541,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     }
 
     const payload = {
+      requestId: this.formPedido.requestId || (this.formPedido.requestId = this.nuevoRequestId()),
       clienteId: this.formPedido.clienteId,
       customerName: this.formPedido.customerName,
       customerPhone: this.formPedido.customerPhone,
@@ -583,13 +587,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
   verPedidosEntregadosHoy() {
     this.cargandoEntregados = true;
     this.mostrarModalEntregados = true;
-    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/estado/ENTREGADO`).subscribe({
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/entregados-hoy`).subscribe({
       next: (data) => {
-        const todayStr = this.fechaCalendarioLima(new Date());
-        this.pedidosEntregadosHoy = data.filter(p => {
-          if (!p.orderDate) return false;
-          return this.fechaCalendarioLima(new Date(this.normalizarFechaUtc(p.orderDate))) === todayStr;
-        });
+        this.pedidosEntregadosHoy = data;
         this.cargandoEntregados = false;
       },
       error: (err) => {
@@ -598,6 +598,13 @@ export class PedidosComponent implements OnInit, OnDestroy {
         this.toastService.error('No se pudieron cargar los pedidos entregados.');
       }
     });
+  }
+
+  private nuevoRequestId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
   normalizarFechaUtc(fecha: string): string {

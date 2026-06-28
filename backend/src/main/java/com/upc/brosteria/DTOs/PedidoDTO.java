@@ -16,6 +16,9 @@ import java.util.List;
 @NoArgsConstructor @AllArgsConstructor
 public class PedidoDTO {
     private Long id;
+    @Size(max = 64, message = "El identificador de solicitud es demasiado largo")
+    @Pattern(regexp = "^[A-Za-z0-9-]{16,64}$", message = "El identificador de solicitud no es valido")
+    private String requestId;
     @Size(max = 120, message = "El nombre del cliente es demasiado largo")
     private String customerName;
     @Pattern(regexp = "^$|^[0-9+() -]{7,20}$", message = "El telefono del cliente no es valido")

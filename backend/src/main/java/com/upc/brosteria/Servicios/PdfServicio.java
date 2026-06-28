@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +27,8 @@ import java.math.BigDecimal;
 
 @Service
 public class PdfServicio {
+
+    private static final ZoneId ZONA_LIMA = ZoneId.of("America/Lima");
 
     @Autowired
     private DetallePedidoRepositorio detallePedidoRepositorio;
@@ -100,7 +105,8 @@ public class PdfServicio {
             double avgTicketPrev = 0.0;
 
             if (fechaInicio != null) {
-                java.time.LocalDateTime endRange = (fechaFin != null) ? fechaFin : java.time.LocalDateTime.now();
+                java.time.LocalDateTime endRange = (fechaFin != null)
+                        ? fechaFin : java.time.LocalDateTime.now(ZoneOffset.UTC);
                 long days = java.time.temporal.ChronoUnit.DAYS.between(fechaInicio, endRange);
                 if (days <= 0) days = 1;
                 final java.time.LocalDateTime startPrev = fechaInicio.minusDays(days);
@@ -252,7 +258,7 @@ public class PdfServicio {
 
             Map<java.time.DayOfWeek, BigDecimal> ventasDia = pedidos.stream()
                     .filter(p -> "ENTREGADO".equals(p.getStatus()))
-                    .collect(Collectors.groupingBy(p -> p.getOrderDate().getDayOfWeek(),
+                    .collect(Collectors.groupingBy(p -> horaLima(p.getOrderDate()).getDayOfWeek(),
                             Collectors.reducing(BigDecimal.ZERO, PedidoEntidad::getTotal, BigDecimal::add)));
 
             List<java.time.DayOfWeek> diasSemana = Arrays.asList(
@@ -290,7 +296,7 @@ public class PdfServicio {
 
             int apCount = 0; int cpCount = 0; int ciCount = 0; int fhCount = 0;
             for (PedidoEntidad p : pedidos) {
-                int hour = p.getOrderDate().getHour();
+                int hour = horaLima(p.getOrderDate()).getHour();
                 if (hour >= 18 && hour < 20) apCount++;
                 else if (hour >= 20 && hour < 22) cpCount++;
                 else if (hour >= 22 && hour <= 23) ciCount++;
@@ -409,16 +415,20 @@ public class PdfServicio {
 
             // Pie de pagina de generacion
             Paragraph footer = new Paragraph("\nReporte Analitico emitido por La Brosteria CRM el " + 
-                    java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")), 
+                    java.time.ZonedDateTime.now(ZONA_LIMA).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
                     FontFactory.getFont(FontFactory.HELVETICA, 8, Font.ITALIC, java.awt.Color.GRAY));
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
 
             document.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudo generar el reporte PDF", e);
         }
         return out.toByteArray();
+    }
+
+    private LocalDateTime horaLima(LocalDateTime valorUtc) {
+        return valorUtc.atZone(ZoneOffset.UTC).withZoneSameInstant(ZONA_LIMA).toLocalDateTime();
     }
 
     private void addKpiCell(PdfPTable table, String label, String value, java.awt.Color colorHeader, Font fontText, String delta, boolean hasComparison) {

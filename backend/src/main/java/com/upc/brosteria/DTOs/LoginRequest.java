@@ -2,6 +2,7 @@ package com.upc.brosteria.DTOs;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter @Setter
@@ -12,5 +13,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "La contrasena es requerida")
+    @Size(max = 72, message = "La contrasena no puede superar 72 caracteres")
     private String password;
 }

@@ -7,9 +7,10 @@ Este cambio requiere actualizar Supabase antes de desplegar el backend. El orden
 1. Abrir Supabase.
 2. Entrar a SQL Editor.
 3. Copiar y ejecutar `backend/migracion_finanzas_alertas.sql`.
-4. Confirmar que la consulta termine sin errores.
+4. Copiar y ejecutar `backend/migracion_confiabilidad.sql`.
+5. Confirmar que ambas consultas terminen sin errores.
 
-El script convierte importes a `NUMERIC`, agrega `last_alerted_at` e instala indices para reportes. Se ejecuta dentro de una transaccion: si una sentencia falla, no deja una migracion parcial.
+Los scripts convierten importes a `NUMERIC`, agregan `last_alerted_at`, instalan la clave idempotente de pedidos e indices para reportes. Cada script usa una transaccion: si una sentencia falla, no deja una migracion parcial.
 
 ## 2. Actualizar Cloud Run
 

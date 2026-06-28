@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "insumos")
@@ -35,6 +36,6 @@ public class InsumoEntidad {
     @PreUpdate
     @PrePersist
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 }

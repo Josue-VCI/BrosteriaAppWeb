@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +24,12 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 public class PedidoServicio {
+
+    private static final ZoneId ZONA_LIMA = ZoneId.of("America/Lima");
 
     private static final java.util.Set<String> ESTADOS_VALIDOS = java.util.Set.of(
             "PENDIENTE", "PREPARANDO", "ENVIADO", "ENTREGADO", "CANCELADO");
@@ -50,25 +55,35 @@ public class PedidoServicio {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<PedidoDTO> listarPorEstado(String status) {
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findByStatusWithCliente(status);
+    public List<PedidoDTO> listarPorEstado(String status, int limite) {
+        int limiteSeguro = Math.max(1, Math.min(limite, 500));
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findByStatusWithCliente(
+                status, org.springframework.data.domain.PageRequest.of(0, limiteSeguro));
         return mappedPedidos(pedidos);
     }
 
-    public List<PedidoDTO> listarTodos() {
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
+    public List<PedidoDTO> listarTodos(int limite) {
+        int limiteSeguro = Math.max(1, Math.min(limite, 500));
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente(
+                org.springframework.data.domain.PageRequest.of(0, limiteSeguro));
         return mappedPedidos(pedidos);
     }
 
     public List<PedidoDTO> listarActivos() {
-        java.time.LocalDateTime todayStart = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Lima"))
-                .toLocalDate().atStartOfDay();
+        LocalDateTime todayStart = inicioDiaLimaUtc();
         List<PedidoEntidad> pedidos = pedidoRepositorio.findActiveWithCliente(todayStart);
         return mappedPedidos(pedidos);
     }
 
+    public List<PedidoDTO> listarEntregadosHoy() {
+        LocalDateTime inicio = inicioDiaLimaUtc();
+        return mappedPedidos(pedidoRepositorio.findByStatusAndRangeWithCliente(
+                "ENTREGADO", inicio, inicio.plusDays(1)));
+    }
+
     public List<PedidoDTO> listarRecientes(int limite) {
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findRecentWithCliente(org.springframework.data.domain.PageRequest.of(0, limite));
+        int limiteSeguro = Math.max(1, Math.min(limite, 100));
+        List<PedidoEntidad> pedidos = pedidoRepositorio.findRecentWithCliente(org.springframework.data.domain.PageRequest.of(0, limiteSeguro));
         return mappedPedidos(pedidos);
     }
 
@@ -91,7 +106,16 @@ public class PedidoServicio {
             throw new IllegalArgumentException("El pedido debe incluir al menos un producto");
         }
 
+        String requestId = normalizarRequestId(pedidoDTO.getRequestId());
+        if (requestId != null) {
+            java.util.Optional<PedidoEntidad> existente = pedidoRepositorio.findByRequestId(requestId);
+            if (existente.isPresent()) {
+                return convertirADTO(existente.get());
+            }
+        }
+
         PedidoEntidad pedido = new PedidoEntidad();
+        pedido.setRequestId(requestId);
         String name = (pedidoDTO.getCustomerName() == null || pedidoDTO.getCustomerName().trim().isEmpty())
                 ? "Anonimo"
                 : pedidoDTO.getCustomerName().trim();
@@ -109,7 +133,7 @@ public class PedidoServicio {
         pedido.setType(pedidoDTO.getType() != null ? pedidoDTO.getType() : "DELIVERY");
         pedido.setPaymentMethod(pedidoDTO.getPaymentMethod() != null ? pedidoDTO.getPaymentMethod() : "EFECTIVO");
         pedido.setStatus("PENDIENTE");
-        pedido.setOrderDate(LocalDateTime.now());
+        pedido.setOrderDate(LocalDateTime.now(ZoneOffset.UTC));
 
         String requestedEmail = normalizarEmail(pedidoDTO.getCustomerEmail());
 
@@ -185,6 +209,10 @@ public class PedidoServicio {
         PedidoEntidad pedido = pedidoRepositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
+        if (estadoNormalizado.equals(pedido.getStatus())) {
+            return convertirADTO(pedido);
+        }
+
         pedido.setStatus(estadoNormalizado);
         pedido = pedidoRepositorio.save(pedido);
 
@@ -202,8 +230,7 @@ public class PedidoServicio {
     }
 
     private void descontarInventarioAsociado(Long productoId, int cantidad) {
-        try {
-            double cantDouble = (double) cantidad;
+        double cantDouble = (double) cantidad;
             if (productoId == 1) { // Combo El Hincha
                 insumoServicio.descontarStock(1L, 1.0 * cantDouble);
                 insumoServicio.descontarStock(2L, 0.2 * cantDouble);
@@ -269,10 +296,20 @@ public class PedidoServicio {
                 insumoServicio.descontarStock(1L, 2.0 * cantDouble);
                 insumoServicio.descontarStock(2L, 0.5 * cantDouble);
                 insumoServicio.descontarStock(8L, 2.0 * cantDouble);
-            }
-        } catch (Exception e) {
-            System.err.println("No se pudo descontar stock de inventario: " + e.getMessage());
         }
+    }
+
+    private String normalizarRequestId(String requestId) {
+        if (requestId == null || requestId.isBlank()) return null;
+        return requestId.trim();
+    }
+
+    private LocalDateTime inicioDiaLimaUtc() {
+        return java.time.ZonedDateTime.now(ZONA_LIMA)
+                .toLocalDate()
+                .atStartOfDay(ZONA_LIMA)
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .toLocalDateTime();
     }
 
     private String normalizarEmail(String email) {
@@ -327,7 +364,10 @@ public class PedidoServicio {
         List<DetallePedidoEntidad> detalles = detallePedidoRepositorio.findByPedidoEntidadId(pedido.getId());
         for (DetallePedidoEntidad det : detalles) {
             itemsHtml.append("<li>%d x %s - S/. %.2f (Cremas: %s)</li>"
-                    .formatted(det.getQuantity(), det.getProductoEntidad().getName(), det.getSubtotal(), det.getCreams()));
+                    .formatted(det.getQuantity(),
+                            HtmlUtils.htmlEscape(det.getProductoEntidad().getName()),
+                            det.getSubtotal(),
+                            HtmlUtils.htmlEscape(det.getCreams() == null ? "" : det.getCreams())));
         }
 
         String html = """
@@ -345,7 +385,9 @@ public class PedidoServicio {
                 <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
                 <p style="font-size: 12px; color: #888; text-align: center;">La Brosteria - Sabor Crujiente Premium</p>
             </div>
-            """.formatted(pedido.getCustomerName(), pedido.getId(), itemsHtml.toString(), pedido.getDeliveryCost(), pedido.getTotal(), pedido.getPaymentMethod(), pedido.getCustomerAddress());
+            """.formatted(HtmlUtils.htmlEscape(pedido.getCustomerName()), pedido.getId(), itemsHtml.toString(),
+                    pedido.getDeliveryCost(), pedido.getTotal(), HtmlUtils.htmlEscape(pedido.getPaymentMethod()),
+                    HtmlUtils.htmlEscape(pedido.getCustomerAddress()));
 
         emailServicio.enviarCorreoHTML(destinatario, asunto, html);
     }
@@ -376,16 +418,10 @@ public class PedidoServicio {
 
     private void recalcularYGuardarStatsCliente(ClienteEntidad cliente) {
         if (cliente == null || cliente.getPhone() == null) return;
-        List<PedidoEntidad> orders = pedidoRepositorio.findByCustomerPhone(cliente.getPhone().trim());
-        int totalOrders = 0;
-        BigDecimal totalSpent = BigDecimal.ZERO;
-        for (PedidoEntidad order : orders) {
-            if ("ENTREGADO".equalsIgnoreCase(order.getStatus())) {
-                totalOrders++;
-                totalSpent = totalSpent.add(order.getTotal());
-            }
-        }
-        cliente.setTotalOrders(totalOrders);
+        PedidoRepositorio.EstadisticasCliente stats = pedidoRepositorio
+                .obtenerEstadisticasCliente(cliente.getPhone().trim());
+        BigDecimal totalSpent = stats.getTotalGastado();
+        cliente.setTotalOrders(stats.getTotalPedidos().intValue());
         cliente.setTotalSpent(totalSpent);
         cliente.setPoints(totalSpent.divideToIntegralValue(BigDecimal.TEN).intValue());
         clienteRepositorio.save(cliente);

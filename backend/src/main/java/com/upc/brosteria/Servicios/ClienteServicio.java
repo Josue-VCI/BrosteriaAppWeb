@@ -28,8 +28,9 @@ public class ClienteServicio {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<ClienteDTO> listarTodos() {
-        return clienteRepositorio.findAll().stream()
+    public List<ClienteDTO> listarTodos(int limite) {
+        int limiteSeguro = Math.max(1, Math.min(limite, 500));
+        return clienteRepositorio.findAll(org.springframework.data.domain.PageRequest.of(0, limiteSeguro)).stream()
                 .map(c -> modelMapper.map(c, ClienteDTO.class))
                 .collect(Collectors.toList());
     }
@@ -39,6 +40,7 @@ public class ClienteServicio {
                 .map(cliente -> modelMapper.map(cliente, ClienteDTO.class));
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public ClienteDTO crearOActualizar(ClienteDTO clienteDTO) {
         ClienteEntidad cliente;
         if (clienteDTO.getId() != null) {
@@ -73,23 +75,11 @@ public class ClienteServicio {
             return;
         }
         String phone = cliente.getPhone().trim();
-        List<PedidoEntidad> orders = pedidoRepositorio.findByCustomerPhone(phone);
-        
-        int totalOrders = 0;
-        BigDecimal totalSpent = BigDecimal.ZERO;
-        
-        for (PedidoEntidad order : orders) {
-            if (order.getClienteEntidad() == null || !order.getClienteEntidad().getId().equals(cliente.getId())) {
-                order.setClienteEntidad(cliente);
-                pedidoRepositorio.save(order);
-            }
-            if ("ENTREGADO".equalsIgnoreCase(order.getStatus())) {
-                totalOrders++;
-                totalSpent = totalSpent.add(order.getTotal());
-            }
-        }
-        
-        cliente.setTotalOrders(totalOrders);
+        pedidoRepositorio.vincularPedidosPorTelefono(cliente.getId(), phone);
+        PedidoRepositorio.EstadisticasCliente stats = pedidoRepositorio.obtenerEstadisticasCliente(phone);
+        BigDecimal totalSpent = stats.getTotalGastado();
+
+        cliente.setTotalOrders(stats.getTotalPedidos().intValue());
         cliente.setTotalSpent(totalSpent);
         cliente.setPoints(totalSpent.divideToIntegralValue(BigDecimal.TEN).intValue());
         clienteRepositorio.save(cliente);
@@ -102,6 +92,15 @@ public class ClienteServicio {
     }
 
     public void enviarCorreoMasivo(List<String> destinatarios, String asunto, String mensajeHtml) {
+        if (destinatarios == null || destinatarios.isEmpty() || destinatarios.size() > 200) {
+            throw new IllegalArgumentException("La lista debe contener entre 1 y 200 destinatarios");
+        }
+        if (asunto == null || asunto.isBlank() || asunto.length() > 150) {
+            throw new IllegalArgumentException("El asunto no es valido");
+        }
+        if (mensajeHtml == null || mensajeHtml.isBlank() || mensajeHtml.length() > 20000) {
+            throw new IllegalArgumentException("El contenido del correo no es valido");
+        }
         for (String email : destinatarios) {
             if (email != null && !email.trim().isEmpty()) {
                 emailServicio.enviarCorreoHTML(email, asunto, mensajeHtml);

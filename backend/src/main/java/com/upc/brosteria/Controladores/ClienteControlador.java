@@ -20,8 +20,8 @@ public class ClienteControlador {
     private ClienteServicio clienteServicio;
 
     @GetMapping
-    public ResponseEntity<List<ClienteDTO>> listarTodos() {
-        return ResponseEntity.ok(clienteServicio.listarTodos());
+    public ResponseEntity<List<ClienteDTO>> listarTodos(@RequestParam(defaultValue = "500") int limite) {
+        return ResponseEntity.ok(clienteServicio.listarTodos(limite));
     }
 
     @GetMapping("/buscar-por-telefono")

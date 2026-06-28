@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 public class ReporteControlador {
 
     private static final LocalDateTime INICIO_HISTORICO = LocalDateTime.of(2000, 1, 1, 0, 0);
+    private static final ZoneId ZONA_LIMA = ZoneId.of("America/Lima");
 
     @Autowired
     private PedidoRepositorio pedidoRepositorio;
@@ -68,7 +71,7 @@ public class ReporteControlador {
             @RequestParam(required = false) String diaSemana,
             @RequestParam(required = false) String tipoPedido) {
 
-        LocalDateTime fin = LocalDateTime.now();
+        LocalDateTime fin = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime inicio = switch (filtroRango == null ? "trimestre" : filtroRango.toLowerCase(Locale.ROOT)) {
             case "semana" -> fin.minusWeeks(1);
             case "mes" -> fin.minusMonths(1);
@@ -127,7 +130,7 @@ public class ReporteControlador {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(
-                pedidos, totalVentas, formato, fechaInicio, fechaFin, tipoPedido, diaSemana);
+                pedidos, totalVentas, formato, inicio, fin, tipoPedido, diaSemana);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -163,7 +166,7 @@ public class ReporteControlador {
                     .append(escapeCsvField(pedido.getCustomerName())).append(",")
                     .append(escapeCsvField(pedido.getCustomerPhone())).append(",")
                     .append(escapeCsvField(pedido.getCustomerAddress())).append(",")
-                    .append(pedido.getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",")
+                    .append(horaLima(pedido.getOrderDate()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",")
                     .append(pedido.getType()).append(",")
                     .append(pedido.getPaymentMethod()).append(",")
                     .append(pedido.getTotal().setScale(2)).append(",")
@@ -179,11 +182,19 @@ public class ReporteControlador {
     }
 
     private LocalDateTime inicio(LocalDateTime valor) {
-        return valor == null ? INICIO_HISTORICO : valor;
+        return valor == null ? INICIO_HISTORICO : limaAUtc(valor);
     }
 
     private LocalDateTime fin(LocalDateTime valor) {
-        return valor == null ? LocalDateTime.now() : valor;
+        return valor == null ? LocalDateTime.now(ZoneOffset.UTC) : limaAUtc(valor);
+    }
+
+    private LocalDateTime limaAUtc(LocalDateTime valor) {
+        return valor.atZone(ZONA_LIMA).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+    }
+
+    private LocalDateTime horaLima(LocalDateTime valorUtc) {
+        return valorUtc.atZone(ZoneOffset.UTC).withZoneSameInstant(ZONA_LIMA).toLocalDateTime();
     }
 
     private String tipo(String valor) {

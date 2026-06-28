@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "pedidos")
@@ -13,6 +14,9 @@ public class PedidoEntidad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true, length = 64)
+    private String requestId;
 
     @Column(nullable = false)
     private String customerName;
@@ -48,7 +52,7 @@ public class PedidoEntidad {
     @PrePersist
     protected void onCreate() {
         if (orderDate == null) {
-            orderDate = LocalDateTime.now();
+            orderDate = LocalDateTime.now(ZoneOffset.UTC);
         }
     }
 }

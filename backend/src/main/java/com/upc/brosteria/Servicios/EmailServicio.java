@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 public class EmailServicio {
@@ -58,7 +59,7 @@ public class EmailServicio {
                 <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
                 <p style="font-size: 12px; color: #888;">CRM La Brosteria - Sistema Automatico de Notificaciones</p>
             </div>
-            """.formatted(insumoNombre, actualStock, unidad);
+            """.formatted(HtmlUtils.htmlEscape(insumoNombre), actualStock, HtmlUtils.htmlEscape(unidad));
         
         enviarCorreoHTML(stockAlertEmail, asunto, html);
     }
