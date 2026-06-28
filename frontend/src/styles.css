@@ -20,6 +20,19 @@
     --font-body: 'Quicksand', sans-serif;
 }
 
+html,
+body {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -40,6 +53,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     padding: 20px;
+    min-width: 0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

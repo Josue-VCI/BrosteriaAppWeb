@@ -8,7 +8,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, throwError, timeout, retry } from 'rxjs';
+import { catchError, throwError, timeout, retry, timer } from 'rxjs';
 import { ToastService } from './services/toast.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
@@ -17,19 +17,27 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const toastService = inject(ToastService);
   
   let authReq = req;
-  if (token) {
+  const esPeticionLogin = req.url.includes('/api/v1/auth/login');
+  if (token && !esPeticionLogin) {
     authReq = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` }
     });
   }
 
-  let requestPipeline = next(authReq).pipe(
-    timeout(12000), // Timeout de 12 segundos para evitar que la interfaz se quede colgada indefinidamente
+  const requestPipeline = next(authReq).pipe(
+    timeout(12000),
+    retry({
+      count: req.method === 'GET' ? 2 : 0,
+      delay: (error) => {
+        const status = error instanceof HttpErrorResponse ? error.status : undefined;
+        const esTransitorio = error?.name === 'TimeoutError' || status === 0 || (status !== undefined && status >= 500);
+        return esTransitorio ? timer(1500) : throwError(() => error);
+      }
+    }),
     catchError((error) => {
-      // Manejar error de timeout de RxJS
       if (error.name === 'TimeoutError') {
-        toastService.error('El servidor esta tardando demasiado en responder. Reintentando...');
-        return throwError(() => new Error('TimeoutError'));
+        toastService.error('El servidor esta tardando demasiado en responder.');
+        return throwError(() => error);
       }
 
       const status = error.status;
@@ -39,20 +47,13 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         localStorage.removeItem('brosteria_role');
         router.navigate(['/login']);
       } else if (status === 0) {
-        toastService.warning('Error de conexion con el servidor. Reintentando...');
+        toastService.warning('Error de conexion con el servidor.');
       } else if (status >= 500) {
         toastService.error('Ocurrio un error en el servidor. Por favor, reintente en unos momentos.');
       }
       return throwError(() => error);
     })
   );
-
-  // Auto-reintento con delay de 1.5s solo para solicitudes de lectura (GET) para tolerar microcaidas de conexion
-  if (req.method === 'GET') {
-    requestPipeline = requestPipeline.pipe(
-      retry({ count: 2, delay: 1500 })
-    );
-  }
 
   return requestPipeline;
 };
