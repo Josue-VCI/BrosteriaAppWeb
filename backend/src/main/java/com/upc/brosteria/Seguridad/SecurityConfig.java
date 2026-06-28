@@ -64,7 +64,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:4200",
+            "http://127.0.0.1:4200",
+            "https://brosteria-app-web.vercel.app",
+            "https://*.vercel.app",
+            "https://*.vci.pe"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
         configuration.setAllowCredentials(true);

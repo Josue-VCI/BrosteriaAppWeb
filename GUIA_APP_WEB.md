@@ -138,6 +138,6 @@ Cada vez que quieras que implementemos o revises una modificación:
      --source . \
      --region us-central1 \
      --allow-unauthenticated \
-     --set-env-vars DB_URL="jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require",DB_USERNAME="postgres.htetwptrtgcwhhpgjfvl",DB_PASSWORD="#16j0sUBV_supabase",MAIL_USERNAME="josuebecerrav19@gmail.com",MAIL_PASSWORD="xudjxokraahmrftp",JWT_SECRET="M1_CL4V3_S3CR3T4_M0Y_L4RG4_Y_S3GUR4_P4R4_3L_PR0Y3CT0_BROSTERIA_CRM_2026"
+     --set-env-vars DB_URL="jdbc:postgresql://[SUPABASE_HOST]:6543/postgres?sslmode=require",DB_USERNAME="[SUPABASE_USER]",DB_PASSWORD="[TU_DB_PASSWORD]",MAIL_USERNAME="[TU_GMAIL_CORREO]",MAIL_PASSWORD="[TU_GMAIL_APP_PASSWORD]",JWT_SECRET="[TU_JWT_SECRET_LARGO_Y_SEGURO]"
    ```
 3. **Frontend:** Vercel detecta la subida en GitHub de manera automática y redespliega la página en menos de un minuto.

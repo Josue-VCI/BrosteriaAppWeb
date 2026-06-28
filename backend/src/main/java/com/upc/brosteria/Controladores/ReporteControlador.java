@@ -289,24 +289,4 @@ public class ReporteControlador {
         return field;
     }
 
-    @org.springframework.transaction.annotation.Transactional
-    @PostMapping("/limpiar-historico")
-    public ResponseEntity<Map<String, Object>> limpiarHistorico() {
-        LocalDateTime limite = LocalDateTime.now().minusDays(90);
-        
-        // Contar cuantos pedidos se van a eliminar
-        long totalAEliminar = pedidoRepositorio.countByOrderDateBefore(limite);
-        
-        if (totalAEliminar > 0) {
-            detallePedidoRepositorio.deleteByPedidoOrderDateBefore(limite);
-            pedidoRepositorio.deleteByOrderDateBefore(limite);
-        }
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("eliminados", totalAEliminar);
-        response.put("mensaje", "Se eliminaron " + totalAEliminar + " pedidos antiguos de la base de datos.");
-        
-        return ResponseEntity.ok(response);
-    }
 }

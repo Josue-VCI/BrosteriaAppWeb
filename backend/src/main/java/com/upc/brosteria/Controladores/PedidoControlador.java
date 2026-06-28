@@ -36,7 +36,7 @@ public class PedidoControlador {
     }
 
     @PostMapping
-    public ResponseEntity<PedidoDTO> crear(@RequestBody PedidoDTO pedidoDTO) {
+    public ResponseEntity<PedidoDTO> crear(@jakarta.validation.Valid @RequestBody PedidoDTO pedidoDTO) {
         return new ResponseEntity<>(pedidoServicio.crear(pedidoDTO), HttpStatus.CREATED);
     }
 

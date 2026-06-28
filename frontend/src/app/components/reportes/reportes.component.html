@@ -122,16 +122,13 @@
 
   <!-- Fila de Mantenimiento de Base de Datos -->
   <div class="glass-card maintenance-wrapper" style="margin-top: 25px;">
-    <h4>Mantenimiento de Base de Datos</h4>
+    <h4>Respaldo y Descarga de Datos</h4>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">
-      Manten el sistema fluido y rapido. Se recomienda realizar una purga manual cada 3 meses para conservar unicamente los pedidos de los ultimos 90 dias.
+      Descarga un archivo de respaldo en formato CSV conteniendo el historial de todos tus pedidos de los ultimos 90 dias para archivar de forma local.
     </p>
     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
       <button class="brand-btn" (click)="descargarReportePDF90Dias()" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-light)) !important; color: #000 !important;">
         Descargar Respaldo CSV (90 dias)
-      </button>
-      <button class="brand-btn logout-btn" (click)="limpiarHistorico()" style="padding: 10px 24px !important;">
-        Purgar Pedidos antiguos (> 90 dias)
       </button>
     </div>
   </div>

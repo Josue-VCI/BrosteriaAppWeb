@@ -330,20 +330,4 @@ export class ReportesComponent implements OnInit {
     });
   }
 
-  limpiarHistorico() {
-    if (!confirm('¿Esta seguro de eliminar de forma permanente todos los pedidos de la base de datos que tengan mas de 90 dias? Se conservara el total acumulado de cada cliente.')) {
-      return;
-    }
-
-    this.http.post(`${this.apiBaseUrl}/limpiar-historico`, {}).subscribe({
-      next: (res: any) => {
-        this.toastService.success(res.mensaje || 'Historial de base de datos purgado con exito.');
-        this.aplicarFiltros();
-      },
-      error: (err) => {
-        console.error('Error al purgar base de datos', err);
-        this.toastService.error('Ocurrio un error al ejecutar el mantenimiento.');
-      }
-    });
-  }
 }

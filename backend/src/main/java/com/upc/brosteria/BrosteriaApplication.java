@@ -36,23 +36,47 @@ public class BrosteriaApplication {
             RolEntidad adminRol = rolRepositorio.findById(1L).orElseThrow();
             RolEntidad cajeroRol = rolRepositorio.findById(2L).orElseThrow();
 
-            // Asegurar/Actualizar los 5 usuarios requeridos (2 Admins y 3 Cajeros de Atencion)
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", "BrosteriaCRM2026!", adminRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", "BrosteriaCRM2026!", adminRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", "BrosteriaCRM2026!", cajeroRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atencion 2", "BrosteriaCRM2026!", cajeroRol);
-            crearOActualizarUsuario(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atencion 3", "BrosteriaCRM2026!", cajeroRol);
+            // Leer contraseñas de las variables de entorno o usar la default de respaldo
+            String envAdminPass = System.getenv("ADMIN_PASSWORD");
+            String envCajeroPass = System.getenv("CAJERO_PASSWORD");
+
+            String adminPassword = (envAdminPass != null && !envAdminPass.trim().isEmpty()) ? envAdminPass.trim() : "BrosteriaCRM2026!";
+            String cajeroPassword = (envCajeroPass != null && !envCajeroPass.trim().isEmpty()) ? envCajeroPass.trim() : "BrosteriaCRM2026!";
+
+            // Asegurar los 5 usuarios requeridos (2 Admins y 3 Cajeros de Atencion)
+            crearUsuarioSiNoExiste(usuarioRepositorio, passwordEncoder, "admin@brosteria.com", "Josue Espinoza (Admin 1)", adminPassword, adminRol);
+            crearUsuarioSiNoExiste(usuarioRepositorio, passwordEncoder, "admin2@brosteria.com", "Administrador 2", adminPassword, adminRol);
+            crearUsuarioSiNoExiste(usuarioRepositorio, passwordEncoder, "cajero@brosteria.com", "Carlos Cajero (Cajero 1)", cajeroPassword, cajeroRol);
+            crearUsuarioSiNoExiste(usuarioRepositorio, passwordEncoder, "cajero2@brosteria.com", "Atencion 2", cajeroPassword, cajeroRol);
+            crearUsuarioSiNoExiste(usuarioRepositorio, passwordEncoder, "cajero3@brosteria.com", "Atencion 3", cajeroPassword, cajeroRol);
         };
     }
 
-    private void crearOActualizarUsuario(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder,
-                                         String email, String name, String rawPassword, RolEntidad rol) {
-        UsuarioEntidad usuario = usuarioRepositorio.findByEmail(email).orElse(new UsuarioEntidad());
-        usuario.setEmail(email);
-        usuario.setName(name);
-        usuario.setPasswordHash(passwordEncoder.encode(rawPassword));
-        usuario.setRolEntidad(rol);
-        usuarioRepositorio.save(usuario);
-        System.out.println("Usuario de personal asegurado/actualizado: " + email);
+    private void crearUsuarioSiNoExiste(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder,
+                                         String email, String name, String password, RolEntidad rol) {
+        java.util.Optional<UsuarioEntidad> optUsuario = usuarioRepositorio.findByEmail(email);
+        if (optUsuario.isEmpty()) {
+            UsuarioEntidad usuario = new UsuarioEntidad();
+            usuario.setEmail(email);
+            usuario.setName(name);
+            usuario.setPasswordHash(passwordEncoder.encode(password));
+            usuario.setRolEntidad(rol);
+            usuarioRepositorio.save(usuario);
+            System.out.println("Usuario de personal creado (nuevo): " + email);
+        } else {
+            // Si ya existe, podemos actualizar la contraseña si y solo si la contraseña del entorno es distinta
+            // de la por defecto, para permitir rotaciones forzadas desde variables de entorno.
+            String envAdminPass = System.getenv("ADMIN_PASSWORD");
+            String envCajeroPass = System.getenv("CAJERO_PASSWORD");
+            boolean overrideRequested = (rol.getName().equals("ADMIN") && envAdminPass != null && !envAdminPass.trim().isEmpty())
+                                     || (rol.getName().equals("CAJERO") && envCajeroPass != null && !envCajeroPass.trim().isEmpty());
+
+            if (overrideRequested) {
+                UsuarioEntidad usuario = optUsuario.get();
+                usuario.setPasswordHash(passwordEncoder.encode(password));
+                usuarioRepositorio.save(usuario);
+                System.out.println("Contraseña de usuario rotada por variable de entorno: " + email);
+            }
+        }
     }
 }
