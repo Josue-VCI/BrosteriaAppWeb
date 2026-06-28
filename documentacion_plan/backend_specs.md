@@ -150,7 +150,7 @@ spring.sql.init.mode=always
 spring.jpa.defer-datasource-initialization=true
 
 # Configuración de Seguridad JWT
-jwt.secret=M1_CL4V3_S3CR3T4_M0Y_L4RG4_Y_S3GUR4_P4R4_3L_PR0Y3CT0_BROSTERIA_CRM_2026
+jwt.secret=${JWT_SECRET}
 jwt.expiration=86400000
 
 # Configuración SMTP de Gmail (Ajustar credenciales de producción)

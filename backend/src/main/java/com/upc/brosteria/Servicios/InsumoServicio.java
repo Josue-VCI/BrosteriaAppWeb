@@ -6,6 +6,7 @@ import com.upc.brosteria.Repositorios.InsumoRepositorio;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,21 +51,23 @@ public class InsumoServicio {
         insumoRepositorio.deleteById(id);
     }
 
+    @Transactional
     public InsumoDTO registrarIngreso(Long id, Double cantidad) {
+        if (insumoRepositorio.registrarIngresoAtomico(id, cantidad) == 0) {
+            throw new RuntimeException("Insumo no encontrado");
+        }
         InsumoEntidad insumo = insumoRepositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
-
-        insumo.setQuantity(insumo.getQuantity() + cantidad);
-        insumo = insumoRepositorio.save(insumo);
         return modelMapper.map(insumo, InsumoDTO.class);
     }
 
+    @Transactional
     public void descontarStock(Long id, Double cantidad) {
+        if (insumoRepositorio.descontarStockAtomico(id, cantidad) == 0) {
+            throw new RuntimeException("Insumo no encontrado");
+        }
         InsumoEntidad insumo = insumoRepositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
-
-        insumo.setQuantity(Math.max(0, insumo.getQuantity() - cantidad));
-        insumo = insumoRepositorio.save(insumo);
 
         if (insumo.getQuantity() <= insumo.getMinimumStock()) {
             emailServicio.notificarStockBajo(insumo.getName(), insumo.getQuantity(), insumo.getUnit());

@@ -24,6 +24,9 @@ import java.util.stream.Collectors;
 @Service
 public class PedidoServicio {
 
+    private static final java.util.Set<String> ESTADOS_VALIDOS = java.util.Set.of(
+            "PENDIENTE", "PREPARANDO", "ENVIADO", "ENTREGADO", "CANCELADO");
+
     @Autowired
     private PedidoRepositorio pedidoRepositorio;
 
@@ -174,14 +177,18 @@ public class PedidoServicio {
 
     @Transactional
     public PedidoDTO actualizarEstado(Long id, String nuevoEstado) {
+        String estadoNormalizado = nuevoEstado == null ? "" : nuevoEstado.trim().toUpperCase(java.util.Locale.ROOT);
+        if (!ESTADOS_VALIDOS.contains(estadoNormalizado)) {
+            throw new IllegalArgumentException("El estado del pedido no es valido");
+        }
         PedidoEntidad pedido = pedidoRepositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
-        pedido.setStatus(nuevoEstado);
+        pedido.setStatus(estadoNormalizado);
         pedido = pedidoRepositorio.save(pedido);
 
         // Si se entrega y el cliente tiene correo, enviar comprobante
-        if ("ENTREGADO".equals(nuevoEstado) && pedido.getClienteEntidad() != null && pedido.getClienteEntidad().getEmail() != null) {
+        if ("ENTREGADO".equals(estadoNormalizado) && pedido.getClienteEntidad() != null && pedido.getClienteEntidad().getEmail() != null) {
             enviarComprobantePorCorreo(pedido);
         }
 

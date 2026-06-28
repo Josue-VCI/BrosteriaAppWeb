@@ -6,10 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/insumos")
+@Validated
 public class InsumoControlador {
 
     @Autowired
@@ -21,12 +25,12 @@ public class InsumoControlador {
     }
 
     @PostMapping
-    public ResponseEntity<InsumoDTO> crear(@RequestBody InsumoDTO insumoDTO) {
+    public ResponseEntity<InsumoDTO> crear(@Valid @RequestBody InsumoDTO insumoDTO) {
         return new ResponseEntity<>(insumoServicio.crear(insumoDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<InsumoDTO> actualizar(@PathVariable Long id, @RequestBody InsumoDTO insumoDTO) {
+    public ResponseEntity<InsumoDTO> actualizar(@PathVariable Long id, @Valid @RequestBody InsumoDTO insumoDTO) {
         return ResponseEntity.ok(insumoServicio.actualizar(id, insumoDTO));
     }
 
@@ -37,7 +41,7 @@ public class InsumoControlador {
     }
 
     @PostMapping("/{id}/ingreso")
-    public ResponseEntity<InsumoDTO> registrarIngreso(@PathVariable Long id, @RequestParam Double cantidad) {
+    public ResponseEntity<InsumoDTO> registrarIngreso(@PathVariable Long id, @RequestParam @Positive Double cantidad) {
         return ResponseEntity.ok(insumoServicio.registrarIngreso(id, cantidad));
     }
 }

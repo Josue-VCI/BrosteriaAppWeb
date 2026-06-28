@@ -37,12 +37,21 @@ public class ClienteServicio {
         if (clienteDTO.getId() != null) {
             cliente = clienteRepositorio.findById(clienteDTO.getId())
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-            cliente.setName(clienteDTO.getName());
-            cliente.setEmail(clienteDTO.getEmail());
-            cliente.setPhone(clienteDTO.getPhone());
-            cliente.setAddress(clienteDTO.getAddress());
+            cliente.setName(clienteDTO.getName().trim());
+            cliente.setEmail(clienteDTO.getEmail() == null || clienteDTO.getEmail().isBlank()
+                    ? null : clienteDTO.getEmail().trim().toLowerCase());
+            cliente.setPhone(clienteDTO.getPhone().trim());
+            cliente.setAddress(clienteDTO.getAddress() == null ? null : clienteDTO.getAddress().trim());
         } else {
-            cliente = modelMapper.map(clienteDTO, ClienteEntidad.class);
+            cliente = new ClienteEntidad();
+            cliente.setName(clienteDTO.getName().trim());
+            cliente.setEmail(clienteDTO.getEmail() == null || clienteDTO.getEmail().isBlank()
+                    ? null : clienteDTO.getEmail().trim().toLowerCase());
+            cliente.setPhone(clienteDTO.getPhone().trim());
+            cliente.setAddress(clienteDTO.getAddress() == null ? null : clienteDTO.getAddress().trim());
+            cliente.setTotalOrders(0);
+            cliente.setTotalSpent(0.0);
+            cliente.setPoints(0);
         }
         cliente = clienteRepositorio.save(cliente);
         

@@ -5,6 +5,7 @@ import com.upc.brosteria.Servicios.ClienteServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class ClienteControlador {
     }
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> crearOActualizar(@RequestBody ClienteDTO clienteDTO) {
+    public ResponseEntity<ClienteDTO> crearOActualizar(@Valid @RequestBody ClienteDTO clienteDTO) {
         return ResponseEntity.ok(clienteServicio.crearOActualizar(clienteDTO));
     }
 

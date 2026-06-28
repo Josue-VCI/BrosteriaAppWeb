@@ -12,12 +12,12 @@ La plataforma está dividida en dos componentes desacoplados:
 * **Lenguaje**: Java 17
 * **Framework**: Spring Boot 3.x, Spring Security, JPA Hibernate.
 * **Seguridad**: Autenticación sin estado (Stateless) mediante JWT tokens y encriptación de contraseñas con `BCrypt`.
-* **Base de Datos**: PostgreSQL (alojada en **Supabase** a coste cero), configurada con pool de conexiones robusto mediante **HikariCP** (20 conexiones máximas) y filtrado lógico multi-inquilino (`tenant_id`).
+* **Base de Datos**: PostgreSQL alojada en **Supabase**, con un pool HikariCP de hasta 5 conexiones ajustado al nivel gratuito.
 * **Correo**: Notificaciones y comprobantes asíncronos (`@Async`) vía SMTP de Gmail.
 * **Alojamiento**: Google Cloud Run (escalable a cero instancias para reducir costos a $0.00 en inactividad).
 
-### 2. Frontend (Angular 17+)
-* **Framework**: Angular 17 con arquitectura Standalone Components.
+### 2. Frontend (Angular 20 LTS)
+* **Framework**: Angular 20 con arquitectura Standalone Components y carga diferida por rutas.
 * **Manejo de Red**: Interceptor HTTP con control de timeouts de 12 segundos y reintentos automáticos para tolerar microcaídas de internet o encendido en frío del backend.
 * **Tablero Kanban**: Gestión visual interactiva en tiempo real (Cocina / Despacho / Entrega) con alertas sonoras sintetizadas (Web Audio API) y optimización móvil.
 * **Alojamiento**: Vercel (Hobby plan de costo cero).
