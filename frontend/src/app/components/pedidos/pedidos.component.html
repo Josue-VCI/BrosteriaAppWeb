@@ -31,7 +31,7 @@
           <div class="card-top">
             <span class="pedido-id">#{{ pedido.id }}</span>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <span class="pedido-time">{{ pedido.orderDate | date:'HH:mm' }}</span>
+              <span class="pedido-time">{{ normalizarFechaUtc(pedido.orderDate) | date:'HH:mm':'-0500' }}</span>
               <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
             </div>
           </div>
@@ -81,7 +81,7 @@
           <div class="card-top">
             <span class="pedido-id">#{{ pedido.id }}</span>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <span class="pedido-time">{{ pedido.orderDate | date:'HH:mm' }}</span>
+              <span class="pedido-time">{{ normalizarFechaUtc(pedido.orderDate) | date:'HH:mm':'-0500' }}</span>
               <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
             </div>
           </div>
@@ -136,7 +136,9 @@
           </div>
           <div class="form-group">
             <label>Telefono Celular (Opcional)</label>
-            <input type="tel" [(ngModel)]="formPedido.customerPhone" class="modal-input" placeholder="Ej. 960373555" inputmode="numeric">
+            <input type="tel" [(ngModel)]="formPedido.customerPhone" (ngModelChange)="buscarClientePorTelefono($event)" class="modal-input" placeholder="Ej. 960373555" inputmode="numeric">
+            <span class="customer-lookup-status" *ngIf="buscandoCliente">Buscando cliente...</span>
+            <span class="customer-lookup-status found" *ngIf="clienteEncontrado">Cliente encontrado. Datos completados.</span>
           </div>
         </div>
 
@@ -291,7 +293,7 @@
             <span class="number-font" style="font-weight: bold; color: var(--success);">S/. {{ pedido.total | number:'1.2-2' }}</span>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
-            <span>Hora: {{ pedido.orderDate | date:'HH:mm' }}</span>
+            <span>Hora: {{ normalizarFechaUtc(pedido.orderDate) | date:'HH:mm':'-0500' }}</span>
             <span>Tipo: {{ pedido.type }} | Pago: {{ pedido.paymentMethod }}</span>
           </div>
           <div style="font-size: 13px; border-top: 1px dashed var(--glass-border); padding-top: 6px; margin-top: 4px;">

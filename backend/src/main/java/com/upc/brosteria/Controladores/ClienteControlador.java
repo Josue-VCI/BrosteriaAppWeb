@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/clientes")
+@Validated
 public class ClienteControlador {
 
     @Autowired
@@ -19,6 +22,14 @@ public class ClienteControlador {
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarTodos() {
         return ResponseEntity.ok(clienteServicio.listarTodos());
+    }
+
+    @GetMapping("/buscar-por-telefono")
+    public ResponseEntity<ClienteDTO> buscarPorTelefono(
+            @RequestParam @Pattern(regexp = "^[0-9+() -]{7,20}$", message = "El telefono no es valido") String telefono) {
+        return clienteServicio.buscarPorTelefono(telefono)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @PostMapping

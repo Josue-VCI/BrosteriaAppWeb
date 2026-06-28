@@ -304,3 +304,13 @@
   border-color: var(--primary) !important;
 }
 
+.customer-lookup-status {
+  color: var(--text-muted);
+  font-size: 11px;
+  min-height: 14px;
+}
+
+.customer-lookup-status.found {
+  color: var(--success);
+}
+

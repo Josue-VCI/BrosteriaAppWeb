@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +31,11 @@ public class ClienteServicio {
         return clienteRepositorio.findAll().stream()
                 .map(c -> modelMapper.map(c, ClienteDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    public Optional<ClienteDTO> buscarPorTelefono(String telefono) {
+        return clienteRepositorio.findFirstByPhoneOrderByIdAsc(telefono.trim())
+                .map(cliente -> modelMapper.map(cliente, ClienteDTO.class));
     }
 
     public ClienteDTO crearOActualizar(ClienteDTO clienteDTO) {

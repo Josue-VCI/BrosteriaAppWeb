@@ -14,6 +14,7 @@ import { ToastService } from '../../services/toast.service';
 export class PedidosComponent implements OnInit, OnDestroy {
   pedidosCocina: any[] = [];
   pedidosDespacho: any[] = [];
+  private cargandoPedidosActivos = false;
   columnaActiva = 'COCINA'; // Control para moviles: COCINA, DESPACHO
 
   // Polling y Alerta Sonora
@@ -25,6 +26,10 @@ export class PedidosComponent implements OnInit, OnDestroy {
   productosCatalogo: any[] = [];
   mostrarModalNuevoPedido = false;
   guardandoPedido = false;
+  buscandoCliente = false;
+  clienteEncontrado = false;
+  private telefonoBusquedaTimeout: ReturnType<typeof setTimeout> | null = null;
+  private secuenciaBusquedaCliente = 0;
   pedidosEnProgreso = new Set<number>();
   textoWhatsApp = '';
   
@@ -51,7 +56,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       this.cargarTodosLosPedidos();
     }, 10000);
 
-    // Escuchar cambios de visibilidad de pestaña para ahorrar llamadas e impedir acumulacion de audio
+    // Escuchar cambios de visibilidad de pestana para ahorrar llamadas e impedir acumulacion de audio
     document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
@@ -62,6 +67,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
     }
     if (this.audioCtx) {
       this.audioCtx.close().catch(() => {});
+    }
+    if (this.telefonoBusquedaTimeout) {
+      clearTimeout(this.telefonoBusquedaTimeout);
     }
   }
 
@@ -89,6 +97,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   cargarTodosLosPedidos() {
+    if (this.cargandoPedidosActivos) return;
+    this.cargandoPedidosActivos = true;
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/activos`).subscribe({
       next: (data) => {
         const nuevosCocina = data.filter(p => p.status === 'PENDIENTE' || p.status === 'PREPARANDO');
@@ -102,8 +112,12 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
         this.pedidosCocina = nuevosCocina;
         this.pedidosDespacho = data.filter(p => p.status === 'ENVIADO');
+        this.cargandoPedidosActivos = false;
       },
-      error: (err) => console.error('Error al cargar pedidos del kanban', err)
+      error: (err) => {
+        this.cargandoPedidosActivos = false;
+        console.error('Error al cargar pedidos del kanban', err);
+      }
     });
   }
 
@@ -197,6 +211,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   abrirNuevoPedido() {
     this.textoWhatsApp = '';
     this.formPedido = {
+      clienteId: null,
       customerName: '',
       customerPhone: '',
       customerAddress: '',
@@ -209,11 +224,59 @@ export class PedidosComponent implements OnInit, OnDestroy {
       detalles: [] as any[],
       total: 5.0
     };
+    this.clienteEncontrado = false;
+    this.buscandoCliente = false;
     this.mostrarModalNuevoPedido = true;
   }
 
   cerrarModalNuevoPedido() {
+    this.secuenciaBusquedaCliente++;
+    if (this.telefonoBusquedaTimeout) {
+      clearTimeout(this.telefonoBusquedaTimeout);
+      this.telefonoBusquedaTimeout = null;
+    }
     this.mostrarModalNuevoPedido = false;
+  }
+
+  buscarClientePorTelefono(telefono: string) {
+    this.formPedido.clienteId = null;
+    this.clienteEncontrado = false;
+    this.buscandoCliente = false;
+    this.secuenciaBusquedaCliente++;
+    const secuenciaActual = this.secuenciaBusquedaCliente;
+
+    if (this.telefonoBusquedaTimeout) {
+      clearTimeout(this.telefonoBusquedaTimeout);
+    }
+
+    const telefonoLimpio = (telefono || '').replace(/\D/g, '');
+    if (telefonoLimpio.length < 7) {
+      return;
+    }
+
+    this.telefonoBusquedaTimeout = setTimeout(() => {
+      this.buscandoCliente = true;
+      this.http.get<any>(`${API_BASE_URL}/api/v1/clientes/buscar-por-telefono?telefono=${encodeURIComponent(telefonoLimpio)}`).subscribe({
+        next: (cliente) => {
+          if (secuenciaActual !== this.secuenciaBusquedaCliente || !this.mostrarModalNuevoPedido) return;
+          if (!cliente) {
+            this.buscandoCliente = false;
+            return;
+          }
+          this.formPedido.clienteId = cliente.id;
+          this.formPedido.customerName = cliente.name || '';
+          this.formPedido.customerEmail = cliente.email || '';
+          this.formPedido.customerAddress = cliente.address || '';
+          this.clienteEncontrado = true;
+          this.buscandoCliente = false;
+        },
+        error: (err) => {
+          if (secuenciaActual !== this.secuenciaBusquedaCliente) return;
+          this.buscandoCliente = false;
+          console.error('Error al buscar cliente por telefono', err);
+        }
+      });
+    }, 450);
   }
 
   procesarTextoWhatsApp() {
@@ -263,7 +326,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
         inDetail = false;
       }
 
-      // Detectar lineas de productos con mayor flexibilidad (soporta viñetas de guion, asterisco, numeros o directo)
+      // Detectar lineas de productos con mayor flexibilidad
       const isProductLine = cleanLine.match(/^[-\*\d\.\s]*\d+x\s*/i);
       if (inDetail && isProductLine) {
         const match = cleanLine.match(/^[-\*\d\.\s]*(\d+)x\s*([^(]+)/i);
@@ -309,6 +372,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     }
 
     this.formPedido = {
+      clienteId: null,
       customerName: parsedName,
       customerPhone: parsedPhone,
       customerAddress: parsedAddress,
@@ -323,6 +387,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
     };
 
     this.recalcularTotal();
+    if (parsedPhone) {
+      this.buscarClientePorTelefono(parsedPhone);
+    }
   }
 
   limpiarNombreProducto(name: string): string {
@@ -474,6 +541,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     }
 
     const payload = {
+      clienteId: this.formPedido.clienteId,
       customerName: this.formPedido.customerName,
       customerPhone: this.formPedido.customerPhone,
       customerAddress: finalAddress,
@@ -520,11 +588,10 @@ export class PedidosComponent implements OnInit, OnDestroy {
     this.mostrarModalEntregados = true;
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/estado/ENTREGADO`).subscribe({
       next: (data) => {
-        const todayStr = new Date().toDateString();
+        const todayStr = this.fechaCalendarioLima(new Date());
         this.pedidosEntregadosHoy = data.filter(p => {
           if (!p.orderDate) return false;
-          const normalizedDate = p.orderDate.includes('Z') ? p.orderDate : p.orderDate + 'Z';
-          return new Date(normalizedDate).toDateString() === todayStr;
+          return this.fechaCalendarioLima(new Date(this.normalizarFechaUtc(p.orderDate))) === todayStr;
         });
         this.cargandoEntregados = false;
       },
@@ -534,6 +601,20 @@ export class PedidosComponent implements OnInit, OnDestroy {
         this.toastService.error('No se pudieron cargar los pedidos entregados.');
       }
     });
+  }
+
+  normalizarFechaUtc(fecha: string): string {
+    if (!fecha) return fecha;
+    return /Z$|[+-]\d{2}:?\d{2}$/.test(fecha) ? fecha : `${fecha}Z`;
+  }
+
+  private fechaCalendarioLima(fecha: Date): string {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(fecha);
   }
 
   cerrarModalEntregados() {

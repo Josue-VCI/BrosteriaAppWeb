@@ -114,16 +114,13 @@ public class PedidoServicio {
         if (pedidoDTO.getClienteId() != null) {
             ClienteEntidad cliente = clienteRepositorio.findById(pedidoDTO.getClienteId())
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+            completarDatosDesdeCliente(pedido, pedidoDTO, cliente, requestedEmail);
             pedido.setClienteEntidad(cliente);
         } else {
             java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findFirstByPhoneOrderByIdAsc(phone);
             if (optCliente.isPresent()) {
                 ClienteEntidad cliente = optCliente.get();
-                if ((cliente.getEmail() == null || cliente.getEmail().trim().isEmpty())
-                        && emailDisponibleParaCliente(requestedEmail, cliente.getId())) {
-                    cliente.setEmail(requestedEmail);
-                    clienteRepositorio.save(cliente);
-                }
+                completarDatosDesdeCliente(pedido, pedidoDTO, cliente, requestedEmail);
                 pedido.setClienteEntidad(cliente);
             } else {
                 ClienteEntidad nuevoCliente = new ClienteEntidad();
@@ -288,6 +285,34 @@ public class PedidoServicio {
         return clienteRepositorio.findByEmail(email)
                 .map(cliente -> clienteIdActual != null && cliente.getId().equals(clienteIdActual))
                 .orElse(true);
+    }
+
+    private void completarDatosDesdeCliente(PedidoEntidad pedido,
+                                             PedidoDTO pedidoDTO,
+                                             ClienteEntidad cliente,
+                                             String requestedEmail) {
+        boolean clienteModificado = false;
+
+        if (pedidoDTO.getCustomerName() == null || pedidoDTO.getCustomerName().isBlank()) {
+            pedido.setCustomerName(cliente.getName());
+        }
+        if ((pedidoDTO.getCustomerAddress() == null || pedidoDTO.getCustomerAddress().isBlank())
+                && cliente.getAddress() != null && !cliente.getAddress().isBlank()) {
+            pedido.setCustomerAddress(cliente.getAddress());
+        }
+        if ((cliente.getEmail() == null || cliente.getEmail().isBlank())
+                && emailDisponibleParaCliente(requestedEmail, cliente.getId())) {
+            cliente.setEmail(requestedEmail);
+            clienteModificado = true;
+        }
+        if ((cliente.getAddress() == null || cliente.getAddress().isBlank())
+                && pedidoDTO.getCustomerAddress() != null && !pedidoDTO.getCustomerAddress().isBlank()) {
+            cliente.setAddress(pedidoDTO.getCustomerAddress().trim());
+            clienteModificado = true;
+        }
+        if (clienteModificado) {
+            clienteRepositorio.save(cliente);
+        }
     }
 
     private void enviarComprobantePorCorreo(PedidoEntidad pedido) {

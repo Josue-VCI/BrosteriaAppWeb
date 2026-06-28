@@ -24,8 +24,9 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
+  const timeoutMs = req.method === 'GET' ? 15000 : 45000;
   const requestPipeline = next(authReq).pipe(
-    timeout(12000),
+    timeout(timeoutMs),
     retry({
       count: req.method === 'GET' ? 2 : 0,
       delay: (error) => {
