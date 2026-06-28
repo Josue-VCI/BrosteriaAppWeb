@@ -40,7 +40,7 @@ public class UsuarioServicio {
             
             return new LoginResponse(token, usuario.getId(), usuario.getName(), roleName);
         } else {
-            throw new RuntimeException("Contraseña incorrecta");
+            throw new RuntimeException("Contrasena incorrecta");
         }
     }
 }

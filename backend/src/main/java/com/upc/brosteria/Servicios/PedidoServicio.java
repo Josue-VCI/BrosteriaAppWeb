@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,6 +82,10 @@ public class PedidoServicio {
 
     @Transactional
     public PedidoDTO crear(PedidoDTO pedidoDTO) {
+        if (pedidoDTO.getDetalles() == null || pedidoDTO.getDetalles().isEmpty()) {
+            throw new IllegalArgumentException("El pedido debe incluir al menos un producto");
+        }
+
         PedidoEntidad pedido = new PedidoEntidad();
         String name = (pedidoDTO.getCustomerName() == null || pedidoDTO.getCustomerName().trim().isEmpty())
                 ? "Anonimo"
@@ -101,17 +106,19 @@ public class PedidoServicio {
         pedido.setStatus("PENDIENTE");
         pedido.setOrderDate(LocalDateTime.now());
 
+        String requestedEmail = normalizarEmail(pedidoDTO.getCustomerEmail());
+
         if (pedidoDTO.getClienteId() != null) {
             ClienteEntidad cliente = clienteRepositorio.findById(pedidoDTO.getClienteId())
                     .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
             pedido.setClienteEntidad(cliente);
         } else {
-            java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findByPhone(phone);
+            java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findFirstByPhoneOrderByIdAsc(phone);
             if (optCliente.isPresent()) {
                 ClienteEntidad cliente = optCliente.get();
-                if ((cliente.getEmail() == null || cliente.getEmail().trim().isEmpty()) 
-                        && pedidoDTO.getCustomerEmail() != null && !pedidoDTO.getCustomerEmail().trim().isEmpty()) {
-                    cliente.setEmail(pedidoDTO.getCustomerEmail().trim());
+                if ((cliente.getEmail() == null || cliente.getEmail().trim().isEmpty())
+                        && emailDisponibleParaCliente(requestedEmail, cliente.getId())) {
+                    cliente.setEmail(requestedEmail);
                     clienteRepositorio.save(cliente);
                 }
                 pedido.setClienteEntidad(cliente);
@@ -120,8 +127,7 @@ public class PedidoServicio {
                 nuevoCliente.setName(name);
                 nuevoCliente.setPhone(phone);
                 nuevoCliente.setAddress(address);
-                nuevoCliente.setEmail(pedidoDTO.getCustomerEmail() != null && !pedidoDTO.getCustomerEmail().trim().isEmpty() 
-                        ? pedidoDTO.getCustomerEmail().trim() : null);
+                nuevoCliente.setEmail(emailDisponibleParaCliente(requestedEmail, null) ? requestedEmail : null);
                 nuevoCliente.setTotalOrders(0);
                 nuevoCliente.setTotalSpent(0.0);
                 nuevoCliente.setPoints(0);
@@ -261,9 +267,25 @@ public class PedidoServicio {
         }
     }
 
+    private String normalizarEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return null;
+        }
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private boolean emailDisponibleParaCliente(String email, Long clienteIdActual) {
+        if (email == null) {
+            return false;
+        }
+        return clienteRepositorio.findByEmail(email)
+                .map(cliente -> clienteIdActual != null && cliente.getId().equals(clienteIdActual))
+                .orElse(true);
+    }
+
     private void enviarComprobantePorCorreo(PedidoEntidad pedido) {
         String destinatario = pedido.getClienteEntidad().getEmail();
-        String asunto = "🍗 ¡Gracias por tu compra en La Brosteria! - Pedido #" + pedido.getId();
+        String asunto = "Gracias por tu compra en La Brosteria - Pedido #" + pedido.getId();
 
         StringBuilder itemsHtml = new StringBuilder();
         List<DetallePedidoEntidad> detalles = detallePedidoRepositorio.findByPedidoEntidadId(pedido.getId());
@@ -274,8 +296,8 @@ public class PedidoServicio {
 
         String html = """
             <div style="font-family: Arial, sans-serif; border: 1px solid #FF6B00; border-radius: 8px; padding: 20px; max-width: 600px;">
-                <h2 style="color: #FF6B00; margin-top: 0;">¡Hola %s! Aqui tienes el detalle de tu orden</h2>
-                <p>Tu pedido ha sido entregado con exito. ¡Que lo disfrutes!</p>
+                <h2 style="color: #FF6B00; margin-top: 0;">Hola %s! Aqui tienes el detalle de tu orden</h2>
+                <p>Tu pedido ha sido entregado con exito. Que lo disfrutes!</p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
                 <h3 style="color: #333;">Detalle del Pedido #%d</h3>
                 <ul>

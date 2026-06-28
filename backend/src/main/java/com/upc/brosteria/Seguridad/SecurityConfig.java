@@ -17,7 +17,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -43,14 +42,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/insumos", "/api/v1/insumos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").permitAll()
+                .requestMatchers("/api/v1/reportes/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/clientes/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/clientes/enviar-masivo").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/insumos").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/insumos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/insumos/**").hasRole("ADMIN")
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -68,8 +67,7 @@ public class SecurityConfig {
             "http://localhost:4200",
             "http://127.0.0.1:4200",
             "https://brosteria-app-web.vercel.app",
-            "https://*.vercel.app",
-            "https://*.vci.pe"
+            "https://brosteria.vci.pe"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));

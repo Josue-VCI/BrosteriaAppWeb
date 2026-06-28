@@ -495,7 +495,10 @@ export class PedidosComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.guardandoPedido = false;
         console.error('Error al guardar pedido', err);
-        this.toastService.error('Ocurrio un error al registrar el pedido.');
+        const mensaje = typeof err?.error?.error === 'string'
+          ? err.error.error
+          : 'Ocurrio un error al registrar el pedido.';
+        this.toastService.error(mensaje);
       }
     });
   }

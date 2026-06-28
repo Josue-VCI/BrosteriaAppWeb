@@ -42,7 +42,7 @@ INSERT INTO productos (id, name, description, price, category, image_url, active
 (16, 'Hamburguesa Broster', 'Filete de pollo broster + Lechuga + Tomate + Cremas de la casa', 12.00, 'BURGERS', 'images/hamburguesa.png', true),
 (17, 'Hamburguesa Doble Smash', 'Doble carne smash + Doble queso cheddar + Tocino', 15.00, 'BURGERS', 'images/hamburguesa.png', true),
 -- Alitas
-(18, 'Alitas BBQ (6 unidades)', '6 Alitas bañadas en salsa BBQ premium + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
+(18, 'Alitas BBQ (6 unidades)', '6 Alitas banadas en salsa BBQ premium + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
 (19, 'Alitas Picantes (6 unidades)', '6 Alitas en salsa bufalo picante + Papas fritas', 15.00, 'ALITAS', 'images/alitas.png', true),
 (20, 'Alitas Broster (6 unidades)', '6 Alitas fritas al estilo broster crujiente + Papas', 14.00, 'ALITAS', 'images/alitas.png', true),
 -- Bebidas
