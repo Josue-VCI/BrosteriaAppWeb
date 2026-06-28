@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 public class PedidoServicio {
@@ -103,7 +105,7 @@ public class PedidoServicio {
         pedido.setCustomerName(name);
         pedido.setCustomerPhone(phone);
         pedido.setCustomerAddress(address);
-        pedido.setDeliveryCost(pedidoDTO.getDeliveryCost() != null ? pedidoDTO.getDeliveryCost() : 0.0);
+        pedido.setDeliveryCost(pedidoDTO.getDeliveryCost() != null ? pedidoDTO.getDeliveryCost() : BigDecimal.ZERO);
         pedido.setType(pedidoDTO.getType() != null ? pedidoDTO.getType() : "DELIVERY");
         pedido.setPaymentMethod(pedidoDTO.getPaymentMethod() != null ? pedidoDTO.getPaymentMethod() : "EFECTIVO");
         pedido.setStatus("PENDIENTE");
@@ -129,14 +131,14 @@ public class PedidoServicio {
                 nuevoCliente.setAddress(address);
                 nuevoCliente.setEmail(emailDisponibleParaCliente(requestedEmail, null) ? requestedEmail : null);
                 nuevoCliente.setTotalOrders(0);
-                nuevoCliente.setTotalSpent(0.0);
+                nuevoCliente.setTotalSpent(BigDecimal.ZERO);
                 nuevoCliente.setPoints(0);
                 nuevoCliente = clienteRepositorio.save(nuevoCliente);
                 pedido.setClienteEntidad(nuevoCliente);
             }
         }
 
-        double subtotal = 0.0;
+        BigDecimal subtotal = BigDecimal.ZERO;
         List<DetallePedidoEntidad> detalles = new ArrayList<>();
 
         for (DetallePedidoDTO detDTO : pedidoDTO.getDetalles()) {
@@ -147,17 +149,19 @@ public class PedidoServicio {
             det.setPedidoEntidad(pedido);
             det.setProductoEntidad(prod);
             det.setQuantity(detDTO.getQuantity());
-            double sub = prod.getPrice() * detDTO.getQuantity();
+            BigDecimal sub = prod.getPrice()
+                    .multiply(BigDecimal.valueOf(detDTO.getQuantity()))
+                    .setScale(2, RoundingMode.HALF_UP);
             det.setSubtotal(sub);
             det.setCreams(detDTO.getCreams());
-            subtotal += sub;
+            subtotal = subtotal.add(sub);
             detalles.add(det);
 
             // Descontar inventario de forma simulada/aproximada por producto vendido
             descontarInventarioAsociado(prod.getId(), detDTO.getQuantity());
         }
 
-        pedido.setTotal(subtotal + pedido.getDeliveryCost());
+        pedido.setTotal(subtotal.add(pedido.getDeliveryCost()).setScale(2, RoundingMode.HALF_UP));
         final PedidoEntidad guardado = pedidoRepositorio.save(pedido);
 
         for (DetallePedidoEntidad det : detalles) {
@@ -374,16 +378,16 @@ public class PedidoServicio {
         if (cliente == null || cliente.getPhone() == null) return;
         List<PedidoEntidad> orders = pedidoRepositorio.findByCustomerPhone(cliente.getPhone().trim());
         int totalOrders = 0;
-        double totalSpent = 0.0;
+        BigDecimal totalSpent = BigDecimal.ZERO;
         for (PedidoEntidad order : orders) {
             if ("ENTREGADO".equalsIgnoreCase(order.getStatus())) {
                 totalOrders++;
-                totalSpent += order.getTotal();
+                totalSpent = totalSpent.add(order.getTotal());
             }
         }
         cliente.setTotalOrders(totalOrders);
         cliente.setTotalSpent(totalSpent);
-        cliente.setPoints((int) (totalSpent / 10));
+        cliente.setPoints(totalSpent.divideToIntegralValue(BigDecimal.TEN).intValue());
         clienteRepositorio.save(cliente);
     }
 }

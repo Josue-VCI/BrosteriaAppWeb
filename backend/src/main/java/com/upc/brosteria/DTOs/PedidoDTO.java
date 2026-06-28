@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter @Setter
@@ -25,7 +26,7 @@ public class PedidoDTO {
     @Size(max = 180, message = "El correo del cliente es demasiado largo")
     private String customerEmail;
     @PositiveOrZero(message = "El costo de envio no puede ser negativo")
-    private Double deliveryCost;
+    private BigDecimal deliveryCost;
 
     @NotNull(message = "El tipo de entrega no puede ser nulo")
     @Pattern(regexp = "DELIVERY|PICKUP", message = "El tipo de entrega no es valido")
@@ -35,7 +36,7 @@ public class PedidoDTO {
     @Pattern(regexp = "YAPE|PLIN|TARJETA|EFECTIVO", message = "El metodo de pago no es valido")
     private String paymentMethod;
 
-    private Double total;
+    private BigDecimal total;
     private String status;
     private Long clienteId;
     private LocalDateTime orderDate;

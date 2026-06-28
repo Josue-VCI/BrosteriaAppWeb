@@ -23,7 +23,7 @@ public class UsuarioEntidad {
     @Column(nullable = false)
     private String passwordHash;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
     private RolEntidad rolEntidad;
 

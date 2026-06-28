@@ -501,9 +501,6 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   recalcularTotal() {
     this.formPedido.deliveryCost = this.formPedido.type === 'PICKUP' ? 0.00 : 5.00;
-    if (this.formPedido.type === 'PICKUP') {
-      this.formPedido.distrito = 'Surquillo';
-    }
     const subtotal = this.formPedido.detalles.reduce((sum: number, d: any) => sum + (d.subtotal || 0), 0);
     this.formPedido.total = subtotal + this.formPedido.deliveryCost;
   }

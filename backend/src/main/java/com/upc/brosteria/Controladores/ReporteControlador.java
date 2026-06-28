@@ -1,23 +1,39 @@
 package com.upc.brosteria.Controladores;
 
-import com.upc.brosteria.Entidades.PedidoEntidad;
 import com.upc.brosteria.Entidades.DetallePedidoEntidad;
-import com.upc.brosteria.Repositorios.PedidoRepositorio;
+import com.upc.brosteria.Entidades.PedidoEntidad;
 import com.upc.brosteria.Repositorios.DetallePedidoRepositorio;
+import com.upc.brosteria.Repositorios.PedidoRepositorio;
 import com.upc.brosteria.Servicios.PdfServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/reportes")
 public class ReporteControlador {
+
+    private static final LocalDateTime INICIO_HISTORICO = LocalDateTime.of(2000, 1, 1, 0, 0);
 
     @Autowired
     private PedidoRepositorio pedidoRepositorio;
@@ -34,46 +50,15 @@ public class ReporteControlador {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
             @RequestParam(required = false) String tipoPedido,
             @RequestParam(required = false) String diaSemana) {
-        
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
 
-        // Aplicar filtros
-        if (fechaInicio != null) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().isAfter(fechaInicio.minusNanos(1)))
-                    .collect(Collectors.toList());
-        }
-        if (fechaFin != null) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().isBefore(fechaFin.plusNanos(1)))
-                    .collect(Collectors.toList());
-        }
-        if (tipoPedido != null && !tipoPedido.isEmpty()) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getType().equalsIgnoreCase(tipoPedido))
-                    .collect(Collectors.toList());
-        }
-        if (diaSemana != null && !diaSemana.isEmpty()) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana))
-                    .collect(Collectors.toList());
-        }
+        PedidoRepositorio.ResumenReporte resumen = pedidoRepositorio.obtenerResumenReporte(
+                inicio(fechaInicio), fin(fechaFin), tipo(tipoPedido), dia(diaSemana));
 
-        Double totalVentas = pedidos.stream()
-                .filter(p -> p.getStatus().equals("ENTREGADO"))
-                .mapToDouble(PedidoEntidad::getTotal)
-                .sum();
-
-        long totalPedidos = pedidos.size();
-        long completados = pedidos.stream().filter(p -> p.getStatus().equals("ENTREGADO")).count();
-        long cancelados = pedidos.stream().filter(p -> p.getStatus().equals("CANCELADO")).count();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("ventasTotales", totalVentas);
-        response.put("totalPedidos", totalPedidos);
-        response.put("completados", completados);
-        response.put("cancelados", cancelados);
-
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("ventasTotales", resumen.getVentasTotales());
+        response.put("totalPedidos", resumen.getTotalPedidos());
+        response.put("completados", resumen.getCompletados());
+        response.put("cancelados", resumen.getCancelados());
         return ResponseEntity.ok(response);
     }
 
@@ -82,109 +67,45 @@ public class ReporteControlador {
             @RequestParam(required = false) String filtroRango,
             @RequestParam(required = false) String diaSemana,
             @RequestParam(required = false) String tipoPedido) {
-        
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente().stream()
-                .filter(p -> p.getStatus().equals("ENTREGADO"))
-                .sorted(Comparator.comparing(PedidoEntidad::getOrderDate))
-                .collect(Collectors.toList());
 
-        LocalDateTime limite = LocalDateTime.now();
-        if ("semana".equalsIgnoreCase(filtroRango)) {
-            limite = LocalDateTime.now().minusWeeks(1);
-        } else if ("mes".equalsIgnoreCase(filtroRango)) {
-            limite = LocalDateTime.now().minusMonths(1);
-        } else {
-            limite = LocalDateTime.now().minusMonths(3); // Por defecto ultimos 3 meses
-        }
+        LocalDateTime fin = LocalDateTime.now();
+        LocalDateTime inicio = switch (filtroRango == null ? "trimestre" : filtroRango.toLowerCase(Locale.ROOT)) {
+            case "semana" -> fin.minusWeeks(1);
+            case "mes" -> fin.minusMonths(1);
+            default -> fin.minusMonths(3);
+        };
+        String tipo = tipo(tipoPedido);
+        int dia = dia(diaSemana);
 
-        final LocalDateTime finalLimite = limite;
-        pedidos = pedidos.stream()
-                .filter(p -> p.getOrderDate().isAfter(finalLimite.minusNanos(1)))
-                .collect(Collectors.toList());
+        List<PedidoRepositorio.EtiquetaMonto> ventas = pedidoRepositorio.ventasPorFecha(inicio, fin, tipo, dia);
+        Map<String, Long> pagos = pedidoRepositorio.pagosReporte(inicio, fin, tipo, dia).stream()
+                .collect(Collectors.toMap(PedidoRepositorio.EtiquetaConteo::getEtiqueta,
+                        PedidoRepositorio.EtiquetaConteo::getCantidad,
+                        (a, b) -> a,
+                        LinkedHashMap::new));
 
-        // Aplicar filtro por tipo de pedido
-        if (tipoPedido != null && !tipoPedido.isEmpty()) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getType().equalsIgnoreCase(tipoPedido))
-                    .collect(Collectors.toList());
-        }
-
-        // Aplicar filtro por dia de la semana si existe
-        if (diaSemana != null && !diaSemana.isEmpty()) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana))
-                    .collect(Collectors.toList());
-        }
-
-        // 1. Agrupar ventas por dia/fecha para el grafico de linea
-        Map<String, Double> ventasPorFecha = new LinkedHashMap<>();
-        for (PedidoEntidad p : pedidos) {
-            String fechaKey = p.getOrderDate().toLocalDate().toString();
-            ventasPorFecha.put(fechaKey, ventasPorFecha.getOrDefault(fechaKey, 0.0) + p.getTotal());
-        }
-
-        // 2. Agrupar metodos de pago para dona
-        Map<String, Long> pagosMap = pedidos.stream()
-                .collect(Collectors.groupingBy(PedidoEntidad::getPaymentMethod, Collectors.counting()));
-
-        // 3. Ventas/Pedidos por Hora (0-23)
         int[] pedidosPorHora = new int[24];
-        for (PedidoEntidad p : pedidos) {
-            int hora = p.getOrderDate().getHour();
-            pedidosPorHora[hora]++;
-        }
+        pedidoRepositorio.pedidosPorHora(inicio, fin, tipo, dia)
+                .forEach(item -> pedidosPorHora[item.getHora()] = item.getCantidad().intValue());
 
-        // 4. Distritos con mas pedidos
-        Map<String, Long> distritosMap = pedidos.stream()
-                .collect(Collectors.groupingBy(p -> extraerDistrito(p.getCustomerAddress()), Collectors.counting()));
+        Map<String, Long> distritos = pedidoRepositorio.distritosReporte(inicio, fin, tipo, dia).stream()
+                .collect(Collectors.toMap(PedidoRepositorio.EtiquetaConteo::getEtiqueta,
+                        PedidoRepositorio.EtiquetaConteo::getCantidad,
+                        (a, b) -> a,
+                        LinkedHashMap::new));
 
-        // 5. Top 5 productos vendidos
-        List<Long> pedidoIds = pedidos.stream().map(PedidoEntidad::getId).collect(Collectors.toList());
-        List<DetallePedidoEntidad> detalles = pedidoIds.isEmpty() ? new ArrayList<>() 
-                : detallePedidoRepositorio.findByPedidoEntidadIdIn(pedidoIds);
+        List<Map<String, Object>> topProductos = pedidoRepositorio.topProductosReporte(inicio, fin, tipo, dia).stream()
+                .map(item -> Map.<String, Object>of("nombre", item.getNombre(), "cantidad", item.getCantidad()))
+                .toList();
 
-        Map<String, Integer> prodCounts = new HashMap<>();
-        for (DetallePedidoEntidad det : detalles) {
-            if (det.getProductoEntidad() != null) {
-                String pName = det.getProductoEntidad().getName();
-                prodCounts.put(pName, prodCounts.getOrDefault(pName, 0) + det.getQuantity());
-            }
-        }
-        List<Map<String, Object>> topProducts = prodCounts.entrySet().stream()
-                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-                .limit(5)
-                .map(e -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("nombre", e.getKey());
-                    item.put("cantidad", e.getValue());
-                    return item;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("fechas", ventasPorFecha.keySet());
-        response.put("montos", ventasPorFecha.values());
-        response.put("metodosPago", pagosMap);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("fechas", ventas.stream().map(PedidoRepositorio.EtiquetaMonto::getEtiqueta).toList());
+        response.put("montos", ventas.stream().map(PedidoRepositorio.EtiquetaMonto::getMonto).toList());
+        response.put("metodosPago", pagos);
         response.put("pedidosPorHora", pedidosPorHora);
-        response.put("distritos", distritosMap);
-        response.put("topProductos", topProducts);
-
+        response.put("distritos", distritos);
+        response.put("topProductos", topProductos);
         return ResponseEntity.ok(response);
-    }
-
-    private String extraerDistrito(String direccion) {
-        if (direccion == null || direccion.trim().isEmpty() || "Retiro en local".equalsIgnoreCase(direccion)) {
-            return "Retiro en Local";
-        }
-        String dirLower = direccion.toLowerCase();
-        if (dirLower.contains("surquillo")) return "Surquillo";
-        if (dirLower.contains("carabayllo")) return "Carabayllo";
-        if (dirLower.contains("comas")) return "Comas";
-        if (dirLower.contains("surco")) return "Surco";
-        if (dirLower.contains("miraflores")) return "Miraflores";
-        if (dirLower.contains("san miguel")) return "San Miguel";
-        if (dirLower.contains("magdalena")) return "Magdalena";
-        return "Otros";
     }
 
     @GetMapping("/descargar-pdf")
@@ -194,33 +115,24 @@ public class ReporteControlador {
             @RequestParam(required = false) String diaSemana,
             @RequestParam(required = false) String tipoPedido,
             @RequestParam(required = false, defaultValue = "naranja") String formato) {
-        
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
- 
-        if (fechaInicio != null) {
-            pedidos = pedidos.stream().filter(p -> p.getOrderDate().isAfter(fechaInicio.minusNanos(1))).collect(Collectors.toList());
-        }
-        if (fechaFin != null) {
-            pedidos = pedidos.stream().filter(p -> p.getOrderDate().isBefore(fechaFin.plusNanos(1))).collect(Collectors.toList());
-        }
-        if (tipoPedido != null && !tipoPedido.isEmpty()) {
-            pedidos = pedidos.stream().filter(p -> p.getType().equalsIgnoreCase(tipoPedido)).collect(Collectors.toList());
-        }
-        if (diaSemana != null && !diaSemana.isEmpty()) {
-            pedidos = pedidos.stream().filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana)).collect(Collectors.toList());
-        }
- 
-        Double totalVentas = pedidos.stream()
-                .filter(p -> p.getStatus().equals("ENTREGADO"))
-                .mapToDouble(PedidoEntidad::getTotal)
-                .sum();
- 
-        byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(pedidos, totalVentas, formato, fechaInicio, fechaFin, tipoPedido, diaSemana);
- 
+
+        LocalDateTime inicio = inicio(fechaInicio);
+        LocalDateTime fin = fin(fechaFin);
+        String tipo = tipo(tipoPedido);
+        int dia = dia(diaSemana);
+        List<PedidoEntidad> pedidos = pedidoRepositorio.buscarParaReporte(inicio, fin, tipo, dia);
+        BigDecimal totalVentas = pedidos.stream()
+                .filter(p -> "ENTREGADO".equals(p.getStatus()))
+                .map(PedidoEntidad::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        byte[] pdfBytes = pdfServicio.generarReporteVentasPdf(
+                pedidos, totalVentas, formato, fechaInicio, fechaFin, tipoPedido, diaSemana);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(ContentDisposition.builder("attachment").filename("reporte_ventas_filtrado.pdf").build());
- 
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename("reporte_ventas_filtrado.pdf").build());
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 
@@ -228,23 +140,13 @@ public class ReporteControlador {
     public ResponseEntity<byte[]> descargarReporteCsv(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
-        
-        List<PedidoEntidad> pedidos = pedidoRepositorio.findAllWithCliente();
-        if (fechaInicio != null) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().isAfter(fechaInicio.minusNanos(1)))
-                    .collect(Collectors.toList());
-        }
-        if (fechaFin != null) {
-            pedidos = pedidos.stream()
-                    .filter(p -> p.getOrderDate().isBefore(fechaFin.plusNanos(1)))
-                    .collect(Collectors.toList());
-        }
 
-        List<Long> pedidoIds = pedidos.stream().map(PedidoEntidad::getId).collect(Collectors.toList());
-        List<DetallePedidoEntidad> detalles = pedidoIds.isEmpty() ? new ArrayList<>() 
+        List<PedidoEntidad> pedidos = pedidoRepositorio.buscarParaReporte(
+                inicio(fechaInicio), fin(fechaFin), "", 0);
+        List<Long> pedidoIds = pedidos.stream().map(PedidoEntidad::getId).toList();
+        List<DetallePedidoEntidad> detalles = pedidoIds.isEmpty()
+                ? new ArrayList<>()
                 : detallePedidoRepositorio.findByPedidoEntidadIdIn(pedidoIds);
-        
         Map<Long, List<DetallePedidoEntidad>> detallesPorPedido = detalles.stream()
                 .collect(Collectors.groupingBy(d -> d.getPedidoEntidad().getId()));
 
@@ -252,33 +154,49 @@ public class ReporteControlador {
         csv.append('\ufeff');
         csv.append("ID Pedido,Cliente,Telefono,Direccion,Fecha,Canal,Metodo Pago,Total,Estado,Detalle Productos\n");
 
-        for (PedidoEntidad ped : pedidos) {
-            String productosSummary = "";
-            List<DetallePedidoEntidad> pDetalles = detallesPorPedido.get(ped.getId());
-            if (pDetalles != null) {
-                productosSummary = pDetalles.stream()
-                        .map(d -> d.getQuantity() + "x " + (d.getProductoEntidad() != null ? d.getProductoEntidad().getName() : "Producto"))
-                        .collect(Collectors.joining(" | "));
-            }
+        for (PedidoEntidad pedido : pedidos) {
+            String productos = detallesPorPedido.getOrDefault(pedido.getId(), List.of()).stream()
+                    .map(d -> d.getQuantity() + "x " + d.getProductoEntidad().getName())
+                    .collect(Collectors.joining(" | "));
 
-            csv.append(ped.getId()).append(",")
-               .append(escapeCsvField(ped.getCustomerName())).append(",")
-               .append(escapeCsvField(ped.getClienteEntidad() != null ? ped.getClienteEntidad().getPhone() : "-")).append(",")
-               .append(escapeCsvField(ped.getClienteEntidad() != null ? ped.getClienteEntidad().getAddress() : "-")).append(",")
-               .append(ped.getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",")
-               .append(ped.getType()).append(",")
-               .append(ped.getPaymentMethod()).append(",")
-               .append(String.format(Locale.US, "%.2f", ped.getTotal())).append(",")
-               .append(ped.getStatus()).append(",")
-               .append(escapeCsvField(productosSummary)).append("\n");
+            csv.append(pedido.getId()).append(",")
+                    .append(escapeCsvField(pedido.getCustomerName())).append(",")
+                    .append(escapeCsvField(pedido.getCustomerPhone())).append(",")
+                    .append(escapeCsvField(pedido.getCustomerAddress())).append(",")
+                    .append(pedido.getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",")
+                    .append(pedido.getType()).append(",")
+                    .append(pedido.getPaymentMethod()).append(",")
+                    .append(pedido.getTotal().setScale(2)).append(",")
+                    .append(pedido.getStatus()).append(",")
+                    .append(escapeCsvField(productos)).append("\n");
         }
 
         byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename("respaldo_pedidos.csv").build());
-
         return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
+    }
+
+    private LocalDateTime inicio(LocalDateTime valor) {
+        return valor == null ? INICIO_HISTORICO : valor;
+    }
+
+    private LocalDateTime fin(LocalDateTime valor) {
+        return valor == null ? LocalDateTime.now() : valor;
+    }
+
+    private String tipo(String valor) {
+        return valor == null ? "" : valor.trim();
+    }
+
+    private int dia(String valor) {
+        if (valor == null || valor.isBlank()) return 0;
+        try {
+            return DayOfWeek.valueOf(valor.trim().toUpperCase(Locale.ROOT)).getValue();
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("El dia de semana no es valido");
+        }
     }
 
     private String escapeCsvField(String field) {
@@ -288,5 +206,4 @@ public class ReporteControlador {
         }
         return field;
     }
-
 }

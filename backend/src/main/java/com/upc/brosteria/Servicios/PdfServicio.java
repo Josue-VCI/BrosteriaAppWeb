@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 @Service
 public class PdfServicio {
@@ -32,7 +33,7 @@ public class PdfServicio {
 
     public byte[] generarReporteVentasPdf(
             List<PedidoEntidad> pedidos, 
-            Double totalVentas, 
+            BigDecimal totalVentas,
             String formato,
             java.time.LocalDateTime fechaInicio,
             java.time.LocalDateTime fechaFin,
@@ -88,11 +89,12 @@ public class PdfServicio {
             long totalPedidos = pedidos.size();
             long completados = pedidos.stream().filter(p -> "ENTREGADO".equals(p.getStatus())).count();
             long cancelados = pedidos.stream().filter(p -> "CANCELADO".equals(p.getStatus())).count();
-            double avgTicket = completados == 0 ? 0.0 : totalVentas / completados;
+            double totalVentasDouble = totalVentas.doubleValue();
+            double avgTicket = completados == 0 ? 0.0 : totalVentasDouble / completados;
 
             // Calcular Comparativas
             boolean hasComparison = false;
-            double totalVentasPrev = 0.0;
+            BigDecimal totalVentasPrev = BigDecimal.ZERO;
             long totalPedidosPrev = 0;
             long completadosPrev = 0;
             double avgTicketPrev = 0.0;
@@ -105,29 +107,22 @@ public class PdfServicio {
                 final java.time.LocalDateTime endPrev = fechaInicio;
                 hasComparison = true;
 
-                List<PedidoEntidad> todosPedidos = pedidoRepositorio.findAll();
-                List<PedidoEntidad> pedidosPrev = todosPedidos.stream()
-                        .filter(p -> p.getOrderDate().isAfter(startPrev.minusNanos(1)) && p.getOrderDate().isBefore(endPrev.plusNanos(1)))
-                        .collect(Collectors.toList());
-                
-                if (tipoPedido != null && !tipoPedido.isEmpty()) {
-                    pedidosPrev = pedidosPrev.stream().filter(p -> p.getType().equalsIgnoreCase(tipoPedido)).collect(Collectors.toList());
-                }
-                if (diaSemana != null && !diaSemana.isEmpty()) {
-                    pedidosPrev = pedidosPrev.stream().filter(p -> p.getOrderDate().getDayOfWeek().name().equalsIgnoreCase(diaSemana)).collect(Collectors.toList());
-                }
+                int diaNumero = (diaSemana == null || diaSemana.isBlank())
+                        ? 0 : java.time.DayOfWeek.valueOf(diaSemana.toUpperCase(Locale.ROOT)).getValue();
+                List<PedidoEntidad> pedidosPrev = pedidoRepositorio.buscarParaReporte(
+                        startPrev, endPrev, tipoPedido == null ? "" : tipoPedido, diaNumero);
 
                 totalVentasPrev = pedidosPrev.stream()
                         .filter(p -> "ENTREGADO".equals(p.getStatus()))
-                        .mapToDouble(PedidoEntidad::getTotal)
-                        .sum();
+                        .map(PedidoEntidad::getTotal)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
                 totalPedidosPrev = pedidosPrev.size();
                 completadosPrev = pedidosPrev.stream().filter(p -> "ENTREGADO".equals(p.getStatus())).count();
-                avgTicketPrev = completadosPrev == 0 ? 0.0 : totalVentasPrev / completadosPrev;
+                avgTicketPrev = completadosPrev == 0 ? 0.0 : totalVentasPrev.doubleValue() / completadosPrev;
             }
 
             // Formatear deltas comparativos
-            String salesDelta = hasComparison ? formatDelta(totalVentas, totalVentasPrev) : "N/D";
+            String salesDelta = hasComparison ? formatDelta(totalVentasDouble, totalVentasPrev.doubleValue()) : "N/D";
             String ordersDelta = hasComparison ? formatDelta(totalPedidos, totalPedidosPrev) : "N/D";
             String ticketDelta = hasComparison ? formatDelta(avgTicket, avgTicketPrev) : "N/D";
 
@@ -255,9 +250,10 @@ public class PdfServicio {
             addTableHeader(tableDays, "Monto", brandOrange, fontTableHeader);
             addTableHeader(tableDays, "Distribucion", brandOrange, fontTableHeader);
 
-            Map<java.time.DayOfWeek, Double> ventasDia = pedidos.stream()
+            Map<java.time.DayOfWeek, BigDecimal> ventasDia = pedidos.stream()
                     .filter(p -> "ENTREGADO".equals(p.getStatus()))
-                    .collect(Collectors.groupingBy(p -> p.getOrderDate().getDayOfWeek(), Collectors.summingDouble(PedidoEntidad::getTotal)));
+                    .collect(Collectors.groupingBy(p -> p.getOrderDate().getDayOfWeek(),
+                            Collectors.reducing(BigDecimal.ZERO, PedidoEntidad::getTotal, BigDecimal::add)));
 
             List<java.time.DayOfWeek> diasSemana = Arrays.asList(
                     java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.WEDNESDAY,
@@ -266,8 +262,8 @@ public class PdfServicio {
             );
 
             for (java.time.DayOfWeek day : diasSemana) {
-                double v = ventasDia.getOrDefault(day, 0.0);
-                double pct = totalVentas == 0 ? 0.0 : (v * 100.0) / totalVentas;
+                BigDecimal v = ventasDia.getOrDefault(day, BigDecimal.ZERO);
+                double pct = totalVentas.signum() == 0 ? 0.0 : (v.doubleValue() * 100.0) / totalVentasDouble;
                 
                 tableDays.addCell(createCell(getDayNameSpanish(day), fontText, Element.ALIGN_LEFT, lightGray));
                 tableDays.addCell(createCell("S/. " + String.format(Locale.US, "%.1f", v), fontText, Element.ALIGN_RIGHT, lightGray));
@@ -345,18 +341,18 @@ public class PdfServicio {
             addTableHeader(tableClientes, "Cliente / Nombre", brandOrange, fontTableHeader);
             addTableHeader(tableClientes, "Consumo", brandOrange, fontTableHeader);
 
-            Map<String, Double> clientesVentas = pedidos.stream()
+            Map<String, BigDecimal> clientesVentas = pedidos.stream()
                     .filter(p -> "ENTREGADO".equals(p.getStatus()))
                     .collect(Collectors.groupingBy(p -> p.getCustomerName() != null ? p.getCustomerName() : "Desconocido",
-                            Collectors.summingDouble(PedidoEntidad::getTotal)));
+                            Collectors.reducing(BigDecimal.ZERO, PedidoEntidad::getTotal, BigDecimal::add)));
 
-            List<Map.Entry<String, Double>> topClientes = clientesVentas.entrySet().stream()
+            List<Map.Entry<String, BigDecimal>> topClientes = clientesVentas.entrySet().stream()
                     .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                     .limit(5)
                     .collect(Collectors.toList());
 
             int cRank = 1;
-            for (Map.Entry<String, Double> entry : topClientes) {
+            for (Map.Entry<String, BigDecimal> entry : topClientes) {
                 tableClientes.addCell(createCell(String.valueOf(cRank++), fontText, Element.ALIGN_CENTER, lightGray));
                 tableClientes.addCell(createCell(entry.getKey(), fontText, Element.ALIGN_LEFT, lightGray));
                 tableClientes.addCell(createCell("S/. " + String.format(Locale.US, "%.2f", entry.getValue()), fontText, Element.ALIGN_RIGHT, lightGray));
@@ -385,15 +381,15 @@ public class PdfServicio {
             addTableHeader(tableChannels, "Pedidos", darkGray, fontTableHeader);
             addTableHeader(tableChannels, "Ingresos", darkGray, fontTableHeader);
 
-            double vDelivery = 0.0; int cDelivery = 0;
-            double vPickup = 0.0; int cPickup = 0;
+            BigDecimal vDelivery = BigDecimal.ZERO; int cDelivery = 0;
+            BigDecimal vPickup = BigDecimal.ZERO; int cPickup = 0;
             for (PedidoEntidad p : pedidos) {
                 if (!"ENTREGADO".equals(p.getStatus())) continue;
                 if ("DELIVERY".equalsIgnoreCase(p.getType())) {
-                    vDelivery += p.getTotal();
+                    vDelivery = vDelivery.add(p.getTotal());
                     cDelivery++;
                 } else {
-                    vPickup += p.getTotal();
+                    vPickup = vPickup.add(p.getTotal());
                     cPickup++;
                 }
             }

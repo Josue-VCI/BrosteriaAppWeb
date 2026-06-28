@@ -3,6 +3,7 @@ package com.upc.brosteria.Entidades;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "insumos")
@@ -16,14 +17,17 @@ public class InsumoEntidad {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Double quantity;
+    @Column(nullable = false, precision = 14, scale = 3)
+    private BigDecimal quantity;
 
     @Column(nullable = false)
     private String unit; // unidades, kg, litros, galones
 
-    @Column(nullable = false)
-    private Double minimumStock;
+    @Column(nullable = false, precision = 14, scale = 3)
+    private BigDecimal minimumStock;
+
+    @Column
+    private LocalDateTime lastAlertedAt;
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;

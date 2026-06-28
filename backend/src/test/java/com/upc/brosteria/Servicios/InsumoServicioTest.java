@@ -9,8 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -29,18 +31,38 @@ class InsumoServicioTest {
     void registraIngresoConActualizacionAtomica() {
         InsumoEntidad insumo = new InsumoEntidad();
         insumo.setId(1L);
-        insumo.setQuantity(12.0);
+        insumo.setQuantity(new BigDecimal("12.000"));
         InsumoDTO dto = new InsumoDTO();
         dto.setId(1L);
-        dto.setQuantity(12.0);
+        dto.setQuantity(new BigDecimal("12.000"));
 
-        when(insumoRepositorio.registrarIngresoAtomico(1L, 2.0)).thenReturn(1);
+        when(insumoRepositorio.registrarIngresoAtomico(1L, new BigDecimal("2.0"))).thenReturn(1);
         when(insumoRepositorio.findById(1L)).thenReturn(Optional.of(insumo));
         when(modelMapper.map(insumo, InsumoDTO.class)).thenReturn(dto);
 
-        InsumoDTO resultado = insumoServicio.registrarIngreso(1L, 2.0);
+        InsumoDTO resultado = insumoServicio.registrarIngreso(1L, new BigDecimal("2.0"));
 
-        verify(insumoRepositorio).registrarIngresoAtomico(1L, 2.0);
-        assertEquals(12.0, resultado.getQuantity());
+        verify(insumoRepositorio).registrarIngresoAtomico(1L, new BigDecimal("2.0"));
+        assertEquals(new BigDecimal("12.000"), resultado.getQuantity());
+    }
+
+    @Test
+    void enviaUnaAlertaSoloCuandoObtieneElCooldown() {
+        InsumoEntidad insumo = new InsumoEntidad();
+        insumo.setId(1L);
+        insumo.setName("Mayonesa");
+        insumo.setUnit("kg");
+        insumo.setQuantity(new BigDecimal("2.000"));
+        insumo.setMinimumStock(new BigDecimal("3.000"));
+
+        ReflectionTestUtils.setField(insumoServicio, "alertCooldownHours", 12);
+        when(insumoRepositorio.descontarStockAtomico(1L, new BigDecimal("1.000"))).thenReturn(1);
+        when(insumoRepositorio.reclamarAlertaStock(1L, 12)).thenReturn(1);
+        when(insumoRepositorio.findById(1L)).thenReturn(Optional.of(insumo));
+
+        insumoServicio.descontarStock(1L, new BigDecimal("1.000"));
+
+        verify(insumoRepositorio).reclamarAlertaStock(1L, 12);
+        verify(emailServicio).notificarStockBajo("Mayonesa", new BigDecimal("2.000"), "kg");
     }
 }

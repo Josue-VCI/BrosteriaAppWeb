@@ -19,6 +19,7 @@ import org.modelmapper.ModelMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +50,7 @@ class PedidoServicioTest {
         ProductoEntidad producto = new ProductoEntidad();
         producto.setId(1L);
         producto.setName("Combo El Hincha");
-        producto.setPrice(15.0);
+        producto.setPrice(new BigDecimal("15.00"));
 
         when(clienteRepositorio.findFirstByPhoneOrderByIdAsc("999111222")).thenReturn(Optional.empty());
         when(clienteRepositorio.findByEmail("cliente@correo.com")).thenReturn(Optional.of(clienteExistente));

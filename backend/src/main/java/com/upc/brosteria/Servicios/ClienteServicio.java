@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +57,7 @@ public class ClienteServicio {
             cliente.setPhone(clienteDTO.getPhone().trim());
             cliente.setAddress(clienteDTO.getAddress() == null ? null : clienteDTO.getAddress().trim());
             cliente.setTotalOrders(0);
-            cliente.setTotalSpent(0.0);
+            cliente.setTotalSpent(BigDecimal.ZERO);
             cliente.setPoints(0);
         }
         cliente = clienteRepositorio.save(cliente);
@@ -75,7 +76,7 @@ public class ClienteServicio {
         List<PedidoEntidad> orders = pedidoRepositorio.findByCustomerPhone(phone);
         
         int totalOrders = 0;
-        double totalSpent = 0.0;
+        BigDecimal totalSpent = BigDecimal.ZERO;
         
         for (PedidoEntidad order : orders) {
             if (order.getClienteEntidad() == null || !order.getClienteEntidad().getId().equals(cliente.getId())) {
@@ -84,13 +85,13 @@ public class ClienteServicio {
             }
             if ("ENTREGADO".equalsIgnoreCase(order.getStatus())) {
                 totalOrders++;
-                totalSpent += order.getTotal();
+                totalSpent = totalSpent.add(order.getTotal());
             }
         }
         
         cliente.setTotalOrders(totalOrders);
         cliente.setTotalSpent(totalSpent);
-        cliente.setPoints((int) (totalSpent / 10));
+        cliente.setPoints(totalSpent.divideToIntegralValue(BigDecimal.TEN).intValue());
         clienteRepositorio.save(cliente);
     }
 

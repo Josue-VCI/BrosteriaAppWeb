@@ -9,9 +9,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(DemasiadosIntentosException.class)
     public ResponseEntity<Map<String, Object>> handleRateLimit(DemasiadosIntentosException ex) {
@@ -58,6 +62,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception ex) {
+        log.error("Error no controlado en el backend", ex);
         Map<String, String> response = new HashMap<>();
         response.put("error", "Ocurrio un error inesperado en el servidor");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

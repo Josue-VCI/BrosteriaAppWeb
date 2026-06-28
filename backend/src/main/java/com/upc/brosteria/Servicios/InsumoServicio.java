@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class InsumoServicio {
@@ -21,6 +24,9 @@ public class InsumoServicio {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Value("${stock.alert.cooldown-hours:12}")
+    private int alertCooldownHours;
 
     public List<InsumoDTO> listarTodos() {
         return insumoRepositorio.findAll().stream()
@@ -52,7 +58,7 @@ public class InsumoServicio {
     }
 
     @Transactional
-    public InsumoDTO registrarIngreso(Long id, Double cantidad) {
+    public InsumoDTO registrarIngreso(Long id, BigDecimal cantidad) {
         if (insumoRepositorio.registrarIngresoAtomico(id, cantidad) == 0) {
             throw new RuntimeException("Insumo no encontrado");
         }
@@ -62,15 +68,18 @@ public class InsumoServicio {
     }
 
     @Transactional
-    public void descontarStock(Long id, Double cantidad) {
+    public void descontarStock(Long id, BigDecimal cantidad) {
         if (insumoRepositorio.descontarStockAtomico(id, cantidad) == 0) {
             throw new RuntimeException("Insumo no encontrado");
         }
-        InsumoEntidad insumo = insumoRepositorio.findById(id)
-                .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
-
-        if (insumo.getQuantity() <= insumo.getMinimumStock()) {
+        if (insumoRepositorio.reclamarAlertaStock(id, alertCooldownHours) == 1) {
+            InsumoEntidad insumo = insumoRepositorio.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
             emailServicio.notificarStockBajo(insumo.getName(), insumo.getQuantity(), insumo.getUnit());
         }
+    }
+
+    public void descontarStock(Long id, double cantidad) {
+        descontarStock(id, BigDecimal.valueOf(cantidad).setScale(3, RoundingMode.HALF_UP));
     }
 }

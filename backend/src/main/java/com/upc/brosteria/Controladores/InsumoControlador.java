@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -41,7 +42,7 @@ public class InsumoControlador {
     }
 
     @PostMapping("/{id}/ingreso")
-    public ResponseEntity<InsumoDTO> registrarIngreso(@PathVariable Long id, @RequestParam @Positive Double cantidad) {
+    public ResponseEntity<InsumoDTO> registrarIngreso(@PathVariable Long id, @RequestParam @Positive BigDecimal cantidad) {
         return ResponseEntity.ok(insumoServicio.registrarIngreso(id, cantidad));
     }
 }

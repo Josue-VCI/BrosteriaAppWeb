@@ -3,6 +3,7 @@ package com.upc.brosteria.Entidades;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "pedidos")
@@ -22,8 +23,8 @@ public class PedidoEntidad {
     @Column
     private String customerAddress;
 
-    @Column(nullable = false)
-    private Double deliveryCost;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal deliveryCost;
 
     @Column(nullable = false)
     private String type; // DELIVERY, PICKUP
@@ -31,13 +32,13 @@ public class PedidoEntidad {
     @Column(nullable = false)
     private String paymentMethod; // YAPE, PLIN, EFECTIVO
 
-    @Column(nullable = false)
-    private Double total;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal total;
 
     @Column(nullable = false)
     private String status; // PENDIENTE, PREPARANDO, ENVIADO, ENTREGADO, CANCELADO
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id")
     private ClienteEntidad clienteEntidad;
 

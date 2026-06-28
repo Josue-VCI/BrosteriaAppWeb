@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
@@ -23,7 +24,7 @@ public class ClienteDTO {
     @Size(max = 250, message = "La direccion del cliente es demasiado larga")
     private String address;
     private Integer totalOrders;
-    private Double totalSpent;
+    private BigDecimal totalSpent;
     private Integer points;
     private LocalDateTime createdAt;
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "clientes")
@@ -29,8 +30,8 @@ public class ClienteEntidad {
     @Column(columnDefinition = "integer default 0")
     private Integer totalOrders = 0;
 
-    @Column(columnDefinition = "double precision default 0.0")
-    private Double totalSpent = 0.0;
+    @Column(precision = 14, scale = 2)
+    private BigDecimal totalSpent = BigDecimal.ZERO;
 
     @Column(columnDefinition = "integer default 0")
     private Integer points = 0;

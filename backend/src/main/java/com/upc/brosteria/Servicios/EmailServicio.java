@@ -7,9 +7,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class EmailServicio {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailServicio.class);
 
     @Autowired(required = false)
     private JavaMailSender mailSender;
@@ -17,10 +22,13 @@ public class EmailServicio {
     @Value("${spring.mail.username:josuebecerrav19@gmail.com}")
     private String fromEmail;
 
+    @Value("${stock.alert.email}")
+    private String stockAlertEmail;
+
     @Async
     public void enviarCorreoHTML(String destinatario, String asunto, String contenidoHtml) {
         if (mailSender == null) {
-            System.out.println("[Email Mock] Enviando correo a " + destinatario + " con asunto: " + asunto);
+            log.info("Email mock para {} con asunto {}", destinatario, asunto);
             return;
         }
         try {
@@ -32,11 +40,12 @@ public class EmailServicio {
             helper.setText(contenidoHtml, true);
             mailSender.send(message);
         } catch (Exception e) {
-            System.err.println("Error al enviar email por SMTP a " + destinatario + ": " + e.getMessage());
+            log.error("Error al enviar email por SMTP a {}", destinatario, e);
         }
     }
 
-    public void notificarStockBajo(String insumoNombre, Double actualStock, String unidad) {
+    @Async
+    public void notificarStockBajo(String insumoNombre, BigDecimal actualStock, String unidad) {
         String asunto = "ALERTA DE STOCK CRITICO: " + insumoNombre.toUpperCase();
         String html = """
             <div style="font-family: Arial, sans-serif; border: 1px solid #FF1744; border-radius: 8px; padding: 20px; max-width: 600px;">
@@ -51,6 +60,6 @@ public class EmailServicio {
             </div>
             """.formatted(insumoNombre, actualStock, unidad);
         
-        enviarCorreoHTML("labrosteriapremium@gmail.com", asunto, html);
+        enviarCorreoHTML(stockAlertEmail, asunto, html);
     }
 }
