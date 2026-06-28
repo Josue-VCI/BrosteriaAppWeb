@@ -59,8 +59,12 @@
           </div>
           <div class="card-actions">
             <!-- Si esta PENDIENTE, permitir pasar a PREPARANDO (Cocina), si esta en PREPARANDO, pasar a ENVIADO (Despachado) -->
-            <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')">Empezar a Cocinar</button>
-            <button *ngIf="pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')">Listo para Despachar</button>
+            <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
+              {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Empezar a Cocinar' }}
+            </button>
+            <button *ngIf="pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
+              {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Listo para Despachar' }}
+            </button>
           </div>
         </div>
         <div class="no-pedidos" *ngIf="pedidosCocina.length === 0">Sin pedidos en cocina</div>
@@ -99,7 +103,9 @@
             </div>
           </div>
           <div class="card-actions">
-            <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')">Pagado</button>
+            <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
+              {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Pagado' }}
+            </button>
           </div>
         </div>
         <div class="no-pedidos" *ngIf="pedidosDespacho.length === 0">Sin pedidos para despachar</div>
@@ -254,8 +260,10 @@
       </div>
 
       <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="brand-btn cancel-btn" (click)="cerrarModalNuevoPedido()">Cancelar</button>
-        <button class="brand-btn" [disabled]="formPedido.detalles.length === 0 || tieneFilasSinProducto()" (click)="guardarNuevoPedido()">Registrar Pedido</button>
+        <button class="brand-btn cancel-btn" (click)="cerrarModalNuevoPedido()" [disabled]="guardandoPedido">Cancelar</button>
+        <button class="brand-btn" [disabled]="formPedido.detalles.length === 0 || tieneFilasSinProducto() || guardandoPedido" (click)="guardarNuevoPedido()">
+          {{ guardandoPedido ? 'Registrando...' : 'Registrar Pedido' }}
+        </button>
       </div>
     </div>
   </div>

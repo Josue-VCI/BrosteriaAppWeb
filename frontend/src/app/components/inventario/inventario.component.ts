@@ -24,6 +24,8 @@ export class InventarioComponent implements OnInit {
   mostrarModalRefill = false;
   mostrarModalCrud = false;
   esEdicion = false;
+  guardandoInsumo = false;
+  guardandoIngreso = false;
 
   // Insumo para recarga
   insumoSeleccionadoId: number | null = null;
@@ -112,15 +114,18 @@ export class InventarioComponent implements OnInit {
   }
 
   guardarIngreso() {
-    if (this.insumoSeleccionadoId === null || this.cantidadIngresar <= 0) return;
+    if (this.insumoSeleccionadoId === null || this.cantidadIngresar <= 0 || this.guardandoIngreso) return;
     
+    this.guardandoIngreso = true;
     this.http.post(`${this.apiBaseUrl}/${this.insumoSeleccionadoId}/ingreso?cantidad=${this.cantidadIngresar}`, {}).subscribe({
       next: () => {
+        this.guardandoIngreso = false;
         this.toastService.success('Ingreso de stock registrado correctamente');
         this.cargarInsumos();
         this.cerrarModalRefill();
       },
       error: (err) => {
+        this.guardandoIngreso = false;
         console.error('Error al registrar ingreso', err);
         this.toastService.error('No se pudo registrar el ingreso de stock');
       }
@@ -168,17 +173,21 @@ export class InventarioComponent implements OnInit {
   }
 
   guardarInsumo() {
-    if (!this.esFormularioValido()) return;
+    if (!this.esFormularioValido() || this.guardandoInsumo) return;
+
+    this.guardandoInsumo = true;
 
     if (this.esEdicion && this.formInsumo.id) {
       // Modificar
       this.http.put(`${this.apiBaseUrl}/${this.formInsumo.id}`, this.formInsumo).subscribe({
         next: () => {
+          this.guardandoInsumo = false;
           this.toastService.success('Insumo actualizado correctamente');
           this.cargarInsumos();
           this.cerrarModalCrud();
         },
         error: (err) => {
+          this.guardandoInsumo = false;
           console.error('Error al actualizar insumo', err);
           this.toastService.error('No se pudo actualizar el insumo');
         }
@@ -187,11 +196,13 @@ export class InventarioComponent implements OnInit {
       // Crear nuevo
       this.http.post(this.apiBaseUrl, this.formInsumo).subscribe({
         next: () => {
+          this.guardandoInsumo = false;
           this.toastService.success('Insumo guardado correctamente');
           this.cargarInsumos();
           this.cerrarModalCrud();
         },
         error: (err) => {
+          this.guardandoInsumo = false;
           console.error('Error al crear insumo', err);
           this.toastService.error('No se pudo guardar el insumo');
         }

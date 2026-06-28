@@ -33,6 +33,7 @@ export class ClientesComponent implements OnInit {
   mostrarModalCorreo = false;
   mostrarModalCrud = false;
   esEdicion = false;
+  guardandoCliente = false;
 
   // Campaña
   asuntoCampana = '';
@@ -234,18 +235,24 @@ export class ClientesComponent implements OnInit {
   }
 
   guardarCliente() {
+    if (this.guardandoCliente) return;
+
     // Concatenar calle y distrito antes de enviar
     this.formCliente.address = `${this.formCliente.calle}, ${this.formCliente.distrito}`;
     
     if (!this.esFormularioValido()) return;
 
+    this.guardandoCliente = true;
+
     this.http.post(this.apiBaseUrl, this.formCliente).subscribe({
       next: () => {
+        this.guardandoCliente = false;
         this.toastService.success(this.esEdicion ? 'Cliente actualizado correctamente' : 'Cliente registrado correctamente');
         this.cargarClientes();
         this.cerrarModalCrud();
       },
       error: (err) => {
+        this.guardandoCliente = false;
         console.error('Error al guardar cliente', err);
         this.toastService.error('No se pudo guardar el cliente');
       }

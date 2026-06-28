@@ -214,8 +214,10 @@
       </div>
       
       <div class="modal-actions">
-        <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()">Cancelar</button>
-        <button class="brand-btn" [disabled]="!esFormularioValido()" (click)="guardarCliente()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
+        <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()" [disabled]="guardandoCliente">Cancelar</button>
+        <button class="brand-btn" [disabled]="!esFormularioValido() || guardandoCliente" (click)="guardarCliente()">
+          {{ guardandoCliente ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
+        </button>
       </div>
     </div>
   </div>

@@ -25,6 +25,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
   // Catalogo y Modal de Parser
   productosCatalogo: any[] = [];
   mostrarModalNuevoPedido = false;
+  guardandoPedido = false;
+  pedidosEnProgreso = new Set<number>();
   textoWhatsApp = '';
   
   formPedido: any = {
@@ -107,6 +109,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   actualizarEstado(pedidoId: number, nuevoEstado: string) {
+    if (this.pedidosEnProgreso.has(pedidoId)) return;
+    this.pedidosEnProgreso.add(pedidoId);
 
     // Copias del estado actual para rollback en caso de error
     const copiaCocina = [...this.pedidosCocina];
@@ -135,10 +139,12 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     this.http.put(`${API_BASE_URL}/api/v1/pedidos/${pedidoId}/estado?nuevoEstado=${nuevoEstado}`, {}).subscribe({
       next: () => {
+        this.pedidosEnProgreso.delete(pedidoId);
         // Cargar en segundo plano para verificar consistencia
         this.cargarTodosLosPedidos();
       },
       error: (err) => {
+        this.pedidosEnProgreso.delete(pedidoId);
         console.error('Error al actualizar estado del pedido', err);
         this.toastService.error('No se pudo actualizar el estado del pedido en el servidor. Revirtiendo cambios...');
         // Revertir UI al estado anterior
@@ -437,6 +443,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   guardarNuevoPedido() {
+    if (this.guardandoPedido) return;
+
     if (this.formPedido.detalles.length === 0) {
       this.toastService.error('Debe agregar al menos un producto al pedido.');
       return;
@@ -447,6 +455,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
       this.toastService.warning('Por favor, selecciona un producto valido para todos los elementos.');
       return;
     }
+
+    this.guardandoPedido = true;
 
     // Limpiar el payload enviando unicamente los campos esperados por el backend DTO
     const cleanDetalles = this.formPedido.detalles.map((d: any) => ({
@@ -477,11 +487,13 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     this.http.post(`${API_BASE_URL}/api/v1/pedidos`, payload).subscribe({
       next: () => {
+        this.guardandoPedido = false;
         this.cargarTodosLosPedidos();
         this.cerrarModalNuevoPedido();
         this.toastService.success('Pedido registrado con exito.');
       },
       error: (err) => {
+        this.guardandoPedido = false;
         console.error('Error al guardar pedido', err);
         this.toastService.error('Ocurrio un error al registrar el pedido.');
       }

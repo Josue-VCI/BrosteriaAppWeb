@@ -93,8 +93,10 @@
       </div>
       
       <div class="modal-actions">
-        <button class="brand-btn cancel-btn" (click)="cerrarModalRefill()">Cancelar</button>
-        <button class="brand-btn" (click)="guardarIngreso()">Confirmar Ingreso</button>
+        <button class="brand-btn cancel-btn" (click)="cerrarModalRefill()" [disabled]="guardandoIngreso">Cancelar</button>
+        <button class="brand-btn" (click)="guardarIngreso()" [disabled]="guardandoIngreso || cantidadIngresar <= 0">
+          {{ guardandoIngreso ? 'Confirmando...' : 'Confirmar Ingreso' }}
+        </button>
       </div>
     </div>
   </div>
@@ -133,8 +135,10 @@
       </div>
       
       <div class="modal-actions">
-        <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()">Cancelar</button>
-        <button class="brand-btn" [disabled]="!esFormularioValido()" (click)="guardarInsumo()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
+        <button class="brand-btn cancel-btn" (click)="cerrarModalCrud()" [disabled]="guardandoInsumo">Cancelar</button>
+        <button class="brand-btn" [disabled]="!esFormularioValido() || guardandoInsumo" (click)="guardarInsumo()">
+          {{ guardandoInsumo ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
+        </button>
       </div>
     </div>
   </div>
