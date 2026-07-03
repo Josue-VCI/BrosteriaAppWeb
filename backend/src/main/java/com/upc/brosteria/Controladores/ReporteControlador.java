@@ -125,7 +125,7 @@ public class ReporteControlador {
         int dia = dia(diaSemana);
         List<PedidoEntidad> pedidos = pedidoRepositorio.buscarParaReporte(inicio, fin, tipo, dia);
         BigDecimal totalVentas = pedidos.stream()
-                .filter(p -> "ENTREGADO".equals(p.getStatus()))
+                .filter(p -> "PAGADO".equals(p.getPaymentStatus()))
                 .map(PedidoEntidad::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -155,12 +155,16 @@ public class ReporteControlador {
 
         StringBuilder csv = new StringBuilder();
         csv.append('\ufeff');
-        csv.append("ID Pedido,Cliente,Telefono,Direccion,Fecha,Canal,Metodo Pago,Total,Estado,Detalle Productos\n");
+        csv.append("ID Pedido,Cliente,Telefono,Direccion,Fecha,Canal,Metodo Pago,Estado Entrega,Estado Pago,Fecha Pago,Total,Detalle Productos\n");
 
         for (PedidoEntidad pedido : pedidos) {
             String productos = detallesPorPedido.getOrDefault(pedido.getId(), List.of()).stream()
                     .map(d -> d.getQuantity() + "x " + d.getProductoEntidad().getName())
                     .collect(Collectors.joining(" | "));
+
+            String fechaPagoStr = pedido.getPaidAt() != null
+                    ? horaLima(pedido.getPaidAt()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    : "";
 
             csv.append(pedido.getId()).append(",")
                     .append(escapeCsvField(pedido.getCustomerName())).append(",")
@@ -169,8 +173,10 @@ public class ReporteControlador {
                     .append(horaLima(pedido.getOrderDate()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(",")
                     .append(pedido.getType()).append(",")
                     .append(pedido.getPaymentMethod()).append(",")
+                    .append(escapeCsvField(pedido.getStatus())).append(",")
+                    .append(escapeCsvField(pedido.getPaymentStatus())).append(",")
+                    .append(escapeCsvField(fechaPagoStr)).append(",")
                     .append(pedido.getTotal().setScale(2)).append(",")
-                    .append(pedido.getStatus()).append(",")
                     .append(escapeCsvField(productos)).append("\n");
         }
 

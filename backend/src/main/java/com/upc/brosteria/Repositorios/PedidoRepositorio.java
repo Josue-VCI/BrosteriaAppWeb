@@ -47,6 +47,10 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
 
     Optional<PedidoEntidad> findByRequestId(String requestId);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM PedidoEntidad p WHERE p.id = :id")
+    Optional<PedidoEntidad> findByIdForUpdate(@Param("id") Long id);
+
     @Query("SELECT p FROM PedidoEntidad p LEFT JOIN FETCH p.clienteEntidad ORDER BY p.orderDate DESC")
     List<PedidoEntidad> findAllWithCliente(org.springframework.data.domain.Pageable pageable);
 
@@ -71,7 +75,7 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     @Query(value = """
             SELECT COUNT(*) AS "totalPedidos", COALESCE(SUM(total), 0) AS "totalGastado"
             FROM pedidos
-            WHERE customer_phone = :telefono AND status = 'ENTREGADO'
+            WHERE customer_phone = :telefono AND payment_status = 'PAGADO'
             """, nativeQuery = true)
     EstadisticasCliente obtenerEstadisticasCliente(@Param("telefono") String telefono);
 
@@ -80,7 +84,7 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     int vincularPedidosPorTelefono(@Param("clienteId") Long clienteId, @Param("telefono") String telefono);
 
     @Query(value = """
-            SELECT COALESCE(SUM(total) FILTER (WHERE status = 'ENTREGADO'), 0) AS "ventasTotales",
+            SELECT (SELECT COALESCE(SUM(p2.total), 0) FROM pedidos p2 WHERE p2.payment_status = 'PAGADO' AND p2.paid_at BETWEEN :inicio AND :fin AND (:tipo = '' OR UPPER(p2.type) = UPPER(:tipo)) AND (:dia = 0 OR EXTRACT(ISODOW FROM p2.paid_at - INTERVAL '5 hours') = :dia)) AS "ventasTotales",
                    COUNT(*) AS "totalPedidos",
                    COUNT(*) FILTER (WHERE status = 'ENTREGADO') AS completados,
                    COUNT(*) FILTER (WHERE status = 'CANCELADO') AS cancelados
@@ -95,12 +99,12 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
                                           @Param("dia") int dia);
 
     @Query(value = """
-            SELECT TO_CHAR(order_date - INTERVAL '5 hours', 'YYYY-MM-DD') AS etiqueta,
+            SELECT TO_CHAR(paid_at - INTERVAL '5 hours', 'YYYY-MM-DD') AS etiqueta,
                    SUM(total) AS monto
             FROM pedidos
-            WHERE status = 'ENTREGADO' AND order_date BETWEEN :inicio AND :fin
+            WHERE payment_status = 'PAGADO' AND paid_at BETWEEN :inicio AND :fin
               AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = :dia)
+              AND (:dia = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = :dia)
             GROUP BY 1 ORDER BY 1
             """, nativeQuery = true)
     List<EtiquetaMonto> ventasPorFecha(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
@@ -109,9 +113,9 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     @Query(value = """
             SELECT payment_method AS etiqueta, COUNT(*) AS cantidad
             FROM pedidos
-            WHERE status = 'ENTREGADO' AND order_date BETWEEN :inicio AND :fin
+            WHERE payment_status = 'PAGADO' AND paid_at BETWEEN :inicio AND :fin
               AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = :dia)
+              AND (:dia = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = :dia)
             GROUP BY payment_method
             """, nativeQuery = true)
     List<EtiquetaConteo> pagosReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,

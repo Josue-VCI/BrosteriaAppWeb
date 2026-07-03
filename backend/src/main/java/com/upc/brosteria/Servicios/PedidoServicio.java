@@ -33,6 +33,7 @@ public class PedidoServicio {
 
     private static final java.util.Set<String> ESTADOS_VALIDOS = java.util.Set.of(
             "PENDIENTE", "PREPARANDO", "ENVIADO", "ENTREGADO", "CANCELADO");
+    private static final java.util.Set<String> ESTADOS_PAGO_VALIDOS = java.util.Set.of("PENDIENTE", "PAGADO");
 
     @Autowired
     private PedidoRepositorio pedidoRepositorio;
@@ -132,8 +133,12 @@ public class PedidoServicio {
         pedido.setDeliveryCost(pedidoDTO.getDeliveryCost() != null ? pedidoDTO.getDeliveryCost() : BigDecimal.ZERO);
         pedido.setType(pedidoDTO.getType() != null ? pedidoDTO.getType() : "DELIVERY");
         pedido.setPaymentMethod(pedidoDTO.getPaymentMethod() != null ? pedidoDTO.getPaymentMethod() : "EFECTIVO");
+        pedido.setPaymentStatus(normalizarEstadoPago(pedidoDTO.getPaymentStatus()));
         pedido.setStatus("PENDIENTE");
         pedido.setOrderDate(LocalDateTime.now(ZoneOffset.UTC));
+        if ("PAGADO".equals(pedido.getPaymentStatus())) {
+            pedido.setPaidAt(pedido.getOrderDate());
+        }
 
         String requestedEmail = normalizarEmail(pedidoDTO.getCustomerEmail());
 
@@ -201,12 +206,144 @@ public class PedidoServicio {
     }
 
     @Transactional
+    public PedidoDTO actualizar(Long id, PedidoDTO pedidoDTO) {
+        if (pedidoDTO.getDetalles() == null || pedidoDTO.getDetalles().isEmpty()) {
+            throw new IllegalArgumentException("El pedido debe incluir al menos un producto");
+        }
+
+        PedidoEntidad pedido = pedidoRepositorio.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        if ("ENTREGADO".equals(pedido.getStatus()) || "CANCELADO".equals(pedido.getStatus())) {
+            throw new IllegalStateException("Un pedido entregado o cancelado ya no puede modificarse");
+        }
+
+        // Calcular diferencias de inventario por diferencia neta
+        List<DetallePedidoEntidad> detallesAnteriores = detallePedidoRepositorio.findByPedidoEntidadId(id);
+        Map<Long, Integer> oldQuantities = detallesAnteriores.stream().collect(Collectors.toMap(
+                d -> d.getProductoEntidad().getId(),
+                d -> d.getQuantity(),
+                (q1, q2) -> q1 + q2
+        ));
+
+        Map<Long, Integer> newQuantities = pedidoDTO.getDetalles().stream().collect(Collectors.toMap(
+                d -> d.getProductoId(),
+                d -> d.getQuantity(),
+                (q1, q2) -> q1 + q2
+        ));
+
+        java.util.Set<Long> allProductIds = new java.util.HashSet<>(oldQuantities.keySet());
+        allProductIds.addAll(newQuantities.keySet());
+
+        for (Long prodId : allProductIds) {
+            int oldQty = oldQuantities.getOrDefault(prodId, 0);
+            int newQty = newQuantities.getOrDefault(prodId, 0);
+            int diff = newQty - oldQty;
+            if (diff != 0) {
+                descontarInventarioAsociado(prodId, diff);
+            }
+        }
+
+        detallePedidoRepositorio.deleteAll(detallesAnteriores);
+        detallePedidoRepositorio.flush();
+
+        String name = (pedidoDTO.getCustomerName() == null || pedidoDTO.getCustomerName().trim().isEmpty())
+                ? "Anonimo"
+                : pedidoDTO.getCustomerName().trim();
+        String phone = (pedidoDTO.getCustomerPhone() == null || pedidoDTO.getCustomerPhone().trim().isEmpty())
+                ? "000000000"
+                : pedidoDTO.getCustomerPhone().trim();
+        String address = (pedidoDTO.getCustomerAddress() == null || pedidoDTO.getCustomerAddress().trim().isEmpty())
+                ? "Sin Direccion"
+                : pedidoDTO.getCustomerAddress().trim();
+
+        ClienteEntidad clienteAnterior = pedido.getClienteEntidad();
+        String phoneAnterior = (clienteAnterior != null) ? clienteAnterior.getPhone().trim() : "";
+
+        if (!phone.equals(phoneAnterior)) {
+            String requestedEmail = normalizarEmail(pedidoDTO.getCustomerEmail());
+            java.util.Optional<ClienteEntidad> optCliente = clienteRepositorio.findFirstByPhoneOrderByIdAsc(phone);
+            ClienteEntidad nuevoCliente;
+            if (optCliente.isPresent()) {
+                nuevoCliente = optCliente.get();
+            } else {
+                nuevoCliente = new ClienteEntidad();
+                nuevoCliente.setName(name);
+                nuevoCliente.setPhone(phone);
+                nuevoCliente.setAddress(address);
+                nuevoCliente.setEmail(emailDisponibleParaCliente(requestedEmail, null) ? requestedEmail : null);
+                nuevoCliente.setTotalOrders(0);
+                nuevoCliente.setTotalSpent(BigDecimal.ZERO);
+                nuevoCliente.setPoints(0);
+                nuevoCliente = clienteRepositorio.save(nuevoCliente);
+            }
+            completarDatosDesdeCliente(pedido, pedidoDTO, nuevoCliente, requestedEmail);
+            pedido.setClienteEntidad(nuevoCliente);
+        } else if (clienteAnterior != null) {
+            String requestedEmail = normalizarEmail(pedidoDTO.getCustomerEmail());
+            completarDatosDesdeCliente(pedido, pedidoDTO, clienteAnterior, requestedEmail);
+        }
+
+        pedido.setCustomerName(name);
+        pedido.setCustomerPhone(phone);
+        pedido.setCustomerAddress(address);
+        pedido.setDeliveryCost(pedidoDTO.getDeliveryCost() != null ? pedidoDTO.getDeliveryCost() : BigDecimal.ZERO);
+        pedido.setType(pedidoDTO.getType());
+        pedido.setPaymentMethod(pedidoDTO.getPaymentMethod());
+
+        BigDecimal subtotal = BigDecimal.ZERO;
+        List<DetallePedidoEntidad> detallesNuevos = new ArrayList<>();
+        for (DetallePedidoDTO detDTO : pedidoDTO.getDetalles()) {
+            ProductoEntidad producto = productoRepositorio.findById(detDTO.getProductoId())
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID " + detDTO.getProductoId()));
+            DetallePedidoEntidad detalle = new DetallePedidoEntidad();
+            detalle.setPedidoEntidad(pedido);
+            detalle.setProductoEntidad(producto);
+            detalle.setQuantity(detDTO.getQuantity());
+            BigDecimal importe = producto.getPrice()
+                    .multiply(BigDecimal.valueOf(detDTO.getQuantity()))
+                    .setScale(2, RoundingMode.HALF_UP);
+            detalle.setSubtotal(importe);
+            detalle.setCreams(detDTO.getCreams());
+            subtotal = subtotal.add(importe);
+            detallesNuevos.add(detalle);
+        }
+
+        BigDecimal nuevoTotal = subtotal.add(pedido.getDeliveryCost()).setScale(2, RoundingMode.HALF_UP);
+
+        String nuevoEstadoPago = normalizarEstadoPago(pedidoDTO.getPaymentStatus());
+        if ("PAGADO".equals(nuevoEstadoPago)) {
+            if (pedido.getTotal() != null && pedido.getTotal().compareTo(nuevoTotal) != 0) {
+                nuevoEstadoPago = "PENDIENTE";
+                pedido.setPaidAt(null);
+            } else if (!"PAGADO".equals(pedido.getPaymentStatus())) {
+                pedido.setPaidAt(LocalDateTime.now(ZoneOffset.UTC));
+            }
+        } else {
+            pedido.setPaidAt(null);
+        }
+        pedido.setPaymentStatus(nuevoEstadoPago);
+        pedido.setTotal(nuevoTotal);
+
+        PedidoEntidad guardado = pedidoRepositorio.save(pedido);
+        detallePedidoRepositorio.saveAll(detallesNuevos);
+
+        if (pedido.getClienteEntidad() != null) {
+            recalcularYGuardarStatsCliente(pedido.getClienteEntidad());
+        }
+        if (clienteAnterior != null && !clienteAnterior.getId().equals(pedido.getClienteEntidad().getId())) {
+            recalcularYGuardarStatsCliente(clienteAnterior);
+        }
+
+        return convertirADTO(guardado, detallesNuevos);
+    }
+
+    @Transactional
     public PedidoDTO actualizarEstado(Long id, String nuevoEstado) {
         String estadoNormalizado = nuevoEstado == null ? "" : nuevoEstado.trim().toUpperCase(java.util.Locale.ROOT);
         if (!ESTADOS_VALIDOS.contains(estadoNormalizado)) {
             throw new IllegalArgumentException("El estado del pedido no es valido");
         }
-        PedidoEntidad pedido = pedidoRepositorio.findById(id)
+        PedidoEntidad pedido = pedidoRepositorio.findByIdForUpdate(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
         if (estadoNormalizado.equals(pedido.getStatus())) {
@@ -227,6 +364,26 @@ public class PedidoServicio {
         }
 
         return convertirADTO(pedido);
+    }
+
+    @Transactional
+    public PedidoDTO actualizarPago(Long id, String nuevoEstado) {
+        String estadoPago = nuevoEstado == null ? "" : nuevoEstado.trim().toUpperCase(Locale.ROOT);
+        if (!ESTADOS_PAGO_VALIDOS.contains(estadoPago)) {
+            throw new IllegalArgumentException("El estado de pago no es valido");
+        }
+        PedidoEntidad pedido = pedidoRepositorio.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        
+        if ("PAGADO".equals(estadoPago)) {
+            if (!"PAGADO".equals(pedido.getPaymentStatus())) {
+                pedido.setPaidAt(LocalDateTime.now(ZoneOffset.UTC));
+            }
+        } else {
+            pedido.setPaidAt(null);
+        }
+        pedido.setPaymentStatus(estadoPago);
+        return convertirADTO(pedidoRepositorio.save(pedido));
     }
 
     private void descontarInventarioAsociado(Long productoId, int cantidad) {
@@ -304,6 +461,19 @@ public class PedidoServicio {
         return requestId.trim();
     }
 
+    private String normalizarEstadoPago(String estadoPago) {
+        if (estadoPago == null || estadoPago.isBlank()) return "PENDIENTE";
+        String normalizado = estadoPago.trim().toUpperCase(Locale.ROOT);
+        if (!ESTADOS_PAGO_VALIDOS.contains(normalizado)) {
+            throw new IllegalArgumentException("El estado de pago no es valido");
+        }
+        return normalizado;
+    }
+
+    private String textoConDefault(String valor, String valorDefault) {
+        return valor == null || valor.isBlank() ? valorDefault : valor.trim();
+    }
+
     private LocalDateTime inicioDiaLimaUtc() {
         return java.time.ZonedDateTime.now(ZONA_LIMA)
                 .toLocalDate()
@@ -358,36 +528,32 @@ public class PedidoServicio {
 
     private void enviarComprobantePorCorreo(PedidoEntidad pedido) {
         String destinatario = pedido.getClienteEntidad().getEmail();
-        String asunto = "Gracias por tu compra en La Brosteria - Pedido #" + pedido.getId();
+        String asunto = "Pedido #" + pedido.getId() + " entregado - La Brosteria";
 
         StringBuilder itemsHtml = new StringBuilder();
         List<DetallePedidoEntidad> detalles = detallePedidoRepositorio.findByPedidoEntidadId(pedido.getId());
         for (DetallePedidoEntidad det : detalles) {
-            itemsHtml.append("<li>%d x %s - S/. %.2f (Cremas: %s)</li>"
+            String cremas = det.getCreams() == null || det.getCreams().isBlank()
+                    ? ""
+                    : " - Cremas: " + HtmlUtils.htmlEscape(det.getCreams());
+            itemsHtml.append("<li>%d x %s%s</li>"
                     .formatted(det.getQuantity(),
                             HtmlUtils.htmlEscape(det.getProductoEntidad().getName()),
-                            det.getSubtotal(),
-                            HtmlUtils.htmlEscape(det.getCreams() == null ? "" : det.getCreams())));
+                            cremas));
         }
 
         String html = """
-            <div style="font-family: Arial, sans-serif; border: 1px solid #FF6B00; border-radius: 8px; padding: 20px; max-width: 600px;">
-                <h2 style="color: #FF6B00; margin-top: 0;">Hola %s! Aqui tienes el detalle de tu orden</h2>
-                <p>Tu pedido ha sido entregado con exito. Que lo disfrutes!</p>
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-                <h3 style="color: #333;">Detalle del Pedido #%d</h3>
-                <ul>
-                    %s
-                </ul>
-                <p><strong>Costo de Delivery:</strong> S/. %.2f</p>
-                <h3 style="color: #FF6B00;">Total Pagado: S/. %.2f (%s)</h3>
-                <p style="font-size: 12px; color: #888;">Direccion de Entrega: %s</p>
-                <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
-                <p style="font-size: 12px; color: #888; text-align: center;">La Brosteria - Sabor Crujiente Premium</p>
+            <div style="font-family:Arial,sans-serif;max-width:520px;padding:24px;border:1px solid #eee;border-radius:8px">
+                <h2 style="color:#FF6B00;margin:0 0 8px">Pedido entregado</h2>
+                <p>Gracias, %s. Tu pedido #%d ya fue entregado.</p>
+                <ul style="padding-left:20px">%s</ul>
+                <p style="font-size:18px"><strong>Total: S/. %.2f</strong></p>
+                <p>Pago: <strong>%s</strong> con %s</p>
+                <a href="https://brosteria.vci.pe/#menu-seccion-anchor" style="display:inline-block;background:#FF6B00;color:#fff;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:bold">Volver a pedir</a>
             </div>
             """.formatted(HtmlUtils.htmlEscape(pedido.getCustomerName()), pedido.getId(), itemsHtml.toString(),
-                    pedido.getDeliveryCost(), pedido.getTotal(), HtmlUtils.htmlEscape(pedido.getPaymentMethod()),
-                    HtmlUtils.htmlEscape(pedido.getCustomerAddress()));
+                    pedido.getTotal(), HtmlUtils.htmlEscape(pedido.getPaymentStatus()),
+                    HtmlUtils.htmlEscape(pedido.getPaymentMethod()));
 
         emailServicio.enviarCorreoHTML(destinatario, asunto, html);
     }
@@ -399,8 +565,10 @@ public class PedidoServicio {
 
     private PedidoDTO convertirADTO(PedidoEntidad entity, List<DetallePedidoEntidad> detalles) {
         PedidoDTO dto = modelMapper.map(entity, PedidoDTO.class);
+        dto.setPaidAt(entity.getPaidAt());
         if (entity.getClienteEntidad() != null) {
             dto.setClienteId(entity.getClienteEntidad().getId());
+            dto.setCustomerEmail(entity.getClienteEntidad().getEmail());
         }
         dto.setDetalles(detalles.stream().map(d -> {
             DetallePedidoDTO dDto = new DetallePedidoDTO();

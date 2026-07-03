@@ -94,8 +94,9 @@ public class PdfServicio {
             long totalPedidos = pedidos.size();
             long completados = pedidos.stream().filter(p -> "ENTREGADO".equals(p.getStatus())).count();
             long cancelados = pedidos.stream().filter(p -> "CANCELADO".equals(p.getStatus())).count();
+            long pagados = pedidos.stream().filter(p -> "PAGADO".equals(p.getPaymentStatus())).count();
             double totalVentasDouble = totalVentas.doubleValue();
-            double avgTicket = completados == 0 ? 0.0 : totalVentasDouble / completados;
+            double avgTicket = pagados == 0 ? 0.0 : totalVentasDouble / pagados;
 
             // Calcular Comparativas
             boolean hasComparison = false;
@@ -119,12 +120,12 @@ public class PdfServicio {
                         startPrev, endPrev, tipoPedido == null ? "" : tipoPedido, diaNumero);
 
                 totalVentasPrev = pedidosPrev.stream()
-                        .filter(p -> "ENTREGADO".equals(p.getStatus()))
+                        .filter(p -> "PAGADO".equals(p.getPaymentStatus()))
                         .map(PedidoEntidad::getTotal)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
                 totalPedidosPrev = pedidosPrev.size();
-                completadosPrev = pedidosPrev.stream().filter(p -> "ENTREGADO".equals(p.getStatus())).count();
-                avgTicketPrev = completadosPrev == 0 ? 0.0 : totalVentasPrev.doubleValue() / completadosPrev;
+                long pagadosPrev = pedidosPrev.stream().filter(p -> "PAGADO".equals(p.getPaymentStatus())).count();
+                avgTicketPrev = pagadosPrev == 0 ? 0.0 : totalVentasPrev.doubleValue() / pagadosPrev;
             }
 
             // Formatear deltas comparativos
@@ -216,10 +217,13 @@ public class PdfServicio {
             addTableHeader(tablePayments, "Porcent.", darkGray, fontTableHeader);
 
             Map<String, Long> payments = pedidos.stream()
+                    .filter(p -> "PAGADO".equals(p.getPaymentStatus()))
                     .collect(Collectors.groupingBy(PedidoEntidad::getPaymentMethod, Collectors.counting()));
 
+            long totalPagados = payments.values().stream().mapToLong(Long::longValue).sum();
+
             for (Map.Entry<String, Long> entry : payments.entrySet()) {
-                double pct = totalPedidos == 0 ? 0.0 : (entry.getValue() * 100.0) / totalPedidos;
+                double pct = totalPagados == 0 ? 0.0 : (entry.getValue() * 100.0) / totalPagados;
                 tablePayments.addCell(createCell(entry.getKey(), fontText, Element.ALIGN_LEFT, lightGray));
                 tablePayments.addCell(createCell(String.valueOf(entry.getValue()), fontText, Element.ALIGN_CENTER, lightGray));
                 tablePayments.addCell(createCell(String.format(Locale.US, "%.1f%%", pct), fontText, Element.ALIGN_CENTER, lightGray));
@@ -257,7 +261,7 @@ public class PdfServicio {
             addTableHeader(tableDays, "Distribucion", brandOrange, fontTableHeader);
 
             Map<java.time.DayOfWeek, BigDecimal> ventasDia = pedidos.stream()
-                    .filter(p -> "ENTREGADO".equals(p.getStatus()))
+                    .filter(p -> "PAGADO".equals(p.getPaymentStatus()))
                     .collect(Collectors.groupingBy(p -> horaLima(p.getOrderDate()).getDayOfWeek(),
                             Collectors.reducing(BigDecimal.ZERO, PedidoEntidad::getTotal, BigDecimal::add)));
 
@@ -348,7 +352,7 @@ public class PdfServicio {
             addTableHeader(tableClientes, "Consumo", brandOrange, fontTableHeader);
 
             Map<String, BigDecimal> clientesVentas = pedidos.stream()
-                    .filter(p -> "ENTREGADO".equals(p.getStatus()))
+                    .filter(p -> "PAGADO".equals(p.getPaymentStatus()))
                     .collect(Collectors.groupingBy(p -> p.getCustomerName() != null ? p.getCustomerName() : "Desconocido",
                             Collectors.reducing(BigDecimal.ZERO, PedidoEntidad::getTotal, BigDecimal::add)));
 
@@ -390,13 +394,12 @@ public class PdfServicio {
             BigDecimal vDelivery = BigDecimal.ZERO; int cDelivery = 0;
             BigDecimal vPickup = BigDecimal.ZERO; int cPickup = 0;
             for (PedidoEntidad p : pedidos) {
-                if (!"ENTREGADO".equals(p.getStatus())) continue;
                 if ("DELIVERY".equalsIgnoreCase(p.getType())) {
-                    vDelivery = vDelivery.add(p.getTotal());
-                    cDelivery++;
+                    if ("ENTREGADO".equals(p.getStatus())) cDelivery++;
+                    if ("PAGADO".equals(p.getPaymentStatus())) vDelivery = vDelivery.add(p.getTotal());
                 } else {
-                    vPickup = vPickup.add(p.getTotal());
-                    cPickup++;
+                    if ("ENTREGADO".equals(p.getStatus())) cPickup++;
+                    if ("PAGADO".equals(p.getPaymentStatus())) vPickup = vPickup.add(p.getTotal());
                 }
             }
 

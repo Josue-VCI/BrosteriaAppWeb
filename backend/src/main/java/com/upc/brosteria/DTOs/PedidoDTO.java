@@ -39,10 +39,14 @@ public class PedidoDTO {
     @Pattern(regexp = "YAPE|PLIN|TARJETA|EFECTIVO", message = "El metodo de pago no es valido")
     private String paymentMethod;
 
+    @Pattern(regexp = "PENDIENTE|PAGADO", message = "El estado de pago no es valido")
+    private String paymentStatus;
+
     private BigDecimal total;
     private String status;
     private Long clienteId;
     private LocalDateTime orderDate;
+    private LocalDateTime paidAt;
 
     @NotEmpty(message = "El pedido debe contener al menos un detalle de producto")
     @Valid

@@ -72,7 +72,7 @@ public class InsumoServicio {
         if (insumoRepositorio.descontarStockAtomico(id, cantidad) == 0) {
             throw new RuntimeException("Insumo no encontrado");
         }
-        if (insumoRepositorio.reclamarAlertaStock(id, alertCooldownHours) == 1) {
+        if (cantidad.signum() > 0 && insumoRepositorio.reclamarAlertaStock(id, alertCooldownHours) == 1) {
             InsumoEntidad insumo = insumoRepositorio.findById(id)
                     .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
             emailServicio.notificarStockBajo(insumo.getName(), insumo.getQuantity(), insumo.getUnit());

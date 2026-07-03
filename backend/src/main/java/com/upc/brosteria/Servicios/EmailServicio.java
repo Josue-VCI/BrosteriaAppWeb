@@ -26,6 +26,9 @@ public class EmailServicio {
     @Value("${stock.alert.email}")
     private String stockAlertEmail;
 
+    @Value("${app.frontend.url:https://brosteria-app-web.vercel.app}")
+    private String frontendUrl;
+
     @Async
     public void enviarCorreoHTML(String destinatario, String asunto, String contenidoHtml) {
         if (mailSender == null) {
@@ -47,19 +50,15 @@ public class EmailServicio {
 
     @Async
     public void notificarStockBajo(String insumoNombre, BigDecimal actualStock, String unidad) {
-        String asunto = "ALERTA DE STOCK CRITICO: " + insumoNombre.toUpperCase();
+        String asunto = "Stock bajo: " + insumoNombre;
         String html = """
-            <div style="font-family: Arial, sans-serif; border: 1px solid #FF1744; border-radius: 8px; padding: 20px; max-width: 600px;">
-                <h2 style="color: #FF1744; margin-top: 0;">Alerta de Inventario en La Brosteria!</h2>
-                <p>El insumo <strong>%s</strong> ha alcanzado su limite minimo de seguridad.</p>
-                <div style="background-color: #ffebee; border-left: 5px solid #FF1744; padding: 10px; margin: 15px 0;">
-                    <strong>Stock Actual:</strong> %s %s
-                </div>
-                <p>Por favor, realice el pedido de reposicion lo antes posible.</p>
-                <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
-                <p style="font-size: 12px; color: #888;">CRM La Brosteria - Sistema Automatico de Notificaciones</p>
+            <div style="font-family:Arial,sans-serif;max-width:480px;padding:24px;border:1px solid #eee;border-radius:8px">
+                <h2 style="color:#FF1744;margin:0 0 8px">Stock bajo</h2>
+                <p><strong>%s</strong> tiene %s %s disponibles.</p>
+                <a href="%s/inventario" style="display:inline-block;background:#FF6B00;color:#fff;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:bold">Revisar inventario</a>
             </div>
-            """.formatted(HtmlUtils.htmlEscape(insumoNombre), actualStock, HtmlUtils.htmlEscape(unidad));
+            """.formatted(HtmlUtils.htmlEscape(insumoNombre), actualStock, HtmlUtils.htmlEscape(unidad),
+                    HtmlUtils.htmlEscape(frontendUrl));
         
         enviarCorreoHTML(stockAlertEmail, asunto, html);
     }

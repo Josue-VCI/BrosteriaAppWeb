@@ -50,4 +50,15 @@ public class PedidoControlador {
     public ResponseEntity<PedidoDTO> actualizarEstado(@PathVariable Long id, @RequestParam String nuevoEstado) {
         return ResponseEntity.ok(pedidoServicio.actualizarEstado(id, nuevoEstado));
     }
+
+    @PutMapping("/{id}/pago")
+    public ResponseEntity<PedidoDTO> actualizarPago(@PathVariable Long id, @RequestParam String nuevoEstado) {
+        return ResponseEntity.ok(pedidoServicio.actualizarPago(id, nuevoEstado));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PedidoDTO> actualizar(@PathVariable Long id,
+                                                @jakarta.validation.Valid @RequestBody PedidoDTO pedidoDTO) {
+        return ResponseEntity.ok(pedidoServicio.actualizar(id, pedidoDTO));
+    }
 }

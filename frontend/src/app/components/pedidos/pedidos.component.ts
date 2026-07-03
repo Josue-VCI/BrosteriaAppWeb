@@ -25,12 +25,14 @@ export class PedidosComponent implements OnInit, OnDestroy {
   // Catalogo y Modal de Parser
   productosCatalogo: any[] = [];
   mostrarModalNuevoPedido = false;
+  pedidoEditandoId: number | null = null;
   guardandoPedido = false;
   buscandoCliente = false;
   clienteEncontrado = false;
   private telefonoBusquedaTimeout: ReturnType<typeof setTimeout> | null = null;
   private secuenciaBusquedaCliente = 0;
   pedidosEnProgreso = new Set<number>();
+  pagosEnProgreso = new Set<number>();
   textoWhatsApp = '';
   
   formPedido: any = {
@@ -41,6 +43,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     deliveryCost: 5.0,
     type: 'DELIVERY',
     paymentMethod: 'YAPE',
+    paymentStatus: 'PENDIENTE',
     status: 'PREPARANDO',
     detalles: [] as any[],
     total: 5.0
@@ -210,6 +213,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   // Logica del Parser de WhatsApp
   abrirNuevoPedido() {
+    this.pedidoEditandoId = null;
     this.textoWhatsApp = '';
     this.formPedido = {
       requestId: this.nuevoRequestId(),
@@ -222,12 +226,45 @@ export class PedidosComponent implements OnInit, OnDestroy {
       deliveryCost: 5.0,
       type: 'DELIVERY',
       paymentMethod: 'YAPE',
+      paymentStatus: 'PENDIENTE',
       status: 'PREPARANDO',
       detalles: [] as any[],
       total: 5.0
     };
     this.clienteEncontrado = false;
     this.buscandoCliente = false;
+    this.mostrarModalNuevoPedido = true;
+  }
+
+  abrirEditarPedido(pedido: any) {
+    this.pedidoEditandoId = pedido.id;
+    this.textoWhatsApp = '';
+    this.clienteEncontrado = !!pedido.clienteId;
+    this.formPedido = {
+      requestId: pedido.requestId || this.nuevoRequestId(),
+      clienteId: pedido.clienteId || null,
+      customerName: pedido.customerName || '',
+      customerPhone: pedido.customerPhone === '000000000' ? '' : (pedido.customerPhone || ''),
+      customerAddress: pedido.type === 'PICKUP' ? '' : (pedido.customerAddress || ''),
+      customerEmail: pedido.customerEmail || '',
+      distrito: '',
+      deliveryCost: Number(pedido.deliveryCost || 0),
+      type: pedido.type,
+      paymentMethod: pedido.paymentMethod,
+      paymentStatus: pedido.paymentStatus || 'PENDIENTE',
+      status: pedido.status,
+      detalles: (pedido.detalles || []).map((detalle: any) => ({
+        productoId: detalle.productoId,
+        productoName: detalle.productoName,
+        productoPrice: Number(detalle.productoPrice || 0),
+        quantity: detalle.quantity,
+        subtotal: Number(detalle.subtotal || 0),
+        creams: detalle.creams || '',
+        noCoincide: false
+      })),
+      total: Number(pedido.total || 0)
+    };
+    this.recalcularTotal();
     this.mostrarModalNuevoPedido = true;
   }
 
@@ -238,6 +275,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       this.telefonoBusquedaTimeout = null;
     }
     this.mostrarModalNuevoPedido = false;
+    this.pedidoEditandoId = null;
   }
 
   buscarClientePorTelefono(telefono: string) {
@@ -384,6 +422,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       deliveryCost: deliveryCost,
       type: type,
       paymentMethod: paymentMethod,
+      paymentStatus: 'PENDIENTE',
       status: 'PREPARANDO',
       detalles: detalles,
       total: 0.0
@@ -550,15 +589,21 @@ export class PedidosComponent implements OnInit, OnDestroy {
       deliveryCost: this.formPedido.deliveryCost,
       type: this.formPedido.type,
       paymentMethod: this.formPedido.paymentMethod,
+      paymentStatus: this.formPedido.paymentStatus || 'PENDIENTE',
       detalles: cleanDetalles
     };
 
-    this.http.post(`${API_BASE_URL}/api/v1/pedidos`, payload).subscribe({
+    const pedidoId = this.pedidoEditandoId;
+    const solicitud = pedidoId
+      ? this.http.put(`${API_BASE_URL}/api/v1/pedidos/${pedidoId}`, payload)
+      : this.http.post(`${API_BASE_URL}/api/v1/pedidos`, payload);
+
+    solicitud.subscribe({
       next: () => {
         this.guardandoPedido = false;
         this.cargarTodosLosPedidos();
         this.cerrarModalNuevoPedido();
-        this.toastService.success('Pedido registrado con exito.');
+        this.toastService.success(pedidoId ? 'Pedido actualizado con exito.' : 'Pedido registrado con exito.');
       },
       error: (err) => {
         this.guardandoPedido = false;
@@ -596,6 +641,23 @@ export class PedidosComponent implements OnInit, OnDestroy {
         console.error('Error al cargar entregados de hoy', err);
         this.cargandoEntregados = false;
         this.toastService.error('No se pudieron cargar los pedidos entregados.');
+      }
+    });
+  }
+
+  actualizarPago(pedido: any, nuevoEstado: 'PENDIENTE' | 'PAGADO') {
+    if (this.pagosEnProgreso.has(pedido.id)) return;
+    this.pagosEnProgreso.add(pedido.id);
+    this.http.put<any>(`${API_BASE_URL}/api/v1/pedidos/${pedido.id}/pago?nuevoEstado=${nuevoEstado}`, {}).subscribe({
+      next: (actualizado) => {
+        pedido.paymentStatus = actualizado.paymentStatus;
+        this.pagosEnProgreso.delete(pedido.id);
+        this.toastService.success(nuevoEstado === 'PAGADO' ? 'Pago confirmado.' : 'Pago marcado como pendiente.');
+      },
+      error: (err) => {
+        this.pagosEnProgreso.delete(pedido.id);
+        console.error('Error al actualizar el pago', err);
+        this.toastService.error('No se pudo actualizar el estado de pago.');
       }
     });
   }

@@ -36,6 +36,9 @@ public class PedidoEntidad {
     @Column(nullable = false)
     private String paymentMethod; // YAPE, PLIN, EFECTIVO
 
+    @Column(nullable = false)
+    private String paymentStatus; // PENDIENTE, PAGADO
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
@@ -48,6 +51,9 @@ public class PedidoEntidad {
 
     @Column(nullable = false)
     private LocalDateTime orderDate;
+
+    @Column
+    private LocalDateTime paidAt;
 
     @PrePersist
     protected void onCreate() {

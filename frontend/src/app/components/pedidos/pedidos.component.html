@@ -33,6 +33,9 @@
             <div style="display: flex; gap: 8px; align-items: center;">
               <span class="pedido-time">{{ normalizarFechaUtc(pedido.orderDate) | date:'HH:mm':'-0500' }}</span>
               <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
+              <span class="payment-badge" [class.paid]="pedido.paymentStatus === 'PAGADO'">
+                {{ pedido.paymentStatus === 'PAGADO' ? 'Pagado' : 'Pago pendiente' }}
+              </span>
             </div>
           </div>
           <div class="card-body">
@@ -58,6 +61,15 @@
             </div>
           </div>
           <div class="card-actions">
+            <div class="secondary-actions">
+              <button class="card-tool-btn" (click)="abrirEditarPedido(pedido)" [disabled]="pedidosEnProgreso.has(pedido.id)">
+                <i class="fa-solid fa-pen"></i> Editar
+              </button>
+              <button class="card-tool-btn payment" (click)="actualizarPago(pedido, pedido.paymentStatus === 'PAGADO' ? 'PENDIENTE' : 'PAGADO')" [disabled]="pagosEnProgreso.has(pedido.id)">
+                <i class="fa-solid" [class.fa-circle-check]="pedido.paymentStatus !== 'PAGADO'" [class.fa-rotate-left]="pedido.paymentStatus === 'PAGADO'"></i>
+                {{ pedido.paymentStatus === 'PAGADO' ? 'Deshacer pago' : 'Marcar pagado' }}
+              </button>
+            </div>
             <!-- Si esta PENDIENTE, permitir pasar a PREPARANDO (Cocina), si esta en PREPARANDO, pasar a ENVIADO (Despachado) -->
             <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
               {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Empezar a Cocinar' }}
@@ -83,6 +95,9 @@
             <div style="display: flex; gap: 8px; align-items: center;">
               <span class="pedido-time">{{ normalizarFechaUtc(pedido.orderDate) | date:'HH:mm':'-0500' }}</span>
               <span class="pedido-type" [class.delivery]="pedido.type === 'DELIVERY'">{{ pedido.type }}</span>
+              <span class="payment-badge" [class.paid]="pedido.paymentStatus === 'PAGADO'">
+                {{ pedido.paymentStatus === 'PAGADO' ? 'Pagado' : 'Pago pendiente' }}
+              </span>
             </div>
           </div>
           <div class="card-body">
@@ -103,8 +118,17 @@
             </div>
           </div>
           <div class="card-actions">
+            <div class="secondary-actions">
+              <button class="card-tool-btn" (click)="abrirEditarPedido(pedido)" [disabled]="pedidosEnProgreso.has(pedido.id)">
+                <i class="fa-solid fa-pen"></i> Editar
+              </button>
+              <button class="card-tool-btn payment" (click)="actualizarPago(pedido, pedido.paymentStatus === 'PAGADO' ? 'PENDIENTE' : 'PAGADO')" [disabled]="pagosEnProgreso.has(pedido.id)">
+                <i class="fa-solid" [class.fa-circle-check]="pedido.paymentStatus !== 'PAGADO'" [class.fa-rotate-left]="pedido.paymentStatus === 'PAGADO'"></i>
+                {{ pedido.paymentStatus === 'PAGADO' ? 'Deshacer pago' : 'Marcar pagado' }}
+              </button>
+            </div>
             <button class="brand-btn deliver-btn" (click)="actualizarEstado(pedido.id, 'ENTREGADO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
-              {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Pagado' }}
+              {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Marcar entregado' }}
             </button>
           </div>
         </div>
@@ -116,11 +140,12 @@
   <!-- Modal de Registro de Pedido de WhatsApp (Parser) -->
   <div class="modal-backdrop" *ngIf="mostrarModalNuevoPedido">
     <div class="modal-card glass-card">
-      <h3>Registrar Pedido desde WhatsApp</h3>
-      <p class="destination-sub">Pega el texto del mensaje de WhatsApp para auto-rellenar el formulario, o completalo manualmente.</p>
+      <h3>{{ pedidoEditandoId ? 'Modificar Pedido #' + pedidoEditandoId : 'Registrar Pedido desde WhatsApp' }}</h3>
+      <p class="destination-sub" *ngIf="!pedidoEditandoId">Pega el texto del mensaje de WhatsApp para auto-rellenar el formulario, o completalo manualmente.</p>
+      <p class="destination-sub" *ngIf="pedidoEditandoId">Actualiza los datos, productos, cremas o pago. El total y el inventario se recalcularan.</p>
 
       <!-- Entrada de texto -->
-      <div class="form-group">
+      <div class="form-group" *ngIf="!pedidoEditandoId">
         <label for="textoRaw">Mensaje de WhatsApp (Opcional)</label>
         <textarea id="textoRaw" [(ngModel)]="textoWhatsApp" (input)="procesarTextoWhatsApp()" placeholder="Pega aqui el mensaje del cliente para auto-rellenar..." rows="4" class="modal-textarea"></textarea>
       </div>
@@ -191,13 +216,20 @@
         </div>
 
         <div class="preview-grid" style="margin-top: 10px;">
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group">
             <label>Metodo de Pago</label>
             <select [(ngModel)]="formPedido.paymentMethod" class="modal-input">
               <option value="YAPE">Yape</option>
               <option value="PLIN">Plin</option>
               <option value="TARJETA">Tarjeta de Credito/Debito</option>
               <option value="EFECTIVO">Efectivo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estado de Pago</label>
+            <select [(ngModel)]="formPedido.paymentStatus" class="modal-input">
+              <option value="PENDIENTE">Pendiente (cobrar despues)</option>
+              <option value="PAGADO">Pagado por adelantado</option>
             </select>
           </div>
         </div>
@@ -227,15 +259,15 @@
               </span>
 
               <!-- Eliminar Fila -->
-              <button type="button" (click)="eliminarFilaDetalle(i)" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
-                🗑️
+              <button type="button" (click)="eliminarFilaDetalle(i)" aria-label="Eliminar producto" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
 
             <!-- Fila inferior: Alertas -->
             <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 58px; width: 100%;">
               <div *ngIf="det.noCoincide && det.productoName" class="select-error-container" style="margin-bottom: 2px;">
-                <span class="error-text" style="font-size: 11px; color: var(--error);">⚠️ No vinculado automatico: <strong>"{{ det.productoName }}"</strong></span>
+                <span class="error-text" style="font-size: 11px; color: var(--error);">No vinculado automatico: <strong>"{{ det.productoName }}"</strong></span>
               </div>
             </div>
             
@@ -244,7 +276,7 @@
           <!-- Boton de Agregar Producto Manual -->
           <div style="display: flex; justify-content: flex-start; margin-top: 5px;">
             <button type="button" class="brand-btn" (click)="agregarFilaDetalle()" style="padding: 6px 12px; font-size: 12px; background: var(--secondary) !important;">
-              ➕ Agregar Producto
+              <i class="fa-solid fa-plus"></i> Agregar Producto
             </button>
           </div>
         </div>
@@ -264,7 +296,7 @@
       <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
         <button class="brand-btn cancel-btn" (click)="cerrarModalNuevoPedido()" [disabled]="guardandoPedido">Cancelar</button>
         <button class="brand-btn" [disabled]="formPedido.detalles.length === 0 || tieneFilasSinProducto() || guardandoPedido" (click)="guardarNuevoPedido()">
-          {{ guardandoPedido ? 'Registrando...' : 'Registrar Pedido' }}
+          {{ guardandoPedido ? 'Guardando...' : (pedidoEditandoId ? 'Guardar Cambios' : 'Registrar Pedido') }}
         </button>
       </div>
     </div>
@@ -275,7 +307,7 @@
     <div class="modal-card glass-card" style="max-width: 600px !important;">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 15px;">
         <h3 style="margin: 0;">Pedidos Entregados Hoy</h3>
-        <button (click)="cerrarModalEntregados()" style="background: none; border: none; color: var(--text-light); font-size: 24px; cursor: pointer; line-height: 1;">×</button>
+        <button (click)="cerrarModalEntregados()" aria-label="Cerrar" style="background: none; border: none; color: var(--text-light); font-size: 24px; cursor: pointer; line-height: 1;"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div *ngIf="cargandoEntregados" style="text-align: center; padding: 20px;">
@@ -283,7 +315,7 @@
       </div>
 
       <div *ngIf="!cargandoEntregados && pedidosEntregadosHoy.length === 0" style="text-align: center; padding: 20px; color: var(--text-muted);">
-        <span>No hay pedidos entregados/pagados registrados hoy.</span>
+        <span>No hay pedidos entregados registrados hoy.</span>
       </div>
 
       <div *ngIf="!cargandoEntregados && pedidosEntregadosHoy.length > 0" class="entregados-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 5px;">
@@ -294,7 +326,7 @@
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
             <span>Hora: {{ normalizarFechaUtc(pedido.orderDate) | date:'HH:mm':'-0500' }}</span>
-            <span>Tipo: {{ pedido.type }} | Pago: {{ pedido.paymentMethod }}</span>
+            <span>Tipo: {{ pedido.type }} | {{ pedido.paymentMethod }} | {{ pedido.paymentStatus === 'PAGADO' ? 'Pagado' : 'Pendiente' }}</span>
           </div>
           <div style="font-size: 13px; border-top: 1px dashed var(--glass-border); padding-top: 6px; margin-top: 4px;">
             <div *ngFor="let det of pedido.detalles" style="display: flex; justify-content: space-between; margin-bottom: 2px;">
@@ -302,6 +334,9 @@
               <span style="color: var(--text-muted); font-size: 11px;" *ngIf="det.creams">Cremas: {{ det.creams }}</span>
             </div>
           </div>
+          <button *ngIf="pedido.paymentStatus !== 'PAGADO'" class="card-tool-btn payment" (click)="actualizarPago(pedido, 'PAGADO')" [disabled]="pagosEnProgreso.has(pedido.id)">
+            <i class="fa-solid fa-circle-check"></i> Confirmar pago
+          </button>
         </div>
       </div>
 
