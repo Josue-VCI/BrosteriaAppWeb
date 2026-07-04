@@ -1,4 +1,5 @@
--- Ejecutar una sola vez en el SQL Editor de Supabase antes de desplegar.
+-- Ejecutar en el SQL Editor de Supabase antes de desplegar.
+-- El script es transaccional e idempotente: puede repetirse si una ejecucion previa fallo.
 BEGIN;
 
 ALTER TABLE pedidos
@@ -14,7 +15,8 @@ SET payment_status = CASE
     WHEN status = 'ENTREGADO' THEN 'PAGADO'
     ELSE 'PENDIENTE'
 END
-WHERE payment_status IS NULL OR payment_status = '';
+WHERE payment_status IS NULL
+   OR payment_status NOT IN ('PENDIENTE', 'PAGADO');
 
 UPDATE pedidos
 SET paid_at = order_date
@@ -41,4 +43,15 @@ CREATE INDEX IF NOT EXISTS idx_pedidos_estado_fecha
 CREATE INDEX IF NOT EXISTS idx_pedidos_pago_fecha
     ON pedidos (payment_status, order_date DESC);
 
+CREATE INDEX IF NOT EXISTS idx_pedidos_paid_at
+    ON pedidos (paid_at DESC)
+    WHERE payment_status = 'PAGADO';
+
 COMMIT;
+
+SELECT
+    EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'pedidos' AND column_name = 'request_id')
+    AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'pedidos' AND column_name = 'payment_status')
+    AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'pedidos' AND column_name = 'paid_at')
+    AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'insumos' AND column_name = 'last_alerted_at')
+    AS migration_ok;

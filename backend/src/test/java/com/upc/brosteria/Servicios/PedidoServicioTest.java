@@ -194,6 +194,7 @@ class PedidoServicioTest {
         pedido.setPaymentStatus("PAGADO");
         pedido.setTotal(new BigDecimal("15.00"));
         pedido.setPaidAt(java.time.LocalDateTime.now());
+        pedido.setClienteEntidad(clienteAnonimo());
 
         ProductoEntidad producto = new ProductoEntidad();
         producto.setId(1L);
@@ -212,6 +213,7 @@ class PedidoServicioTest {
         when(productoRepositorio.findById(1L)).thenReturn(Optional.of(producto));
         when(pedidoRepositorio.save(any(PedidoEntidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(modelMapper.map(any(PedidoEntidad.class), eq(PedidoDTO.class))).thenReturn(new PedidoDTO());
+        mockEstadisticasCliente();
 
         PedidoDTO cambios = new PedidoDTO();
         DetallePedidoDTO detDto = new DetallePedidoDTO();
@@ -219,6 +221,8 @@ class PedidoServicioTest {
         detDto.setQuantity(2); // Cambia la cantidad de 1 a 2 -> Total cambia a S/. 30
         cambios.setDetalles(List.of(detDto));
         cambios.setPaymentStatus("PAGADO");
+        cambios.setType("PICKUP");
+        cambios.setPaymentMethod("YAPE");
 
         pedidoServicio.actualizar(70L, cambios);
 
@@ -233,6 +237,7 @@ class PedidoServicioTest {
         pedido.setStatus("PREPARANDO");
         pedido.setPaymentStatus("PENDIENTE");
         pedido.setTotal(new BigDecimal("30.00"));
+        pedido.setClienteEntidad(clienteAnonimo());
 
         ProductoEntidad producto = new ProductoEntidad();
         producto.setId(1L);
@@ -251,6 +256,7 @@ class PedidoServicioTest {
         when(productoRepositorio.findById(1L)).thenReturn(Optional.of(producto));
         when(pedidoRepositorio.save(any(PedidoEntidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(modelMapper.map(any(PedidoEntidad.class), eq(PedidoDTO.class))).thenReturn(new PedidoDTO());
+        mockEstadisticasCliente();
 
         PedidoDTO cambios = new PedidoDTO();
         DetallePedidoDTO detDto = new DetallePedidoDTO();
@@ -258,6 +264,8 @@ class PedidoServicioTest {
         detDto.setQuantity(3); // Cambia a 3 unidades -> Diferencia neta es +1 unidad
         cambios.setDetalles(List.of(detDto));
         cambios.setPaymentStatus("PENDIENTE");
+        cambios.setType("PICKUP");
+        cambios.setPaymentMethod("YAPE");
 
         pedidoServicio.actualizar(80L, cambios);
 
@@ -266,5 +274,21 @@ class PedidoServicioTest {
         verify(insumoServicio).descontarStock(1L, 1.0);
         verify(insumoServicio).descontarStock(2L, 0.2);
         verify(insumoServicio).descontarStock(8L, 1.0);
+    }
+
+    private ClienteEntidad clienteAnonimo() {
+        ClienteEntidad cliente = new ClienteEntidad();
+        cliente.setId(1L);
+        cliente.setName("Anonimo");
+        cliente.setPhone("000000000");
+        cliente.setAddress("Sin Direccion");
+        return cliente;
+    }
+
+    private void mockEstadisticasCliente() {
+        PedidoRepositorio.EstadisticasCliente stats = mock(PedidoRepositorio.EstadisticasCliente.class);
+        when(stats.getTotalPedidos()).thenReturn(0L);
+        when(stats.getTotalGastado()).thenReturn(BigDecimal.ZERO);
+        when(pedidoRepositorio.obtenerEstadisticasCliente("000000000")).thenReturn(stats);
     }
 }
