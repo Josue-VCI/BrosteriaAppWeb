@@ -42,7 +42,6 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").permitAll()
                 .requestMatchers("/api/v1/reportes/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/clientes/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/clientes/enviar-masivo").hasRole("ADMIN")

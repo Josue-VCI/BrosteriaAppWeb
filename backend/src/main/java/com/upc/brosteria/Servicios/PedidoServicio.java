@@ -330,7 +330,7 @@ public class PedidoServicio {
         if (pedido.getClienteEntidad() != null) {
             recalcularYGuardarStatsCliente(pedido.getClienteEntidad());
         }
-        if (clienteAnterior != null && !clienteAnterior.getId().equals(pedido.getClienteEntidad().getId())) {
+        if (clienteAnterior != null && pedido.getClienteEntidad() != null && !clienteAnterior.getId().equals(pedido.getClienteEntidad().getId())) {
             recalcularYGuardarStatsCliente(clienteAnterior);
         }
 

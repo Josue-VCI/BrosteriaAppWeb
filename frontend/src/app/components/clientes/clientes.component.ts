@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { WORLD_CUP_TEMPLATE, COMBO_PROMO_TEMPLATE, WEEKEND_PROMO_TEMPLATE } from './templates';
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
+import { Cliente } from '../../models/interfaces';
 
 @Component({
     selector: 'app-clientes',
@@ -13,8 +14,8 @@ import { ToastService } from '../../services/toast.service';
     styleUrls: ['./clientes.component.css']
 })
 export class ClientesComponent implements OnInit {
-  clientes: any[] = [];
-  clientesFiltrados: any[] = [];
+  clientes: Cliente[] = [];
+  clientesFiltrados: Cliente[] = [];
   clientesPaginados: any[] = [];
   limiteMostrar = 50;
   busqueda = '';
@@ -57,8 +58,8 @@ export class ClientesComponent implements OnInit {
   }
 
   // Formulario CRUD
-  formCliente: any = {
-    id: null,
+  formCliente: Cliente = {
+    id: undefined,
     name: '',
     email: '',
     phone: '',
@@ -143,8 +144,8 @@ export class ClientesComponent implements OnInit {
   ordenarPorColumnaActiva() {
     const col = this.columnaOrden;
     this.clientesFiltrados.sort((a, b) => {
-      let valA = a[col];
-      let valB = b[col];
+      let valA = (a as any)[col];
+      let valB = (b as any)[col];
 
       if (valA === undefined || valA === null) valA = '';
       if (valB === undefined || valB === null) valB = '';

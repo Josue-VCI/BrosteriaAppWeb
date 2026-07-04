@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
+import { Pedido, Producto } from '../../models/interfaces';
 
 @Component({
     selector: 'app-pedidos',
@@ -12,8 +13,8 @@ import { ToastService } from '../../services/toast.service';
     styleUrls: ['./pedidos.component.css']
 })
 export class PedidosComponent implements OnInit, OnDestroy {
-  pedidosCocina: any[] = [];
-  pedidosDespacho: any[] = [];
+  pedidosCocina: Pedido[] = [];
+  pedidosDespacho: Pedido[] = [];
   private cargandoPedidosActivos = false;
   columnaActiva = 'COCINA'; // Control para moviles: COCINA, DESPACHO
 
@@ -23,7 +24,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   audioCtx: AudioContext | null = null;
 
   // Catalogo y Modal de Parser
-  productosCatalogo: any[] = [];
+  productosCatalogo: Producto[] = [];
   mostrarModalNuevoPedido = false;
   pedidoEditandoId: number | null = null;
   guardandoPedido = false;
@@ -31,11 +32,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
   clienteEncontrado = false;
   private telefonoBusquedaTimeout: ReturnType<typeof setTimeout> | null = null;
   private secuenciaBusquedaCliente = 0;
-  pedidosEnProgreso = new Set<number>();
-  pagosEnProgreso = new Set<number>();
+  pedidosEnProgreso = new Set<number | null | undefined>();
+  pagosEnProgreso = new Set<number | null | undefined>();
   textoWhatsApp = '';
   
-  formPedido: any = {
+  formPedido: Pedido = {
     requestId: '',
     customerName: '',
     customerPhone: '',
@@ -45,7 +46,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     paymentMethod: 'YAPE',
     paymentStatus: 'PENDIENTE',
     status: 'PREPARANDO',
-    detalles: [] as any[],
+    detalles: [],
     total: 5.0
   };
 
@@ -125,7 +126,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
     });
   }
 
-  actualizarEstado(pedidoId: number, nuevoEstado: string) {
+  actualizarEstado(pedidoId: number | null | undefined, nuevoEstado: string) {
+    if (pedidoId === null || pedidoId === undefined) return;
     if (this.pedidosEnProgreso.has(pedidoId)) return;
     this.pedidosEnProgreso.add(pedidoId);
 
@@ -645,7 +647,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
     });
   }
 
-  actualizarPago(pedido: any, nuevoEstado: 'PENDIENTE' | 'PAGADO') {
+  actualizarPago(pedido: Pedido, nuevoEstado: 'PENDIENTE' | 'PAGADO') {
+    if (pedido.id === null || pedido.id === undefined) return;
     if (this.pagosEnProgreso.has(pedido.id)) return;
     this.pagosEnProgreso.add(pedido.id);
     this.http.put<any>(`${API_BASE_URL}/api/v1/pedidos/${pedido.id}/pago?nuevoEstado=${nuevoEstado}`, {}).subscribe({
@@ -669,8 +672,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
     return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  normalizarFechaUtc(fecha: string): string {
-    if (!fecha) return fecha;
+  normalizarFechaUtc(fecha: string | undefined): string {
+    if (!fecha) return '';
     return /Z$|[+-]\d{2}:?\d{2}$/.test(fecha) ? fecha : `${fecha}Z`;
   }
 

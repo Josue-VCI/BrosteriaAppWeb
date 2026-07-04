@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
+import { Insumo } from '../../models/interfaces';
 
 @Component({
     selector: 'app-inventario',
@@ -12,7 +13,7 @@ import { ToastService } from '../../services/toast.service';
     styleUrls: ['./inventario.component.css']
 })
 export class InventarioComponent implements OnInit {
-  insumos: any[] = [];
+  insumos: Insumo[] = [];
   esAdmin = false;
   
   // Ordenacion
@@ -32,8 +33,8 @@ export class InventarioComponent implements OnInit {
   cantidadIngresar = 10.0;
 
   // Insumo para CRUD
-  formInsumo: any = {
-    id: null,
+  formInsumo: Insumo = {
+    id: undefined,
     name: '',
     quantity: 0.0,
     unit: 'unidades',
@@ -81,8 +82,8 @@ export class InventarioComponent implements OnInit {
   ordenarPorColumnaActiva() {
     const col = this.columnaOrden;
     this.insumos.sort((a, b) => {
-      let valA = a[col];
-      let valB = b[col];
+      let valA = (a as any)[col];
+      let valB = (b as any)[col];
 
       if (valA === undefined || valA === null) valA = '';
       if (valB === undefined || valB === null) valB = '';
@@ -209,7 +210,8 @@ export class InventarioComponent implements OnInit {
     }
   }
 
-  eliminarInsumo(id: number) {
+  eliminarInsumo(id: number | null | undefined) {
+    if (id === null || id === undefined) return;
     if (!confirm('¿Esta seguro de eliminar este insumo del inventario?')) return;
 
     this.http.delete(`${this.apiBaseUrl}/${id}`).subscribe({
