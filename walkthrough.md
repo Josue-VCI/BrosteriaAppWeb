@@ -14,13 +14,10 @@ Se han implementado y verificado con éxito las mejoras de seguridad, estabilida
 
 ---
 
-## 🌐 2. Tolerancia a Fallos en el Carrito de la Página Pública
+## 🌐 2. Carrito de la Página Pública
 - **Archivo**: [index.html](file:///D:/Proyecto_Brosteria/pagina_web/index.html)
 - **Detalle**:
-  - Anteriormente, al presionar "Pedir por WhatsApp", el carrito se limpiaba instantáneamente en `localStorage`. Si la redirección fallaba (por ejemplo, si el navegador bloqueaba las ventanas emergentes o WhatsApp Web tardaba en cargar), el cliente perdía el pedido.
-  - **Nueva lógica**: Al hacer clic en enviar, el modal se transforma en una pantalla de confirmación/redirección amigable que indica que se está abriendo WhatsApp.
-  - Si no se abre automáticamente, se ofrece un botón verde destacado de **"Abrir WhatsApp"** y un cuadro para copiar el texto del pedido.
-  - Solo se limpia el carrito cuando el usuario confirma el éxito de la operación haciendo clic en **"Limpiar Carrito y Volver"**.
+  - Se mantuvo la redirección directa con un solo click a WhatsApp al momento del checkout (limpiando el carrito y cerrando el modal de forma automática e inmediata), respetando la preferencia del usuario por un flujo ágil.
 
 ---
 
