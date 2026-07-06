@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,8 @@ import { WORLD_CUP_TEMPLATE, COMBO_PROMO_TEMPLATE, WEEKEND_PROMO_TEMPLATE } from
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
 import { Cliente } from '../../models/interfaces';
+import { Subscription } from 'rxjs';
+import { AppLifecycleService } from '../../services/app-lifecycle.service';
 
 @Component({
     selector: 'app-clientes',
@@ -13,7 +15,7 @@ import { Cliente } from '../../models/interfaces';
     templateUrl: './clientes.component.html',
     styleUrls: ['./clientes.component.css']
 })
-export class ClientesComponent implements OnInit {
+export class ClientesComponent implements OnInit, OnDestroy {
   clientes: Cliente[] = [];
   clientesFiltrados: Cliente[] = [];
   clientesPaginados: any[] = [];
@@ -67,12 +69,22 @@ export class ClientesComponent implements OnInit {
   };
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/clientes`;
+  private lifecycleSubscription?: Subscription;
 
-  constructor(private http: HttpClient, private toastService: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private toastService: ToastService,
+    private appLifecycle: AppLifecycleService
+  ) {}
 
   ngOnInit() {
     this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
     this.cargarClientes();
+    this.lifecycleSubscription = this.appLifecycle.refresh$.subscribe(() => this.cargarClientes());
+  }
+
+  ngOnDestroy() {
+    this.lifecycleSubscription?.unsubscribe();
   }
 
   cargarClientes() {

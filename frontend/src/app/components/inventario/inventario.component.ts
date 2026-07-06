@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
 import { Insumo } from '../../models/interfaces';
+import { Subscription } from 'rxjs';
+import { AppLifecycleService } from '../../services/app-lifecycle.service';
 
 @Component({
     selector: 'app-inventario',
@@ -12,7 +14,7 @@ import { Insumo } from '../../models/interfaces';
     templateUrl: './inventario.component.html',
     styleUrls: ['./inventario.component.css']
 })
-export class InventarioComponent implements OnInit {
+export class InventarioComponent implements OnInit, OnDestroy {
   insumos: Insumo[] = [];
   esAdmin = false;
   
@@ -42,12 +44,22 @@ export class InventarioComponent implements OnInit {
   };
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/insumos`;
+  private lifecycleSubscription?: Subscription;
 
-  constructor(private http: HttpClient, private toastService: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private toastService: ToastService,
+    private appLifecycle: AppLifecycleService
+  ) {}
 
   ngOnInit() {
     this.esAdmin = localStorage.getItem('brosteria_role') === 'ADMIN';
     this.cargarInsumos();
+    this.lifecycleSubscription = this.appLifecycle.refresh$.subscribe(() => this.cargarInsumos());
+  }
+
+  ngOnDestroy() {
+    this.lifecycleSubscription?.unsubscribe();
   }
 
   cargarInsumos() {

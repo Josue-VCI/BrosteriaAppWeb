@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { API_BASE_URL } from '../../config';
+import { Subscription } from 'rxjs';
+import { AppLifecycleService } from '../../services/app-lifecycle.service';
 
 @Component({
     selector: 'app-dashboard',
@@ -10,7 +12,7 @@ import { API_BASE_URL } from '../../config';
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   resumen: any = { ventasTotales: 0, totalPedidos: 0, completados: 0, cancelados: 0 };
   insumosCriticos: any[] = [];
   pedidosRecientes: any[] = [];
@@ -18,10 +20,22 @@ export class DashboardComponent implements OnInit {
   // Ordenacion
   columnaOrden = '';
   ordenAscendente = true;
+  private lifecycleSubscription?: Subscription;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private appLifecycle: AppLifecycleService) {}
 
   ngOnInit() {
+    this.cargarResumen();
+    this.cargarInventarioCritico();
+    this.cargarPedidosRecientes();
+    this.lifecycleSubscription = this.appLifecycle.refresh$.subscribe(() => this.actualizarDatos());
+  }
+
+  ngOnDestroy() {
+    this.lifecycleSubscription?.unsubscribe();
+  }
+
+  private actualizarDatos() {
     this.cargarResumen();
     this.cargarInventarioCritico();
     this.cargarPedidosRecientes();

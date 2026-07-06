@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
+import { Subscription } from 'rxjs';
+import { AppLifecycleService } from '../../services/app-lifecycle.service';
 
 Chart.register(...registerables);
 
@@ -15,7 +17,7 @@ Chart.register(...registerables);
     templateUrl: './reportes.component.html',
     styleUrls: ['./reportes.component.css']
 })
-export class ReportesComponent implements OnInit {
+export class ReportesComponent implements OnInit, OnDestroy {
   resumen: any = { ventasTotales: 0, totalPedidos: 0, completados: 0, cancelados: 0 };
   filtroRango = 'trimestre'; // semana, mes, trimestre
   tipoPedido = ''; // vacio, delivery, pickup
@@ -29,8 +31,14 @@ export class ReportesComponent implements OnInit {
   topProductos: any[] = [];
 
   private apiBaseUrl = `${API_BASE_URL}/api/v1/reportes`;
+  private lifecycleSubscription?: Subscription;
 
-  constructor(private http: HttpClient, private router: Router, private toastService: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private toastService: ToastService,
+    private appLifecycle: AppLifecycleService
+  ) {}
 
   ngOnInit(): void {
     if (localStorage.getItem('brosteria_role') !== 'ADMIN') {
@@ -38,6 +46,15 @@ export class ReportesComponent implements OnInit {
       return;
     }
     this.aplicarFiltros();
+    this.lifecycleSubscription = this.appLifecycle.refresh$.subscribe(() => this.aplicarFiltros());
+  }
+
+  ngOnDestroy(): void {
+    this.lifecycleSubscription?.unsubscribe();
+    this.ventasChartRef?.destroy();
+    this.pagosChartRef?.destroy();
+    this.horasChartRef?.destroy();
+    this.distritosChartRef?.destroy();
   }
 
   aplicarFiltros() {

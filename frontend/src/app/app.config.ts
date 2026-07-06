@@ -42,11 +42,14 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       const status = error.status;
-      if (status === 401 || status === 403) {
+      if (status === 401) {
         localStorage.removeItem('brosteria_token');
         localStorage.removeItem('brosteria_username');
         localStorage.removeItem('brosteria_role');
+        toastService.warning('Tu sesion expiro. Inicia sesion nuevamente.');
         router.navigate(['/login']);
+      } else if (status === 403) {
+        toastService.warning('Tu usuario no tiene permiso para realizar esta accion.');
       } else if (status === 0) {
         toastService.warning('Error de conexion con el servidor.');
       } else if (status >= 500) {

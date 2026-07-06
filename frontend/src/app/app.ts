@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { ToastService, ToastMessage } from './services/toast.service';
 import { Subscription } from 'rxjs';
+import { AppLifecycleService } from './services/app-lifecycle.service';
 
 @Component({
     selector: 'app-root',
@@ -12,6 +13,7 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./app.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
+  private static readonly INACTIVIDAD_MAXIMA_MS = 12 * 60 * 60 * 1000;
   mostrarSidebar = false;
   sidebarAbierto = false;
   usuarioNombre = 'Administrador (Demo)';
@@ -19,10 +21,19 @@ export class AppComponent implements OnInit, OnDestroy {
 
   toasts: ToastMessage[] = [];
   private toastSubscription!: Subscription;
+  private connectionSubscription!: Subscription;
   private timeoutId: any;
+  private reconnectTimeoutId: any;
   private eventListeners: { name: string; handler: any }[] = [];
+  sinConexion = !navigator.onLine;
+  reconectando = false;
+  private estuvoSinConexion = !navigator.onLine;
 
-  constructor(private router: Router, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private toastService: ToastService,
+    private appLifecycle: AppLifecycleService
+  ) {}
 
   toggleSidebar() {
     this.sidebarAbierto = !this.sidebarAbierto;
@@ -46,6 +57,21 @@ export class AppComponent implements OnInit, OnDestroy {
       }, toast.duration || 4000);
     });
 
+    this.connectionSubscription = this.appLifecycle.online$.subscribe(online => {
+      this.sinConexion = !online;
+      if (!online) {
+        this.estuvoSinConexion = true;
+        this.reconectando = false;
+        return;
+      }
+      if (this.estuvoSinConexion) {
+        this.estuvoSinConexion = false;
+        this.reconectando = true;
+        clearTimeout(this.reconnectTimeoutId);
+        this.reconnectTimeoutId = setTimeout(() => this.reconectando = false, 4000);
+      }
+    });
+
     // Inicializar tracker de inactividad
     this.iniciarTrackerInactividad();
   }
@@ -54,8 +80,14 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.toastSubscription) {
       this.toastSubscription.unsubscribe();
     }
+    if (this.connectionSubscription) {
+      this.connectionSubscription.unsubscribe();
+    }
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
+    }
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
     }
     // Remover event listeners
     this.eventListeners.forEach(el => {
@@ -81,7 +113,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  // Tracker de Inactividad (5 Minutos)
+  // Tracker de inactividad para una jornada completa.
   private iniciarTrackerInactividad() {
     const handler = () => this.reiniciarTimerInactividad();
     const eventos = ['mousemove', 'click', 'keypress', 'scroll', 'touchstart'];
@@ -102,12 +134,12 @@ export class AppComponent implements OnInit, OnDestroy {
     if (localStorage.getItem('brosteria_token')) {
       this.timeoutId = setTimeout(() => {
         this.logoutPorInactividad();
-      }, 5 * 60 * 1000); // 5 minutos
+      }, AppComponent.INACTIVIDAD_MAXIMA_MS);
     }
   }
 
   private logoutPorInactividad() {
     this.logout();
-    this.toastService.warning('Tu sesion ha expirado por inactividad de 5 minutos.', 8000);
+    this.toastService.warning('Tu sesion ha expirado despues de 12 horas sin actividad.', 8000);
   }
 }

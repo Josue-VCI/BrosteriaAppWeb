@@ -207,3 +207,22 @@
     padding: 20px;
   }
 }
+
+.connection-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  z-index: 1000;
+  max-width: calc(100vw - 24px);
+  padding: 10px 14px;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  transform: translateX(-50%);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.connection-banner.offline { background: #b91c1c; }
+.connection-banner.reconnecting { background: #087f3e; }

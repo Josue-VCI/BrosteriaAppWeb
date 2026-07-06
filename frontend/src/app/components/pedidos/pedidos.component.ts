@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { API_BASE_URL } from '../../config';
 import { ToastService } from '../../services/toast.service';
 import { Pedido, Producto } from '../../models/interfaces';
+import { Subscription } from 'rxjs';
+import { AppLifecycleService } from '../../services/app-lifecycle.service';
 
 @Component({
     selector: 'app-pedidos',
@@ -33,6 +35,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
   mostrarDatosCliente = false;
   private telefonoBusquedaTimeout: ReturnType<typeof setTimeout> | null = null;
   private secuenciaBusquedaCliente = 0;
+  private lifecycleSubscription?: Subscription;
+  private connectionSubscription?: Subscription;
   pedidosEnProgreso = new Set<number | null | undefined>();
   pagosEnProgreso = new Set<number | null | undefined>();
   textoWhatsApp = '';
@@ -52,7 +56,11 @@ export class PedidosComponent implements OnInit, OnDestroy {
     total: 5.0
   };
 
-  constructor(private http: HttpClient, private toastService: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private toastService: ToastService,
+    private appLifecycle: AppLifecycleService
+  ) {}
 
   ngOnInit() {
     this.cargarTodosLosPedidos();
@@ -65,10 +73,26 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     // Escuchar cambios de visibilidad de pestana para ahorrar llamadas e impedir acumulacion de audio
     document.addEventListener('visibilitychange', this.onVisibilityChange);
+    this.lifecycleSubscription = this.appLifecycle.refresh$.subscribe(() => {
+      if (document.visibilityState === 'visible') {
+        this.cargarTodosLosPedidos();
+        this.cargarProductos();
+      }
+    });
+    this.connectionSubscription = this.appLifecycle.online$.subscribe(online => {
+      if (!online && this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      } else if (online && document.visibilityState === 'visible' && !this.intervalId) {
+        this.intervalId = setInterval(() => this.cargarTodosLosPedidos(), 10000);
+      }
+    });
   }
 
   ngOnDestroy() {
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.lifecycleSubscription?.unsubscribe();
+    this.connectionSubscription?.unsubscribe();
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
@@ -82,8 +106,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   onVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
-      this.cargarTodosLosPedidos();
-      if (!this.intervalId) {
+      if (navigator.onLine && !this.intervalId) {
         this.intervalId = setInterval(() => {
           this.cargarTodosLosPedidos();
         }, 10000);
