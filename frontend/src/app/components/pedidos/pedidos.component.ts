@@ -30,11 +30,13 @@ export class PedidosComponent implements OnInit, OnDestroy {
   guardandoPedido = false;
   buscandoCliente = false;
   clienteEncontrado = false;
+  mostrarDatosCliente = false;
   private telefonoBusquedaTimeout: ReturnType<typeof setTimeout> | null = null;
   private secuenciaBusquedaCliente = 0;
   pedidosEnProgreso = new Set<number | null | undefined>();
   pagosEnProgreso = new Set<number | null | undefined>();
   textoWhatsApp = '';
+  readonly cremasDisponibles = ['Mayonesa', 'Ketchup', 'Aji', 'Mostaza', 'Tartara', 'Golf'];
   
   formPedido: Pedido = {
     requestId: '',
@@ -43,7 +45,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     customerAddress: '',
     deliveryCost: 5.0,
     type: 'DELIVERY',
-    paymentMethod: 'YAPE',
+    paymentMethod: 'EFECTIVO',
     paymentStatus: 'PENDIENTE',
     status: 'PREPARANDO',
     detalles: [],
@@ -216,6 +218,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   // Logica del Parser de WhatsApp
   abrirNuevoPedido() {
     this.pedidoEditandoId = null;
+    this.mostrarDatosCliente = false;
     this.textoWhatsApp = '';
     this.formPedido = {
       requestId: this.nuevoRequestId(),
@@ -227,7 +230,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       distrito: '',
       deliveryCost: 5.0,
       type: 'DELIVERY',
-      paymentMethod: 'YAPE',
+      paymentMethod: 'EFECTIVO',
       paymentStatus: 'PENDIENTE',
       status: 'PREPARANDO',
       detalles: [] as any[],
@@ -240,6 +243,9 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   abrirEditarPedido(pedido: any) {
     this.pedidoEditandoId = pedido.id;
+    this.mostrarDatosCliente = pedido.customerPhone !== '000000000'
+      || (!!pedido.customerName && pedido.customerName !== 'Anonimo')
+      || !!pedido.customerEmail;
     this.textoWhatsApp = '';
     this.clienteEncontrado = !!pedido.clienteId;
     this.formPedido = {
@@ -252,7 +258,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       distrito: '',
       deliveryCost: Number(pedido.deliveryCost || 0),
       type: pedido.type,
-      paymentMethod: pedido.paymentMethod,
+      paymentMethod: ['EFECTIVO', 'YAPE'].includes(pedido.paymentMethod) ? pedido.paymentMethod : 'OTRO',
       paymentStatus: pedido.paymentStatus || 'PENDIENTE',
       status: pedido.status,
       detalles: (pedido.detalles || []).map((detalle: any) => ({
@@ -262,6 +268,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
         quantity: detalle.quantity,
         subtotal: Number(detalle.subtotal || 0),
         creams: detalle.creams || '',
+        extraChaufa: !!detalle.extraChaufa,
         noCoincide: false
       })),
       total: Number(pedido.total || 0)
@@ -278,6 +285,18 @@ export class PedidosComponent implements OnInit, OnDestroy {
     }
     this.mostrarModalNuevoPedido = false;
     this.pedidoEditandoId = null;
+    this.mostrarDatosCliente = false;
+  }
+
+  toggleDatosCliente() {
+    this.mostrarDatosCliente = !this.mostrarDatosCliente;
+    if (!this.mostrarDatosCliente) {
+      this.formPedido.clienteId = null;
+      this.formPedido.customerName = '';
+      this.formPedido.customerPhone = '';
+      this.formPedido.customerEmail = '';
+      this.clienteEncontrado = false;
+    }
   }
 
   buscarClientePorTelefono(telefono: string) {
@@ -350,8 +369,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
     let paymentMethod = 'EFECTIVO';
     if (parsedPaymentStr.includes('YAPE')) paymentMethod = 'YAPE';
-    else if (parsedPaymentStr.includes('PLIN')) paymentMethod = 'PLIN';
-    else if (parsedPaymentStr.includes('TARJETA')) paymentMethod = 'TARJETA';
+    else if (!parsedPaymentStr.includes('EFECTIVO')) paymentMethod = 'OTRO';
 
     // Procesar lineas de productos
     const detalles: any[] = [];
@@ -395,7 +413,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
               productoPrice: product.price,
               quantity: quantity,
               subtotal: quantity * product.price,
-              creams: creamsDeFila
+              creams: creamsDeFila,
+              extraChaufa: false
             });
           } else {
             // Producto no emparejado: se asume precio 0 y se marca para resolucion manual
@@ -406,6 +425,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
               quantity: quantity,
               subtotal: 0.0,
               creams: creamsDeFila,
+              extraChaufa: false,
               noCoincide: true
             });
           }
@@ -430,6 +450,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       total: 0.0
     };
 
+    this.mostrarDatosCliente = !!(parsedName || parsedPhone || parsedEmail);
     this.recalcularTotal();
     if (parsedPhone) {
       this.buscarClientePorTelefono(parsedPhone);
@@ -500,6 +521,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       quantity: 1,
       subtotal: 0.0,
       creams: '',
+      extraChaufa: false,
       noCoincide: true
     });
     this.recalcularTotal();
@@ -514,7 +536,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     if (detalle.quantity < 1) {
       detalle.quantity = 1;
     }
-    detalle.subtotal = detalle.quantity * (detalle.productoPrice || 0);
+    detalle.subtotal = detalle.quantity * this.precioUnitarioDetalle(detalle);
     this.recalcularTotal();
   }
 
@@ -525,6 +547,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
       detalle.productoName = '';
       detalle.productoPrice = 0.0;
       detalle.subtotal = 0.0;
+      detalle.extraChaufa = false;
       detalle.noCoincide = true;
       this.recalcularTotal();
       return;
@@ -537,7 +560,10 @@ export class PedidosComponent implements OnInit, OnDestroy {
       detalle.productoId = product.id;
       detalle.productoName = product.name;
       detalle.productoPrice = product.price;
-      detalle.subtotal = detalle.quantity * product.price;
+      if (!this.productoPermiteChaufa(product.id)) {
+        detalle.extraChaufa = false;
+      }
+      detalle.subtotal = detalle.quantity * this.precioUnitarioDetalle(detalle);
       detalle.noCoincide = false;
       this.recalcularTotal();
     }
@@ -547,6 +573,67 @@ export class PedidosComponent implements OnInit, OnDestroy {
     this.formPedido.deliveryCost = this.formPedido.type === 'PICKUP' ? 0.00 : 5.00;
     const subtotal = this.formPedido.detalles.reduce((sum: number, d: any) => sum + (d.subtotal || 0), 0);
     this.formPedido.total = subtotal + this.formPedido.deliveryCost;
+  }
+
+  get productosFrecuentes(): Producto[] {
+    const ids = [1, 3, 5, 6, 8, 11, 15, 18];
+    return ids
+      .map(id => this.productosCatalogo.find(producto => producto.id === id))
+      .filter((producto): producto is Producto => !!producto && producto.active !== false);
+  }
+
+  agregarProductoRapido(producto: Producto) {
+    this.formPedido.detalles.push({
+      productoId: producto.id,
+      productoName: producto.name,
+      productoPrice: producto.price,
+      quantity: 1,
+      subtotal: producto.price,
+      creams: '',
+      extraChaufa: false,
+      noCoincide: false
+    });
+    this.recalcularTotal();
+  }
+
+  productoPermiteChaufa(productoId: number | null): boolean {
+    return productoId !== null && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 16, 20, 28, 29, 30].includes(productoId);
+  }
+
+  productoPermiteCremas(productoId: number | null): boolean {
+    return productoId !== null && ![21, 22, 23, 24].includes(productoId);
+  }
+
+  toggleChaufa(detalle: any) {
+    if (!this.productoPermiteChaufa(detalle.productoId)) return;
+    detalle.extraChaufa = !detalle.extraChaufa;
+    detalle.subtotal = detalle.quantity * this.precioUnitarioDetalle(detalle);
+    this.recalcularTotal();
+  }
+
+  toggleCrema(detalle: any, crema: string) {
+    const seleccionadas = String(detalle.creams || '')
+      .split(',')
+      .map((valor: string) => valor.trim())
+      .filter(Boolean);
+    const indice = seleccionadas.indexOf(crema);
+    if (indice >= 0) {
+      seleccionadas.splice(indice, 1);
+    } else {
+      seleccionadas.push(crema);
+    }
+    detalle.creams = seleccionadas.join(', ');
+  }
+
+  cremaSeleccionada(detalle: any, crema: string): boolean {
+    return String(detalle.creams || '')
+      .split(',')
+      .map((valor: string) => valor.trim())
+      .includes(crema);
+  }
+
+  private precioUnitarioDetalle(detalle: any): number {
+    return Number(detalle.productoPrice || 0) + (detalle.extraChaufa ? 4 : 0);
   }
 
   guardarNuevoPedido() {
@@ -569,7 +656,8 @@ export class PedidosComponent implements OnInit, OnDestroy {
     const cleanDetalles = this.formPedido.detalles.map((d: any) => ({
       productoId: d.productoId,
       quantity: d.quantity,
-      creams: d.creams
+      creams: d.creams,
+      extraChaufa: !!d.extraChaufa
     }));
 
     let finalAddress = this.formPedido.customerAddress;
@@ -692,6 +780,17 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
   setDeliveryType(type: string) {
     this.formPedido.type = type;
+    if (type === 'PICKUP') {
+      this.formPedido.distrito = 'Surquillo';
+      this.formPedido.customerAddress = 'Retiro en local';
+    } else {
+      if (this.formPedido.customerAddress === 'Retiro en local') {
+        this.formPedido.customerAddress = '';
+      }
+      if (this.formPedido.distrito === 'Surquillo') {
+        this.formPedido.distrito = '';
+      }
+    }
     this.recalcularTotal();
   }
 }

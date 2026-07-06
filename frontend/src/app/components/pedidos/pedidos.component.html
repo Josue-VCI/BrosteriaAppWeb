@@ -52,6 +52,7 @@
               <div class="item" *ngFor="let det of pedido.detalles">
                 <span class="item-name">{{ det.quantity }}x {{ det.productoName }}</span>
                 <span class="creams-subtext" *ngIf="det.creams">Cremas: {{ det.creams }}</span>
+                <span class="chaufa-subtext" *ngIf="det.extraChaufa">Con chaufa (+ S/. 4.00 c/u)</span>
               </div>
             </div>
             
@@ -109,6 +110,7 @@
               <div class="item" *ngFor="let det of pedido.detalles">
                 <span class="item-name">{{ det.quantity }}x {{ det.productoName }}</span>
                 <span class="creams-subtext" *ngIf="det.creams">Cremas: {{ det.creams }}</span>
+                <span class="chaufa-subtext" *ngIf="det.extraChaufa">Con chaufa (+ S/. 4.00 c/u)</span>
               </div>
             </div>
 
@@ -152,9 +154,16 @@
 
       <!-- Formulario de datos del cliente (siempre visible) -->
       <div class="parsed-preview" style="margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 15px;">
-        <h4 class="preview-title" style="color: var(--secondary); margin-bottom: 12px; font-size: 15px;">DATOS DEL PEDIDO</h4>
-        
-        <div class="preview-grid">
+        <div class="form-section-toolbar">
+          <h4 class="preview-title">REGISTRO RAPIDO</h4>
+          <button type="button" class="customer-data-toggle" [class.active]="mostrarDatosCliente" (click)="toggleDatosCliente()">
+            <i class="fa-solid" [class.fa-user-plus]="!mostrarDatosCliente" [class.fa-user-check]="mostrarDatosCliente"></i>
+            {{ mostrarDatosCliente ? 'Quitar datos' : 'Anotar datos' }}
+          </button>
+        </div>
+
+        <div class="customer-data-panel" *ngIf="mostrarDatosCliente">
+          <div class="preview-grid">
           <div class="form-group">
             <label>Cliente (Nombre) (Opcional)</label>
             <input type="text" [(ngModel)]="formPedido.customerName" class="modal-input" placeholder="Nombre del cliente">
@@ -165,42 +174,38 @@
             <span class="customer-lookup-status" *ngIf="buscandoCliente">Buscando cliente...</span>
             <span class="customer-lookup-status found" *ngIf="clienteEncontrado">Cliente encontrado. Datos completados.</span>
           </div>
-        </div>
+          </div>
 
-        <div class="preview-grid" style="margin-top: 10px;">
-          <div class="form-group">
+          <div class="form-group" style="margin-top: 10px;">
             <label>Email (Opcional)</label>
             <input type="email" [(ngModel)]="formPedido.customerEmail" class="modal-input" placeholder="correo@ejemplo.com">
           </div>
-          <div class="form-group">
-            <label>Tipo de Entrega</label>
-            <div class="delivery-btn-group" style="display: flex; gap: 8px; width: 100%;">
-              <button type="button" 
-                      class="delivery-option-btn" 
-                      [class.active]="formPedido.type === 'PICKUP'" 
-                      (click)="setDeliveryType('PICKUP')"
-                      style="flex: 1; padding: 12px 10px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.03); color: var(--text-muted); font-family: var(--font-body); font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fa-solid fa-shop"></i> Retiro en local
-              </button>
-              <button type="button" 
-                      class="delivery-option-btn" 
-                      [class.active]="formPedido.type === 'DELIVERY'" 
-                      (click)="setDeliveryType('DELIVERY')"
-                      style="flex: 1; padding: 12px 10px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.03); color: var(--text-muted); font-family: var(--font-body); font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fa-solid fa-motorcycle"></i> Delivery
-              </button>
-            </div>
+        </div>
+
+        <div class="order-control-block">
+          <label>Tipo de Entrega</label>
+          <div class="choice-grid two-options">
+            <button type="button" class="choice-btn pickup" [class.active]="formPedido.type === 'PICKUP'" (click)="setDeliveryType('PICKUP')">
+              <i class="fa-solid fa-shop"></i> Recojo en local
+            </button>
+            <button type="button" class="choice-btn delivery" [class.active]="formPedido.type === 'DELIVERY'" (click)="setDeliveryType('DELIVERY')">
+              <i class="fa-solid fa-motorcycle"></i> Delivery
+            </button>
           </div>
         </div>
 
-        <div class="preview-grid" style="margin-top: 10px;">
+        <div class="pickup-location" *ngIf="formPedido.type === 'PICKUP'">
+          <i class="fa-solid fa-location-dot"></i> Recojo en Surquillo
+        </div>
+
+        <div class="preview-grid" *ngIf="formPedido.type === 'DELIVERY'">
           <div class="form-group">
-            <label>Direccion de Entrega (Opcional)</label>
-            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Direccion exacta" [disabled]="formPedido.type === 'PICKUP'">
+            <label>Direccion de Entrega</label>
+            <input type="text" [(ngModel)]="formPedido.customerAddress" class="modal-input" placeholder="Direccion exacta">
           </div>
           <div class="form-group">
-            <label>Distrito (Opcional)</label>
-            <select [(ngModel)]="formPedido.distrito" class="modal-input" [disabled]="formPedido.type === 'PICKUP'">
+            <label>Distrito</label>
+            <select [(ngModel)]="formPedido.distrito" class="modal-input">
               <option value="">-- Seleccionar --</option>
               <option value="Surquillo">Surquillo</option>
               <option value="Miraflores">Miraflores</option>
@@ -215,28 +220,47 @@
           </div>
         </div>
 
-        <div class="preview-grid" style="margin-top: 10px;">
-          <div class="form-group">
-            <label>Metodo de Pago</label>
-            <select [(ngModel)]="formPedido.paymentMethod" class="modal-input">
-              <option value="YAPE">Yape</option>
-              <option value="PLIN">Plin</option>
-              <option value="TARJETA">Tarjeta de Credito/Debito</option>
-              <option value="EFECTIVO">Efectivo</option>
-            </select>
+        <div class="order-control-block">
+          <label>Metodo de Pago</label>
+          <div class="choice-grid three-options">
+            <button type="button" class="choice-btn cash" [class.active]="formPedido.paymentMethod === 'EFECTIVO'" (click)="formPedido.paymentMethod = 'EFECTIVO'">
+              <i class="fa-solid fa-money-bill-wave"></i> Efectivo
+            </button>
+            <button type="button" class="choice-btn yape" [class.active]="formPedido.paymentMethod === 'YAPE'" (click)="formPedido.paymentMethod = 'YAPE'">
+              <i class="fa-solid fa-mobile-screen-button"></i> Yape
+            </button>
+            <button type="button" class="choice-btn other" [class.active]="formPedido.paymentMethod === 'OTRO'" (click)="formPedido.paymentMethod = 'OTRO'">
+              <i class="fa-solid fa-ellipsis"></i> Otro
+            </button>
           </div>
-          <div class="form-group">
-            <label>Estado de Pago</label>
-            <select [(ngModel)]="formPedido.paymentStatus" class="modal-input">
-              <option value="PENDIENTE">Pendiente (cobrar despues)</option>
-              <option value="PAGADO">Pagado por adelantado</option>
-            </select>
+        </div>
+
+        <div class="order-control-block">
+          <label>Estado de Pago</label>
+          <div class="choice-grid two-options">
+            <button type="button" class="choice-btn pending" [class.active]="formPedido.paymentStatus === 'PENDIENTE'" (click)="formPedido.paymentStatus = 'PENDIENTE'">
+              <i class="fa-solid fa-clock"></i> Pendiente
+            </button>
+            <button type="button" class="choice-btn paid" [class.active]="formPedido.paymentStatus === 'PAGADO'" (click)="formPedido.paymentStatus = 'PAGADO'">
+              <i class="fa-solid fa-circle-check"></i> Pagado
+            </button>
           </div>
         </div>
 
         <!-- Tabla de Productos (manual o desde WhatsApp) -->
         <div class="parsed-items-table" style="margin-top: 15px; background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;">
           <h5 style="margin: 0 0 10px 0; font-size: 13px; color: var(--text-light);">Productos Solicitados</h5>
+
+          <div class="quick-products" *ngIf="productosFrecuentes.length > 0">
+            <span class="quick-products-label">Agregar frecuente</span>
+            <div class="quick-products-grid">
+              <button type="button" *ngFor="let producto of productosFrecuentes" (click)="agregarProductoRapido(producto)">
+                <i class="fa-solid fa-plus"></i>
+                <span>{{ producto.name }}</span>
+                <strong>S/. {{ producto.price | number:'1.2-2' }}</strong>
+              </button>
+            </div>
+          </div>
           
           <div class="parsed-item-row" *ngFor="let det of formPedido.detalles; let i = index" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--glass-border);">
             
@@ -261,6 +285,20 @@
               <!-- Eliminar Fila -->
               <button type="button" (click)="eliminarFilaDetalle(i)" aria-label="Eliminar producto" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
                 <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+
+            <div class="product-options" *ngIf="det.productoId">
+              <div class="cream-options" *ngIf="productoPermiteCremas(det.productoId)">
+                <span class="option-label">Cremas</span>
+                <button type="button" *ngFor="let crema of cremasDisponibles" [class.active]="cremaSeleccionada(det, crema)" (click)="toggleCrema(det, crema)">
+                  {{ crema }}
+                </button>
+              </div>
+              <button type="button" class="chaufa-option" *ngIf="productoPermiteChaufa(det.productoId)" [class.active]="det.extraChaufa" (click)="toggleChaufa(det)">
+                <i class="fa-solid fa-bowl-rice"></i>
+                {{ det.extraChaufa ? 'Con chaufa' : 'Agregar chaufa' }}
+                <strong>+ S/. 4.00</strong>
               </button>
             </div>
 
@@ -332,6 +370,7 @@
             <div *ngFor="let det of pedido.detalles" style="display: flex; justify-content: space-between; margin-bottom: 2px;">
               <span>{{ det.quantity }}x {{ det.productoName }}</span>
               <span style="color: var(--text-muted); font-size: 11px;" *ngIf="det.creams">Cremas: {{ det.creams }}</span>
+              <span class="chaufa-subtext" *ngIf="det.extraChaufa">Con chaufa</span>
             </div>
           </div>
           <button *ngIf="pedido.paymentStatus !== 'PAGADO'" class="card-tool-btn payment" (click)="actualizarPago(pedido, 'PAGADO')" [disabled]="pagosEnProgreso.has(pedido.id)">

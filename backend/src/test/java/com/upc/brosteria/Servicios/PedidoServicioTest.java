@@ -126,6 +126,73 @@ class PedidoServicioTest {
     }
 
     @Test
+    void agregaCuatroSolesPorCadaUnidadConChaufa() {
+        ProductoEntidad producto = new ProductoEntidad();
+        producto.setId(1L);
+        producto.setName("Combo El Hincha");
+        producto.setPrice(new BigDecimal("15.00"));
+
+        when(clienteRepositorio.findFirstByPhoneOrderByIdAsc("000000000")).thenReturn(Optional.empty());
+        when(clienteRepositorio.save(any(ClienteEntidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(productoRepositorio.findById(1L)).thenReturn(Optional.of(producto));
+        when(pedidoRepositorio.save(any(PedidoEntidad.class))).thenAnswer(invocation -> {
+            PedidoEntidad pedido = invocation.getArgument(0);
+            pedido.setId(45L);
+            return pedido;
+        });
+        when(detallePedidoRepositorio.findByPedidoEntidadId(45L)).thenReturn(List.of());
+        when(modelMapper.map(any(PedidoEntidad.class), eq(PedidoDTO.class))).thenReturn(new PedidoDTO());
+        mockEstadisticasCliente();
+
+        DetallePedidoDTO detalle = new DetallePedidoDTO();
+        detalle.setProductoId(1L);
+        detalle.setQuantity(2);
+        detalle.setExtraChaufa(true);
+
+        PedidoDTO pedido = new PedidoDTO();
+        pedido.setType("PICKUP");
+        pedido.setPaymentMethod("EFECTIVO");
+        pedido.setDetalles(List.of(detalle));
+
+        pedidoServicio.crear(pedido);
+
+        ArgumentCaptor<PedidoEntidad> pedidoCaptor = ArgumentCaptor.forClass(PedidoEntidad.class);
+        verify(pedidoRepositorio).save(pedidoCaptor.capture());
+        assertEquals(new BigDecimal("38.00"), pedidoCaptor.getValue().getTotal());
+
+        ArgumentCaptor<com.upc.brosteria.Entidades.DetallePedidoEntidad> detalleCaptor =
+                ArgumentCaptor.forClass(com.upc.brosteria.Entidades.DetallePedidoEntidad.class);
+        verify(detallePedidoRepositorio).save(detalleCaptor.capture());
+        assertEquals(new BigDecimal("38.00"), detalleCaptor.getValue().getSubtotal());
+        assertEquals(Boolean.TRUE, detalleCaptor.getValue().getExtraChaufa());
+    }
+
+    @Test
+    void rechazaChaufaEnProductoNoElegible() {
+        ProductoEntidad producto = new ProductoEntidad();
+        producto.setId(11L);
+        producto.setName("Salchipapa Clasica");
+        producto.setPrice(new BigDecimal("10.00"));
+
+        when(clienteRepositorio.findFirstByPhoneOrderByIdAsc("000000000")).thenReturn(Optional.empty());
+        when(clienteRepositorio.save(any(ClienteEntidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(productoRepositorio.findById(11L)).thenReturn(Optional.of(producto));
+
+        DetallePedidoDTO detalle = new DetallePedidoDTO();
+        detalle.setProductoId(11L);
+        detalle.setQuantity(1);
+        detalle.setExtraChaufa(true);
+
+        PedidoDTO pedido = new PedidoDTO();
+        pedido.setType("PICKUP");
+        pedido.setPaymentMethod("EFECTIVO");
+        pedido.setDetalles(List.of(detalle));
+
+        assertThrows(IllegalArgumentException.class, () -> pedidoServicio.crear(pedido));
+        verify(pedidoRepositorio, never()).save(any(PedidoEntidad.class));
+    }
+
+    @Test
     void falloDeInventarioNoSeOculta() {
         ProductoEntidad producto = new ProductoEntidad();
         producto.setId(1L);

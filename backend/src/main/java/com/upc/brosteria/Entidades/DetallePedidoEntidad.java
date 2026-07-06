@@ -29,4 +29,7 @@ public class DetallePedidoEntidad {
 
     @Column
     private String creams; // Lista de cremas seleccionadas por ejemplo: "Mayonesa, Aji, Ketchup"
+
+    @Column(name = "extra_chaufa", nullable = false)
+    private Boolean extraChaufa = false;
 }

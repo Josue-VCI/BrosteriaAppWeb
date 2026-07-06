@@ -159,7 +159,8 @@ public class ReporteControlador {
 
         for (PedidoEntidad pedido : pedidos) {
             String productos = detallesPorPedido.getOrDefault(pedido.getId(), List.of()).stream()
-                    .map(d -> d.getQuantity() + "x " + d.getProductoEntidad().getName())
+                    .map(d -> d.getQuantity() + "x " + d.getProductoEntidad().getName()
+                            + (Boolean.TRUE.equals(d.getExtraChaufa()) ? " + Chaufa" : ""))
                     .collect(Collectors.joining(" | "));
 
             String fechaPagoStr = pedido.getPaidAt() != null

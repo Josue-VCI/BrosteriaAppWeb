@@ -22,4 +22,5 @@ public class DetallePedidoDTO {
 
     private BigDecimal subtotal;
     private String creams;
+    private Boolean extraChaufa;
 }

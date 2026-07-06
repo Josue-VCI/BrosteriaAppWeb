@@ -40,6 +40,7 @@ export interface DetallePedido {
   quantity: number;
   subtotal?: number;
   creams?: any;
+  extraChaufa?: boolean;
   noCoincide?: boolean;
 }
 
@@ -51,7 +52,7 @@ export interface Pedido {
   customerAddress: string;
   deliveryCost: number;
   type: string; // 'DELIVERY', 'PICKUP'
-  paymentMethod: string; // 'YAPE', 'PLIN', 'EFECTIVO', 'TARJETA'
+  paymentMethod: string; // 'YAPE', 'EFECTIVO', 'OTRO'
   paymentStatus: string; // 'PENDIENTE', 'PAGADO'
   status: string; // 'PREPARANDO', 'ENVIADO', 'ENTREGADO', 'CANCELADO'
   detalles: DetallePedido[];

@@ -34,6 +34,9 @@ public class PedidoServicio {
     private static final java.util.Set<String> ESTADOS_VALIDOS = java.util.Set.of(
             "PENDIENTE", "PREPARANDO", "ENVIADO", "ENTREGADO", "CANCELADO");
     private static final java.util.Set<String> ESTADOS_PAGO_VALIDOS = java.util.Set.of("PENDIENTE", "PAGADO");
+    private static final BigDecimal PRECIO_EXTRA_CHAUFA = new BigDecimal("4.00");
+    private static final java.util.Set<Long> PRODUCTOS_CON_CHAUFA = java.util.Set.of(
+            1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 14L, 16L, 20L, 28L, 29L, 30L);
 
     @Autowired
     private PedidoRepositorio pedidoRepositorio;
@@ -178,11 +181,14 @@ public class PedidoServicio {
             det.setPedidoEntidad(pedido);
             det.setProductoEntidad(prod);
             det.setQuantity(detDTO.getQuantity());
-            BigDecimal sub = prod.getPrice()
+            boolean extraChaufa = validarExtraChaufa(prod.getId(), detDTO.getExtraChaufa());
+            BigDecimal precioUnitario = prod.getPrice().add(extraChaufa ? PRECIO_EXTRA_CHAUFA : BigDecimal.ZERO);
+            BigDecimal sub = precioUnitario
                     .multiply(BigDecimal.valueOf(detDTO.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP);
             det.setSubtotal(sub);
             det.setCreams(detDTO.getCreams());
+            det.setExtraChaufa(extraChaufa);
             subtotal = subtotal.add(sub);
             detalles.add(det);
 
@@ -299,11 +305,14 @@ public class PedidoServicio {
             detalle.setPedidoEntidad(pedido);
             detalle.setProductoEntidad(producto);
             detalle.setQuantity(detDTO.getQuantity());
-            BigDecimal importe = producto.getPrice()
+            boolean extraChaufa = validarExtraChaufa(producto.getId(), detDTO.getExtraChaufa());
+            BigDecimal precioUnitario = producto.getPrice().add(extraChaufa ? PRECIO_EXTRA_CHAUFA : BigDecimal.ZERO);
+            BigDecimal importe = precioUnitario
                     .multiply(BigDecimal.valueOf(detDTO.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP);
             detalle.setSubtotal(importe);
             detalle.setCreams(detDTO.getCreams());
+            detalle.setExtraChaufa(extraChaufa);
             subtotal = subtotal.add(importe);
             detallesNuevos.add(detalle);
         }
@@ -470,6 +479,14 @@ public class PedidoServicio {
         return normalizado;
     }
 
+    private boolean validarExtraChaufa(Long productoId, Boolean solicitado) {
+        boolean extraChaufa = Boolean.TRUE.equals(solicitado);
+        if (extraChaufa && !PRODUCTOS_CON_CHAUFA.contains(productoId)) {
+            throw new IllegalArgumentException("El extra de chaufa no esta disponible para este producto");
+        }
+        return extraChaufa;
+    }
+
     private String textoConDefault(String valor, String valorDefault) {
         return valor == null || valor.isBlank() ? valorDefault : valor.trim();
     }
@@ -536,10 +553,12 @@ public class PedidoServicio {
             String cremas = det.getCreams() == null || det.getCreams().isBlank()
                     ? ""
                     : " - Cremas: " + HtmlUtils.htmlEscape(det.getCreams());
-            itemsHtml.append("<li>%d x %s%s</li>"
+            String chaufa = Boolean.TRUE.equals(det.getExtraChaufa()) ? " - Con chaufa" : "";
+            itemsHtml.append("<li>%d x %s%s%s</li>"
                     .formatted(det.getQuantity(),
                             HtmlUtils.htmlEscape(det.getProductoEntidad().getName()),
-                            cremas));
+                            cremas,
+                            chaufa));
         }
 
         String html = """
@@ -579,6 +598,7 @@ public class PedidoServicio {
             dDto.setQuantity(d.getQuantity());
             dDto.setSubtotal(d.getSubtotal());
             dDto.setCreams(d.getCreams());
+            dDto.setExtraChaufa(Boolean.TRUE.equals(d.getExtraChaufa()));
             return dDto;
         }).collect(Collectors.toList()));
         return dto;
