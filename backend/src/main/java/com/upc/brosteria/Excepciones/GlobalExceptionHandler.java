@@ -28,8 +28,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        log.error("Error al procesar la solicitud", ex);
         Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
+        response.put("error", "No se pudo procesar la solicitud");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

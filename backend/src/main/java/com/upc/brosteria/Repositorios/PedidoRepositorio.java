@@ -84,14 +84,14 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     int vincularPedidosPorTelefono(@Param("clienteId") Long clienteId, @Param("telefono") String telefono);
 
     @Query(value = """
-            SELECT (SELECT COALESCE(SUM(p2.total), 0) FROM pedidos p2 WHERE p2.payment_status = 'PAGADO' AND p2.paid_at BETWEEN :inicio AND :fin AND (:tipo = '' OR UPPER(p2.type) = UPPER(:tipo)) AND (:dia = 0 OR EXTRACT(ISODOW FROM p2.paid_at - INTERVAL '5 hours') = :dia)) AS "ventasTotales",
+            SELECT (SELECT COALESCE(SUM(p2.total), 0) FROM pedidos p2 WHERE p2.payment_status = 'PAGADO' AND p2.paid_at BETWEEN :inicio AND :fin AND (CAST(:tipo AS text) = '' OR UPPER(p2.type) = UPPER(CAST(:tipo AS text))) AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM p2.paid_at - INTERVAL '5 hours') = CAST(:dia AS integer))) AS "ventasTotales",
                    COUNT(*) AS "totalPedidos",
                    COUNT(*) FILTER (WHERE status = 'ENTREGADO') AS completados,
                    COUNT(*) FILTER (WHERE status = 'CANCELADO') AS cancelados
             FROM pedidos
             WHERE order_date BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = CAST(:dia AS integer))
             """, nativeQuery = true)
     ResumenReporte obtenerResumenReporte(@Param("inicio") LocalDateTime inicio,
                                           @Param("fin") LocalDateTime fin,
@@ -103,8 +103,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
                    SUM(total) AS monto
             FROM pedidos
             WHERE payment_status = 'PAGADO' AND paid_at BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = CAST(:dia AS integer))
             GROUP BY 1 ORDER BY 1
             """, nativeQuery = true)
     List<EtiquetaMonto> ventasPorFecha(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
@@ -114,8 +114,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
             SELECT payment_method AS etiqueta, COUNT(*) AS cantidad
             FROM pedidos
             WHERE payment_status = 'PAGADO' AND paid_at BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = CAST(:dia AS integer))
             GROUP BY payment_method
             """, nativeQuery = true)
     List<EtiquetaConteo> pagosReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
@@ -125,8 +125,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
             SELECT EXTRACT(HOUR FROM order_date - INTERVAL '5 hours')::int AS hora, COUNT(*) AS cantidad
             FROM pedidos
             WHERE status = 'ENTREGADO' AND order_date BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = CAST(:dia AS integer))
             GROUP BY 1 ORDER BY 1
             """, nativeQuery = true)
     List<HoraConteo> pedidosPorHora(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
@@ -148,8 +148,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
                    COUNT(*) AS cantidad
             FROM pedidos
             WHERE status = 'ENTREGADO' AND order_date BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = CAST(:dia AS integer))
             GROUP BY 1 ORDER BY cantidad DESC
             """, nativeQuery = true)
     List<EtiquetaConteo> distritosReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
@@ -161,8 +161,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
             JOIN pedidos p ON p.id = dp.pedido_id
             JOIN productos pr ON pr.id = dp.producto_id
             WHERE p.status = 'ENTREGADO' AND p.order_date BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(p.type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM p.order_date - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(p.type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM p.order_date - INTERVAL '5 hours') = CAST(:dia AS integer))
             GROUP BY pr.name ORDER BY cantidad DESC LIMIT 5
             """, nativeQuery = true)
     List<ProductoConteo> topProductosReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
@@ -171,8 +171,8 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
     @Query(value = """
             SELECT * FROM pedidos
             WHERE order_date BETWEEN :inicio AND :fin
-              AND (:tipo = '' OR UPPER(type) = UPPER(:tipo))
-              AND (:dia = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = :dia)
+              AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
+              AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM order_date - INTERVAL '5 hours') = CAST(:dia AS integer))
             ORDER BY order_date DESC
             """, nativeQuery = true)
     List<PedidoEntidad> buscarParaReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,

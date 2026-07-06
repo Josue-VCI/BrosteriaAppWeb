@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
@@ -80,7 +80,11 @@ export class ReportesComponent implements OnInit {
   }
 
   cargarDatosGrafico() {
-    this.http.get<any>(`${this.apiBaseUrl}/datos-grafico?filtroRango=${this.filtroRango}&diaSemana=${this.diaSemana}&tipoPedido=${this.tipoPedido}`).subscribe({
+    let params = new HttpParams().set('filtroRango', this.filtroRango);
+    if (this.diaSemana) params = params.set('diaSemana', this.diaSemana);
+    if (this.tipoPedido) params = params.set('tipoPedido', this.tipoPedido);
+
+    this.http.get<any>(`${this.apiBaseUrl}/datos-grafico`, { params }).subscribe({
       next: (data) => {
         this.renderizarGraficoVentas(data.fechas, data.montos);
         this.renderizarGraficoPagos(data.metodosPago);
@@ -88,7 +92,10 @@ export class ReportesComponent implements OnInit {
         this.renderizarGraficoDistritos(data.distritos || {});
         this.topProductos = data.topProductos || [];
       },
-      error: (err) => console.error('Error al cargar datos del grafico', err)
+      error: (err) => {
+        console.error('Error al cargar datos del grafico', err);
+        this.toastService.error(err?.error?.error || 'No se pudieron cargar los graficos.');
+      }
     });
   }
 

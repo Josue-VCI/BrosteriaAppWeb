@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -30,11 +32,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 @RestController
 @RequestMapping("/api/v1/reportes")
 public class ReporteControlador {
 
+    private static final Logger log = LoggerFactory.getLogger(ReporteControlador.class);
     private static final LocalDateTime INICIO_HISTORICO = LocalDateTime.of(2000, 1, 1, 0, 0);
     private static final ZoneId ZONA_LIMA = ZoneId.of("America/Lima");
 
@@ -80,24 +84,36 @@ public class ReporteControlador {
         String tipo = tipo(tipoPedido);
         int dia = dia(diaSemana);
 
-        List<PedidoRepositorio.EtiquetaMonto> ventas = pedidoRepositorio.ventasPorFecha(inicio, fin, tipo, dia);
-        Map<String, Long> pagos = pedidoRepositorio.pagosReporte(inicio, fin, tipo, dia).stream()
+        List<PedidoRepositorio.EtiquetaMonto> ventas = consultaSegura(
+                "ventas por fecha", () -> pedidoRepositorio.ventasPorFecha(inicio, fin, tipo, dia), List.of());
+        Map<String, Long> pagos = consultaSegura(
+                "metodos de pago", () -> pedidoRepositorio.pagosReporte(inicio, fin, tipo, dia), List.<PedidoRepositorio.EtiquetaConteo>of()).stream()
                 .collect(Collectors.toMap(PedidoRepositorio.EtiquetaConteo::getEtiqueta,
                         PedidoRepositorio.EtiquetaConteo::getCantidad,
                         (a, b) -> a,
                         LinkedHashMap::new));
 
         int[] pedidosPorHora = new int[24];
-        pedidoRepositorio.pedidosPorHora(inicio, fin, tipo, dia)
-                .forEach(item -> pedidosPorHora[item.getHora()] = item.getCantidad().intValue());
+        consultaSegura("pedidos por hora",
+                () -> pedidoRepositorio.pedidosPorHora(inicio, fin, tipo, dia),
+                List.<PedidoRepositorio.HoraConteo>of())
+                .forEach(item -> {
+                    if (item.getHora() != null && item.getHora() >= 0 && item.getHora() < 24) {
+                        pedidosPorHora[item.getHora()] = item.getCantidad().intValue();
+                    }
+                });
 
-        Map<String, Long> distritos = pedidoRepositorio.distritosReporte(inicio, fin, tipo, dia).stream()
+        Map<String, Long> distritos = consultaSegura(
+                "pedidos por distrito", () -> pedidoRepositorio.distritosReporte(inicio, fin, tipo, dia),
+                List.<PedidoRepositorio.EtiquetaConteo>of()).stream()
                 .collect(Collectors.toMap(PedidoRepositorio.EtiquetaConteo::getEtiqueta,
                         PedidoRepositorio.EtiquetaConteo::getCantidad,
                         (a, b) -> a,
                         LinkedHashMap::new));
 
-        List<Map<String, Object>> topProductos = pedidoRepositorio.topProductosReporte(inicio, fin, tipo, dia).stream()
+        List<Map<String, Object>> topProductos = consultaSegura(
+                "top de productos", () -> pedidoRepositorio.topProductosReporte(inicio, fin, tipo, dia),
+                List.<PedidoRepositorio.ProductoConteo>of()).stream()
                 .map(item -> Map.<String, Object>of("nombre", item.getNombre(), "cantidad", item.getCantidad()))
                 .toList();
 
@@ -214,6 +230,15 @@ public class ReporteControlador {
             return DayOfWeek.valueOf(valor.trim().toUpperCase(Locale.ROOT)).getValue();
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("El dia de semana no es valido");
+        }
+    }
+
+    private <T> T consultaSegura(String nombre, Supplier<T> consulta, T valorDefault) {
+        try {
+            return consulta.get();
+        } catch (RuntimeException ex) {
+            log.error("No se pudo cargar {} del reporte", nombre, ex);
+            return valorDefault;
         }
     }
 
