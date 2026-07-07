@@ -111,12 +111,17 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
                                        @Param("tipo") String tipo, @Param("dia") int dia);
 
     @Query(value = """
-            SELECT payment_method AS etiqueta, COUNT(*) AS cantidad
+            SELECT CASE
+                     WHEN UPPER(payment_method) = 'EFECTIVO' THEN 'EFECTIVO'
+                     WHEN UPPER(payment_method) = 'YAPE' THEN 'YAPE'
+                     ELSE 'OTRO'
+                   END AS etiqueta,
+                   COUNT(*) AS cantidad
             FROM pedidos
             WHERE payment_status = 'PAGADO' AND paid_at BETWEEN :inicio AND :fin
               AND (CAST(:tipo AS text) = '' OR UPPER(type) = UPPER(CAST(:tipo AS text)))
               AND (CAST(:dia AS integer) = 0 OR EXTRACT(ISODOW FROM paid_at - INTERVAL '5 hours') = CAST(:dia AS integer))
-            GROUP BY payment_method
+            GROUP BY 1
             """, nativeQuery = true)
     List<EtiquetaConteo> pagosReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
                                       @Param("tipo") String tipo, @Param("dia") int dia);
@@ -167,6 +172,16 @@ public interface PedidoRepositorio extends JpaRepository<PedidoEntidad, Long> {
             """, nativeQuery = true)
     List<ProductoConteo> topProductosReporte(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin,
                                              @Param("tipo") String tipo, @Param("dia") int dia);
+
+    @Query(value = """
+            SELECT pr.name AS nombre, SUM(dp.quantity)::bigint AS cantidad
+            FROM detalle_pedidos dp
+            JOIN pedidos p ON p.id = dp.pedido_id
+            JOIN productos pr ON pr.id = dp.producto_id
+            WHERE p.status = 'ENTREGADO'
+            GROUP BY pr.name ORDER BY cantidad DESC LIMIT 5
+            """, nativeQuery = true)
+    List<ProductoConteo> topProductosHistorico();
 
     @Query(value = """
             SELECT * FROM pedidos

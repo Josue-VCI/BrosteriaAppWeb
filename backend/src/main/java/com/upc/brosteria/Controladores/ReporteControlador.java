@@ -86,12 +86,16 @@ public class ReporteControlador {
 
         List<PedidoRepositorio.EtiquetaMonto> ventas = consultaSegura(
                 "ventas por fecha", () -> pedidoRepositorio.ventasPorFecha(inicio, fin, tipo, dia), List.of());
-        Map<String, Long> pagos = consultaSegura(
+        Map<String, Long> pagosConsultados = consultaSegura(
                 "metodos de pago", () -> pedidoRepositorio.pagosReporte(inicio, fin, tipo, dia), List.<PedidoRepositorio.EtiquetaConteo>of()).stream()
                 .collect(Collectors.toMap(PedidoRepositorio.EtiquetaConteo::getEtiqueta,
                         PedidoRepositorio.EtiquetaConteo::getCantidad,
                         (a, b) -> a,
                         LinkedHashMap::new));
+        Map<String, Long> pagos = new LinkedHashMap<>();
+        pagos.put("EFECTIVO", pagosConsultados.getOrDefault("EFECTIVO", 0L));
+        pagos.put("YAPE", pagosConsultados.getOrDefault("YAPE", 0L));
+        pagos.put("OTRO", pagosConsultados.getOrDefault("OTRO", 0L));
 
         int[] pedidosPorHora = new int[24];
         consultaSegura("pedidos por hora",
@@ -111,9 +115,15 @@ public class ReporteControlador {
                         (a, b) -> a,
                         LinkedHashMap::new));
 
-        List<Map<String, Object>> topProductos = consultaSegura(
+        List<PedidoRepositorio.ProductoConteo> productosConsultados = consultaSegura(
                 "top de productos", () -> pedidoRepositorio.topProductosReporte(inicio, fin, tipo, dia),
-                List.<PedidoRepositorio.ProductoConteo>of()).stream()
+                List.<PedidoRepositorio.ProductoConteo>of());
+        if (productosConsultados.isEmpty()) {
+            productosConsultados = consultaSegura(
+                    "top historico de productos", pedidoRepositorio::topProductosHistorico,
+                    List.<PedidoRepositorio.ProductoConteo>of());
+        }
+        List<Map<String, Object>> topProductos = productosConsultados.stream()
                 .map(item -> Map.<String, Object>of("nombre", item.getNombre(), "cantidad", item.getCantidad()))
                 .toList();
 

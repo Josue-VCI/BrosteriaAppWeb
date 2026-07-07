@@ -93,7 +93,14 @@
     <!-- Alertas de Inventario -->
     <div class="glass-card alerts-section">
       <h3>Alertas de Inventario Critico</h3>
-      <div class="alerts-list" *ngIf="insumosCriticos.length > 0; else noAlerts">
+      <div class="no-alerts-card" *ngIf="cargandoInventario">
+        <span><i class="fa-solid fa-rotate fa-spin"></i> Actualizando inventario...</span>
+      </div>
+      <div class="no-alerts-card" *ngIf="!cargandoInventario && errorInventario">
+        <span><i class="fa-solid fa-triangle-exclamation"></i> No se pudo verificar el stock.</span>
+        <button type="button" class="brand-btn" (click)="cargarInventarioCritico()">Reintentar</button>
+      </div>
+      <div class="alerts-list" *ngIf="!cargandoInventario && !errorInventario && insumosCriticos.length > 0; else noAlerts">
         <div class="alert-item" *ngFor="let insumo of insumosCriticos">
           <div class="alert-indicator"></div>
           <div class="alert-details">
@@ -103,7 +110,7 @@
         </div>
       </div>
       <ng-template #noAlerts>
-        <div class="no-alerts-card">
+        <div class="no-alerts-card" *ngIf="!cargandoInventario && !errorInventario && insumosCriticos.length === 0">
           <span><i class="fa-solid fa-circle-check"></i> Todo el stock se encuentra en niveles optimos.</span>
         </div>
       </ng-template>

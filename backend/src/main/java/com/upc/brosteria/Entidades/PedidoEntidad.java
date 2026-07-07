@@ -34,7 +34,7 @@ public class PedidoEntidad {
     private String type; // DELIVERY, PICKUP
 
     @Column(nullable = false)
-    private String paymentMethod; // YAPE, PLIN, EFECTIVO
+    private String paymentMethod; // YAPE, EFECTIVO, OTRO
 
     @Column(nullable = false)
     private String paymentStatus; // PENDIENTE, PAGADO

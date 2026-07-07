@@ -41,8 +41,8 @@
           <div class="card-body">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <strong>{{ pedido.customerName }}</strong>
-              <span class="status-badge" [class.pendiente]="pedido.status === 'PENDIENTE'" [class.preparando]="pedido.status === 'PREPARANDO'">
-                {{ pedido.status === 'PENDIENTE' ? 'Pendiente' : 'Cocina' }}
+              <span class="status-badge preparando">
+                Cocina
               </span>
             </div>
             <p class="phone">{{ pedido.customerPhone }}</p>
@@ -71,11 +71,7 @@
                 {{ pedido.paymentStatus === 'PAGADO' ? 'Deshacer pago' : 'Marcar pagado' }}
               </button>
             </div>
-            <!-- Si esta PENDIENTE, permitir pasar a PREPARANDO (Cocina), si esta en PREPARANDO, pasar a ENVIADO (Despachado) -->
-            <button *ngIf="pedido.status === 'PENDIENTE'" class="brand-btn accept-btn" style="background: var(--secondary) !important;" (click)="actualizarEstado(pedido.id, 'PREPARANDO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
-              {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Empezar a Cocinar' }}
-            </button>
-            <button *ngIf="pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
+            <button *ngIf="pedido.status === 'PENDIENTE' || pedido.status === 'PREPARANDO'" class="brand-btn accept-btn" (click)="actualizarEstado(pedido.id, 'ENVIADO')" [disabled]="pedidosEnProgreso.has(pedido.id)">
               {{ pedidosEnProgreso.has(pedido.id) ? 'Procesando...' : 'Listo para Despachar' }}
             </button>
           </div>
@@ -251,17 +247,6 @@
         <div class="parsed-items-table" style="margin-top: 15px; background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;">
           <h5 style="margin: 0 0 10px 0; font-size: 13px; color: var(--text-light);">Productos Solicitados</h5>
 
-          <div class="quick-products" *ngIf="productosFrecuentes.length > 0">
-            <span class="quick-products-label">Agregar frecuente</span>
-            <div class="quick-products-grid">
-              <button type="button" *ngFor="let producto of productosFrecuentes" (click)="agregarProductoRapido(producto)">
-                <i class="fa-solid fa-plus"></i>
-                <span>{{ producto.name }}</span>
-                <strong>S/. {{ producto.price | number:'1.2-2' }}</strong>
-              </button>
-            </div>
-          </div>
-          
           <div class="parsed-item-row" *ngFor="let det of formPedido.detalles; let i = index" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--glass-border);">
             
             <!-- Fila superior: Cantidad y Selector del Catalogo -->

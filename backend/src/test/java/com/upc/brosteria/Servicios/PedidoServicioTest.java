@@ -98,6 +98,7 @@ class PedidoServicioTest {
         ArgumentCaptor<PedidoEntidad> pedidoCaptor = ArgumentCaptor.forClass(PedidoEntidad.class);
         verify(pedidoRepositorio).save(pedidoCaptor.capture());
         assertEquals("PENDIENTE", pedidoCaptor.getValue().getPaymentStatus());
+        assertEquals("PREPARANDO", pedidoCaptor.getValue().getStatus());
     }
 
     @Test

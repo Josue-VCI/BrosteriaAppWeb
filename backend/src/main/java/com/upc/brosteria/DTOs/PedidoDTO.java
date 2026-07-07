@@ -36,7 +36,7 @@ public class PedidoDTO {
     private String type;
 
     @NotNull(message = "El metodo de pago no puede ser nulo")
-    @Pattern(regexp = "YAPE|PLIN|TARJETA|EFECTIVO|OTRO", message = "El metodo de pago no es valido")
+    @Pattern(regexp = "YAPE|EFECTIVO|OTRO", message = "El metodo de pago no es valido")
     private String paymentMethod;
 
     @Pattern(regexp = "PENDIENTE|PAGADO", message = "El estado de pago no es valido")

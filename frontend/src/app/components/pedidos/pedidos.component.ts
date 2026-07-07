@@ -143,6 +143,10 @@ export class PedidosComponent implements OnInit, OnDestroy {
         this.pedidosCocina = nuevosCocina;
         this.pedidosDespacho = data.filter(p => p.status === 'ENVIADO');
         this.cargandoPedidosActivos = false;
+        if (!this.entregadosPrecargados) {
+          this.entregadosPrecargados = true;
+          this.cargarPedidosEntregados(false);
+        }
       },
       error: (err) => {
         this.cargandoPedidosActivos = false;
@@ -179,6 +183,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     } else if (nuevoEstado === 'ENTREGADO') {
       // Se elimina de Despacho
       this.pedidosDespacho = this.pedidosDespacho.filter(p => p.id !== pedidoId);
+      this.entregadosCargadosAt = 0;
     }
 
     this.http.put(`${API_BASE_URL}/api/v1/pedidos/${pedidoId}/estado?nuevoEstado=${nuevoEstado}`, {}).subscribe({
@@ -430,14 +435,16 @@ export class PedidosComponent implements OnInit, OnDestroy {
           const product = this.buscarCoincidencia(productName);
 
           if (product) {
+            const extraChaufa = /\bcon\s+chaufa\b/i.test(cleanLine)
+              && this.productoPermiteChaufa(product.id);
             detalles.push({
               productoId: product.id,
               productoName: product.name,
               productoPrice: product.price,
               quantity: quantity,
-              subtotal: quantity * product.price,
+              subtotal: quantity * (product.price + (extraChaufa ? 4 : 0)),
               creams: creamsDeFila,
-              extraChaufa: false
+              extraChaufa: extraChaufa
             });
           } else {
             // Producto no emparejado: se asume precio 0 y se marca para resolucion manual
@@ -598,27 +605,6 @@ export class PedidosComponent implements OnInit, OnDestroy {
     this.formPedido.total = subtotal + this.formPedido.deliveryCost;
   }
 
-  get productosFrecuentes(): Producto[] {
-    const ids = [1, 3, 5, 6, 8, 11, 15, 18];
-    return ids
-      .map(id => this.productosCatalogo.find(producto => producto.id === id))
-      .filter((producto): producto is Producto => !!producto && producto.active !== false);
-  }
-
-  agregarProductoRapido(producto: Producto) {
-    this.formPedido.detalles.push({
-      productoId: producto.id,
-      productoName: producto.name,
-      productoPrice: producto.price,
-      quantity: 1,
-      subtotal: producto.price,
-      creams: '',
-      extraChaufa: false,
-      noCoincide: false
-    });
-    this.recalcularTotal();
-  }
-
   productoPermiteChaufa(productoId: number | null): boolean {
     return productoId !== null && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 16, 20, 28, 29, 30].includes(productoId);
   }
@@ -741,19 +727,28 @@ export class PedidosComponent implements OnInit, OnDestroy {
   mostrarModalEntregados = false;
   pedidosEntregadosHoy: any[] = [];
   cargandoEntregados = false;
+  private entregadosPrecargados = false;
+  private entregadosCargadosAt = 0;
 
   verPedidosEntregadosHoy() {
-    this.cargandoEntregados = true;
     this.mostrarModalEntregados = true;
+    if (Date.now() - this.entregadosCargadosAt < 30000) return;
+    this.cargarPedidosEntregados(true);
+  }
+
+  private cargarPedidosEntregados(mostrarError: boolean) {
+    if (this.cargandoEntregados) return;
+    this.cargandoEntregados = true;
     this.http.get<any[]>(`${API_BASE_URL}/api/v1/pedidos/entregados-hoy`).subscribe({
       next: (data) => {
         this.pedidosEntregadosHoy = data;
+        this.entregadosCargadosAt = Date.now();
         this.cargandoEntregados = false;
       },
       error: (err) => {
         console.error('Error al cargar entregados de hoy', err);
         this.cargandoEntregados = false;
-        this.toastService.error('No se pudieron cargar los pedidos entregados.');
+        if (mostrarError) this.toastService.error('No se pudieron cargar los pedidos entregados.');
       }
     });
   }

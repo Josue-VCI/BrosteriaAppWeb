@@ -50,6 +50,28 @@ class ReporteControladorTest {
         assertEquals(List.of(), body.get("fechas"));
         List<?> top = (List<?>) body.get("topProductos");
         assertEquals(1, top.size());
-        assertEquals("Combo El Hincha", ((Map<?, ?>) top.getFirst()).get("nombre"));
+        assertEquals("Combo El Hincha", ((Map<?, ?>) top.get(0)).get("nombre"));
+    }
+
+    @Test
+    void usaTopHistoricoYSiempreDevuelveTresMetodosDePago() {
+        when(pedidoRepositorio.ventasPorFecha(any(), any(), anyString(), anyInt())).thenReturn(List.of());
+        when(pedidoRepositorio.pagosReporte(any(), any(), anyString(), anyInt())).thenReturn(List.of());
+        when(pedidoRepositorio.pedidosPorHora(any(), any(), anyString(), anyInt())).thenReturn(List.of());
+        when(pedidoRepositorio.distritosReporte(any(), any(), anyString(), anyInt())).thenReturn(List.of());
+        when(pedidoRepositorio.topProductosReporte(any(), any(), anyString(), anyInt())).thenReturn(List.of());
+
+        PedidoRepositorio.ProductoConteo producto = mock(PedidoRepositorio.ProductoConteo.class);
+        when(producto.getNombre()).thenReturn("Combo Gol de Media Cancha");
+        when(producto.getCantidad()).thenReturn(25L);
+        when(pedidoRepositorio.topProductosHistorico()).thenReturn(List.of(producto));
+
+        Map<String, Object> body = reporteControlador
+                .obtenerDatosGrafico("semana", "", "")
+                .getBody();
+
+        Map<?, ?> pagos = (Map<?, ?>) body.get("metodosPago");
+        assertEquals(List.of("EFECTIVO", "YAPE", "OTRO"), pagos.keySet().stream().toList());
+        assertEquals(1, ((List<?>) body.get("topProductos")).size());
     }
 }

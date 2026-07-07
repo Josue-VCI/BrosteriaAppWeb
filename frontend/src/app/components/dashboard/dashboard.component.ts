@@ -16,6 +16,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   resumen: any = { ventasTotales: 0, totalPedidos: 0, completados: 0, cancelados: 0 };
   insumosCriticos: any[] = [];
   pedidosRecientes: any[] = [];
+  cargandoInventario = true;
+  errorInventario = false;
 
   // Ordenacion
   columnaOrden = '';
@@ -49,12 +51,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   cargarInventarioCritico() {
-    this.http.get<any[]>(`${API_BASE_URL}/api/v1/insumos`).subscribe({
+    this.cargandoInventario = true;
+    this.errorInventario = false;
+    this.http.get<any[]>(`${API_BASE_URL}/api/v1/insumos?v=${Date.now()}`).subscribe({
       next: (data) => {
         // Filtrar insumos criticos
         this.insumosCriticos = data.filter(i => i.quantity <= i.minimumStock);
+        this.cargandoInventario = false;
       },
-      error: (err) => console.error('Error al cargar insumos', err)
+      error: (err) => {
+        console.error('Error al cargar insumos', err);
+        this.cargandoInventario = false;
+        this.errorInventario = true;
+      }
     });
   }
 

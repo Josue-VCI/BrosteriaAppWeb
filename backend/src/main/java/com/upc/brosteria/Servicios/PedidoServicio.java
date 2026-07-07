@@ -137,7 +137,7 @@ public class PedidoServicio {
         pedido.setType(pedidoDTO.getType() != null ? pedidoDTO.getType() : "DELIVERY");
         pedido.setPaymentMethod(pedidoDTO.getPaymentMethod() != null ? pedidoDTO.getPaymentMethod() : "EFECTIVO");
         pedido.setPaymentStatus(normalizarEstadoPago(pedidoDTO.getPaymentStatus()));
-        pedido.setStatus("PENDIENTE");
+        pedido.setStatus("PREPARANDO");
         pedido.setOrderDate(LocalDateTime.now(ZoneOffset.UTC));
         if ("PAGADO".equals(pedido.getPaymentStatus())) {
             pedido.setPaidAt(pedido.getOrderDate());

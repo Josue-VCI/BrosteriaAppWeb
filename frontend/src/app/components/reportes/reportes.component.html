@@ -117,6 +117,9 @@
         </div>
         <span class="badge badge-success">{{ prod.cantidad }} unds. vendidos</span>
       </div>
+      <p class="ranking-empty" *ngIf="topProductos.length === 0">
+        No hay pedidos entregados para construir el ranking.
+      </p>
     </div>
   </div>
 
