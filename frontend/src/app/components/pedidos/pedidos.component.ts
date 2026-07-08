@@ -295,7 +295,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
         productoPrice: Number(detalle.productoPrice || 0),
         quantity: detalle.quantity,
         subtotal: Number(detalle.subtotal || 0),
-        creams: detalle.creams || '',
+        creams: this.normalizarCremas(detalle.creams || ''),
         extraChaufa: !!detalle.extraChaufa,
         noCoincide: false
       })),
@@ -387,7 +387,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
     const parsedTypeStr = typeMatch ? typeMatch[1].trim().toUpperCase() : 'DELIVERY';
     const parsedDistrict = districtMatch ? districtMatch[1].trim() : '';
     const parsedAddress = addressMatch ? addressMatch[1].trim() : '';
-    const parsedCreams = creamsMatch ? creamsMatch[1].trim() : '';
+    const parsedCreams = creamsMatch ? this.normalizarCremas(creamsMatch[1]) : '';
     const parsedPaymentStr = paymentMatch ? paymentMatch[1].trim().toUpperCase() : 'EFECTIVO';
     const parsedEmail = emailMatch ? emailMatch[1].trim() : '';
 
@@ -402,10 +402,13 @@ export class PedidosComponent implements OnInit, OnDestroy {
     // Procesar lineas de productos
     const detalles: any[] = [];
     const lines = text.split('\n');
+    const cantidadLineasProducto = lines.filter(linea =>
+      /^[-\*\d\.\s]*\d+x\s*/i.test(linea.trim())
+    ).length;
     let inDetail = false;
 
-    for (let line of lines) {
-      const cleanLine = line.trim();
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+      const cleanLine = lines[lineIndex].trim();
       if (cleanLine.toLowerCase().includes('detalle del pedido')) {
         inDetail = true;
         continue;
@@ -424,18 +427,33 @@ export class PedidosComponent implements OnInit, OnDestroy {
 
           productName = this.limpiarNombreProducto(productName);
 
-          // Extraer cremas especificas de la fila si estan indicadas entre parentesis (ej: (Cremas: Mayo, Ketchup))
-          let creamsDeFila = parsedCreams;
-          const creamsInLineMatch = cleanLine.match(/\(Cremas:\s*([^)]+)\)/i);
+          // Une la linea del producto con su configuracion inmediata. Algunos mensajes
+          // colocan cremas y chaufa en las siguientes lineas.
+          let configuracionProducto = cleanLine;
+          for (let offset = 1; offset <= 4 && lineIndex + offset < lines.length; offset++) {
+            const lineaSiguiente = lines[lineIndex + offset].trim();
+            if (!lineaSiguiente) continue;
+            if (/^[-\*\d\.\s]*\d+x\s*/i.test(lineaSiguiente)
+              || /total de productos|total\s*:/i.test(lineaSiguiente)) {
+              break;
+            }
+            configuracionProducto += ` | ${lineaSiguiente}`;
+          }
+
+          let creamsDeFila = cantidadLineasProducto === 1 ? parsedCreams : '';
+          const creamsInLineMatch = configuracionProducto.match(/(?:cremas?|salsas?)[^:]*:\s*\**([^\)\|\n]+)/i);
           if (creamsInLineMatch) {
-            creamsDeFila = creamsInLineMatch[1].trim();
+            creamsDeFila = this.normalizarCremas(creamsInLineMatch[1]);
+          }
+          if (/sin\s+(?:cremas?|salsas?)/i.test(configuracionProducto)) {
+            creamsDeFila = '';
           }
 
           // Buscar coincidencia ultra-robusta en el catalogo
           const product = this.buscarCoincidencia(productName);
 
           if (product) {
-            const extraChaufa = /\bcon\s+chaufa\b/i.test(cleanLine)
+            const extraChaufa = /\bcon\s+chaufa\b/i.test(configuracionProducto)
               && this.productoPermiteChaufa(product.id);
             detalles.push({
               productoId: product.id,
@@ -504,6 +522,28 @@ export class PedidosComponent implements OnInit, OnDestroy {
       .replace(/[^\w\s]/g, '') // Eliminar caracteres especiales
       .replace(/\s+/g, ' ') // Colapsar espacios multiples
       .trim();
+  }
+
+  private normalizarCremas(valor: string): string {
+    if (!valor || /sin\s+(?:cremas?|salsas?)/i.test(valor)) return '';
+
+    const cremas = valor
+      .replace(/\*/g, '')
+      .replace(/\s+y\s+/gi, ',')
+      .split(/[,;\/|]+/)
+      .map(crema => {
+        const nombre = this.normalizarParaComparar(crema);
+        if (nombre === 'mayo' || nombre.includes('mayonesa')) return 'Mayonesa';
+        if (nombre.includes('ketchup') || nombre.includes('catsup') || nombre.includes('catchup')) return 'Ketchup';
+        if (nombre.includes('aji')) return 'Aji';
+        if (nombre.includes('mostaza')) return 'Mostaza';
+        if (nombre.includes('tartara')) return 'Tartara';
+        if (nombre.includes('golf')) return 'Golf';
+        return '';
+      })
+      .filter(Boolean);
+
+    return [...new Set(cremas)].join(', ');
   }
 
   buscarCoincidencia(productName: string): any {
@@ -621,7 +661,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   toggleCrema(detalle: any, crema: string) {
-    const seleccionadas = String(detalle.creams || '')
+    const seleccionadas = this.normalizarCremas(detalle.creams || '')
       .split(',')
       .map((valor: string) => valor.trim())
       .filter(Boolean);
@@ -635,7 +675,7 @@ export class PedidosComponent implements OnInit, OnDestroy {
   }
 
   cremaSeleccionada(detalle: any, crema: string): boolean {
-    return String(detalle.creams || '')
+    return this.normalizarCremas(detalle.creams || '')
       .split(',')
       .map((valor: string) => valor.trim())
       .includes(crema);

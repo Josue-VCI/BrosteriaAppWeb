@@ -174,10 +174,22 @@
     left: -280px; /* Oculto por defecto en movil */
     margin: 0;
     height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     width: 260px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
     border-radius: 0;
+  }
+
+  .sidebar-menu {
+    flex: 0 1 auto;
+  }
+
+  .sidebar-footer {
+    flex-shrink: 0;
+    margin-top: auto;
   }
 
   .sidebar-active .sidebar {

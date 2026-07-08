@@ -30,7 +30,7 @@
 
     <div class="right-actions">
       <button class="brand-btn add-btn" (click)="abrirNuevoCliente()">Nuevo Cliente</button>
-      <button class="brand-btn" (click)="abrirRedactarMasivo()">Campaña Masiva</button>
+      <button *ngIf="esAdmin" class="brand-btn" (click)="abrirRedactarMasivo()">Campana Masiva</button>
     </div>
   </div>
 
@@ -106,9 +106,9 @@
   <!-- Vista Movil: Listado de Tarjetas por Cliente (Oculto en Desktop) -->
   <div class="mobile-only-crm mobile-clientes-list">
     <!-- Boton de accion rapida en movil -->
-    <div class="mobile-action-card glass-card" style="margin-bottom: 15px; text-align: center; padding: 15px !important;">
+    <div *ngIf="esAdmin" class="mobile-action-card glass-card" style="margin-bottom: 15px; text-align: center; padding: 15px !important;">
       <button class="brand-btn" (click)="abrirRedactarMasivo()" style="width: 100%;">
-        Campaña Filtrada ({{ obtenerDestinatariosValidosCount() }} destinatarios)
+        Campana Filtrada ({{ obtenerDestinatariosValidosCount() }} destinatarios)
       </button>
     </div>
     
@@ -139,24 +139,24 @@
   </div>
 
   <!-- Modal de Redaccion de Gmail Masivo -->
-  <div class="modal-backdrop" *ngIf="mostrarModalCorreo">
+  <div class="modal-backdrop" *ngIf="mostrarModalCorreo && esAdmin">
     <div class="modal-card glass-card">
-      <h3>Redactar Campaña de Fidelizacion (Gmail)</h3>
+      <h3>Redactar Campana de Fidelizacion (Gmail)</h3>
       <p class="destination-sub">Se enviara a los clientes filtrados con correo registrado (Destinatarios: {{ obtenerDestinatariosValidosCount() }}).</p>
       
       <div class="form-group">
-        <label for="plantilla">Plantilla de Campaña</label>
+        <label for="plantilla">Plantilla de Campana</label>
         <select id="plantilla" [(ngModel)]="plantillaSeleccionada" (change)="onTemplateChange()" class="modal-input">
           <option value="libre">Texto Libre (Escribe tu propio mensaje)</option>
-          <option value="mundial">Campaña Mundialista (Diseño Premium)</option>
-          <option value="combo">Campaña Super 2x1 (Salchipapas y Pollo)</option>
-          <option value="finsemana">Campaña Fin de Semana (Descuento Locura)</option>
+          <option value="mundial">Campana Mundialista (Diseno Premium)</option>
+          <option value="combo">Campana Super 2x1 (Salchipapas y Pollo)</option>
+          <option value="finsemana">Campana Fin de Semana (Descuento Locura)</option>
         </select>
       </div>
 
       <div class="form-group">
         <label for="asunto">Asunto del Correo</label>
-        <input type="text" id="asunto" [(ngModel)]="asuntoCampana" placeholder="Ej. ¡Jueves Brostero! 20% de descuento" class="modal-input">
+        <input type="text" id="asunto" [(ngModel)]="asuntoCampana" placeholder="Ej. Jueves Brostero: 20% de descuento" class="modal-input">
       </div>
       
       <div class="form-group">
@@ -167,7 +167,7 @@
       <div class="modal-actions">
         <button class="brand-btn cancel-btn" [disabled]="enviandoCorreo" (click)="cerrarModalCorreo()">Cancelar</button>
         <button class="brand-btn" [disabled]="enviandoCorreo" (click)="enviarMasivo()">
-          {{ enviandoCorreo ? 'Enviando correos...' : 'Enviar Campaña' }}
+          {{ enviandoCorreo ? 'Enviando correos...' : 'Enviar Campana' }}
         </button>
       </div>
     </div>

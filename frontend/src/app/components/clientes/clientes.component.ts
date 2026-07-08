@@ -294,6 +294,10 @@ export class ClientesComponent implements OnInit, OnDestroy {
 
   // Logica Masivos
   abrirRedactarMasivo() {
+    if (!this.esAdmin) {
+      this.toastService.warning('Solo un administrador puede enviar campanas.');
+      return;
+    }
     this.asuntoCampana = '';
     this.cuerpoCampana = '';
     this.mostrarModalCorreo = true;
@@ -304,6 +308,11 @@ export class ClientesComponent implements OnInit, OnDestroy {
   }
 
   enviarMasivo() {
+    if (!this.esAdmin) {
+      this.toastService.warning('Solo un administrador puede enviar campanas.');
+      this.cerrarModalCorreo();
+      return;
+    }
     if (!this.asuntoCampana || (!this.cuerpoCampana && this.plantillaSeleccionada === 'libre')) return;
 
     this.enviandoCorreo = true;
@@ -342,7 +351,9 @@ export class ClientesComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.enviandoCorreo = false;
         console.error('Error al enviar correo masivo', err);
-        this.toastService.error('Ocurrio un error al despachar los correos por SMTP.');
+        if (err.status !== 403) {
+          this.toastService.error(err?.error?.error || 'No se pudieron enviar los correos.');
+        }
       }
     });
   }
